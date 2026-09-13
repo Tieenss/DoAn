@@ -8,6 +8,7 @@ public class HocSinh {
     private String diaChi;
     private String maLop;
     private String maDT;
+    private String nienKhoa;
 
     public HocSinh() {}
 
@@ -75,5 +76,13 @@ public class HocSinh {
 
     public void setMaDT(String maDT) {
         this.maDT = maDT;
+    }
+
+    public String getNienKhoa() {
+        return nienKhoa;
+    }
+
+    public void setNienKhoa(String nienKhoa) {
+        this.nienKhoa = nienKhoa;
     }
 }

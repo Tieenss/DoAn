@@ -30,9 +30,11 @@ public class HocPhiRestController {
     }
 
     @GetMapping("/search")
-    public List<HocPhi> search(@RequestParam(defaultValue = "") String keyword) {
+    public List<HocPhi> search(
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(required = false, defaultValue = "") String namHoc) {
 
-        return hocPhiService.search(keyword);
+        return hocPhiService.search(keyword, namHoc);
 
     }
 
@@ -51,6 +53,13 @@ public class HocPhiRestController {
     public List<String> getNamHoc(@RequestParam String maLop){
 
         return hocPhiService.getNamHocByMaLop(maLop);
+
+    }
+
+    @GetMapping("/allnamhoc")
+    public List<String> getAllNamHoc(){
+
+        return hocPhiService.getDistinctNamHoc();
 
     }
 

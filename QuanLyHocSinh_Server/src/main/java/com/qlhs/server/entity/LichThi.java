@@ -38,6 +38,12 @@ public class LichThi {
     @Column(name = "MaLop", length = 10)
     private String maLop;
 
+    @Column(name = "NamHoc", length = 20)
+    private String namHoc;
+
+    @Column(name = "HocKy")
+    private int hocKy;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaMH", insertable = false, updatable = false)
     @com.fasterxml.jackson.annotation.JsonIgnore

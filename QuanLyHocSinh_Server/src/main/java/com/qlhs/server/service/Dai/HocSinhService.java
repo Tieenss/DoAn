@@ -32,14 +32,8 @@ public class HocSinhService {
         repository.deleteById(maHS);
     }
 
-    public List<HocSinh> search(String keyword) {
-
-        LinkedHashSet<HocSinh> result = new LinkedHashSet<>();
-
-        result.addAll(repository.findByMaHSContaining(keyword));
-        result.addAll(repository.findByHoTenContaining(keyword));
-
-        return new ArrayList<>(result);
+    public List<HocSinh> search(String keyword, String nienKhoa) {
+        return repository.search(keyword, nienKhoa);
     }
 
     public List<String> getAllMaLop() {
@@ -78,6 +72,10 @@ public class HocSinhService {
 
         return list;
 
+    }
+
+    public List<String> getDistinctNienKhoa() {
+        return repository.findDistinctNienKhoa();
     }
 
 }

@@ -24,8 +24,9 @@ public class DiemController {
     public List<Diem> getDiemByFilter(
             @RequestParam String maLop,
             @RequestParam String maMH,
-            @RequestParam int hocKy) {
-        return diemService.getDiemByFilter(maLop, maMH, hocKy);
+            @RequestParam int hocKy,
+            @RequestParam(required = false, defaultValue = "") String namHoc) {
+        return diemService.getDiemByFilter(maLop, maMH, hocKy, namHoc);
     }
 
     @GetMapping("/search")
@@ -36,6 +37,11 @@ public class DiemController {
     @GetMapping("/hocky")
     public List<Integer> getDistinctHocKy() {
         return diemService.getDistinctHocKy();
+    }
+
+    @GetMapping("/namhoc")
+    public List<String> getDistinctNamHoc() {
+        return diemService.getDistinctNamHoc();
     }
 
     @GetMapping("/hocsinh/{maHS}")

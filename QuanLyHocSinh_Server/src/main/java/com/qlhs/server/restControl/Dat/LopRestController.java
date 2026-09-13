@@ -23,8 +23,9 @@ public class LopRestController {
 
     @GetMapping("/search")
     public List<Map<String, Object>> searchLop(
-            @RequestParam String keyword) {
-        return lopService.searchLop(keyword);
+            @RequestParam String keyword,
+            @RequestParam(required = false, defaultValue = "") String nienKhoa) {
+        return lopService.searchLop(keyword, nienKhoa);
     }
 
     @GetMapping("/nienkhoa")

@@ -169,11 +169,12 @@ public class HocSinhApi {
         return false;
     }
 
-    public List<HocSinh> search(String keyword) {
+    public List<HocSinh> search(String keyword, String nienKhoa) {
 
         try {
 
-            URL url = new URL(API_URL + "/search?keyword=" + URLEncoder.encode(keyword, "UTF-8"));
+            URL url = new URL(API_URL + "/search?keyword=" + URLEncoder.encode(keyword, "UTF-8")
+                                + "&nienKhoa=" + URLEncoder.encode(nienKhoa, "UTF-8"));
 
             HttpURLConnection conn =
                     (HttpURLConnection) url.openConnection();
@@ -234,6 +235,36 @@ public class HocSinhApi {
         try {
 
             URL url = new URL(API_URL + "/madoituong");
+
+            HttpURLConnection conn =
+                    (HttpURLConnection) url.openConnection();
+
+            conn.setRequestMethod("GET");
+
+            BufferedReader br =
+                    new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+            Type type = new TypeToken<List<String>>(){}.getType();
+
+            List<String> list = gson.fromJson(br, type);
+
+            br.close();
+            conn.disconnect();
+
+            return list;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public List<String> getDistinctNienKhoa() {
+
+        try {
+
+            URL url = new URL(API_URL + "/nienkhoa");
 
             HttpURLConnection conn =
                     (HttpURLConnection) url.openConnection();

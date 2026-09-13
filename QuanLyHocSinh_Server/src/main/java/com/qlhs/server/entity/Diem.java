@@ -19,6 +19,7 @@ public class Diem {
         private String maHS;
         private String maMH;
         private int hocKy;
+        private String namHoc;
     }
 
     @Id
@@ -32,6 +33,10 @@ public class Diem {
     @Id
     @Column(name = "HocKy")
     private int hocKy;
+
+    @Id
+    @Column(name = "NamHoc", length = 20)
+    private String namHoc;
 
     @Column(name = "Diem15p")
     private double diem15p;

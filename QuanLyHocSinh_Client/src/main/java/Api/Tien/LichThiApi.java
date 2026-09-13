@@ -46,11 +46,12 @@ public class LichThiApi {
         return new ArrayList<>();
     }
 
-    public List<LichThi> searchLichThi(String keyword) {
+    public List<LichThi> searchLichThi(String keyword, String namHoc) {
         try {
-            String url = String.format("%s/search?keyword=%s",
+            String url = String.format("%s/search?keyword=%s&namHoc=%s",
                     BASE_URL,
-                    URLEncoder.encode(keyword, StandardCharsets.UTF_8));
+                    URLEncoder.encode(keyword, StandardCharsets.UTF_8),
+                    URLEncoder.encode(namHoc, StandardCharsets.UTF_8));
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .GET()
@@ -70,6 +71,23 @@ public class LichThiApi {
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(BASE_URL + "/kythi"))
+                    .GET()
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                Type type = new TypeToken<List<String>>(){}.getType();
+                return gson.fromJson(response.body(), type);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
+    }
+
+    public List<String> getDistinctNamHoc() {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(BASE_URL + "/namhoc"))
                     .GET()
                     .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());

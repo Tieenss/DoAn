@@ -26,12 +26,13 @@ public interface LopRepository extends JpaRepository<Lop, String> {
     List<Map<String, Object>> findAllLopWithGVCN();
 
     @Query(value = BASE_QUERY +
-            "WHERE l.MaLop LIKE %:keyword% " +
+            "WHERE (:nienKhoa = '' OR l.NienKhoa = :nienKhoa) " +
+            "AND (l.MaLop LIKE %:keyword% " +
             "OR l.TenLop LIKE %:keyword% " +
             "OR l.NienKhoa LIKE %:keyword% " +
-            "OR gv.HoTen LIKE %:keyword%",
+            "OR gv.HoTen LIKE %:keyword%)",
             nativeQuery = true)
-    List<Map<String, Object>> searchLop(@Param("keyword") String keyword);
+    List<Map<String, Object>> searchLop(@Param("keyword") String keyword, @Param("nienKhoa") String nienKhoa);
 
     @Query(value = BASE_QUERY +
             "WHERE l.MaLop = :maLop",

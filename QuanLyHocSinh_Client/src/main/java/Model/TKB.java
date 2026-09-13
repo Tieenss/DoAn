@@ -11,6 +11,8 @@ public class TKB {
     private int thu;
     private int tietBatDau;
     private int tietKetThuc;
+    private String namHoc;
+    private int hocKy;
 
     public TKB() {
     }
@@ -79,6 +81,14 @@ public class TKB {
         return tietKetThuc;
     }
 
+    public String getNamHoc() {
+        return namHoc;
+    }
+
+    public int getHocKy() {
+        return hocKy;
+    }
+
     public void setMaTKB(int maTKB) {
         this.maTKB = maTKB;
     }
@@ -109,6 +119,14 @@ public class TKB {
 
     public void setTietKetThuc(int tietKetThuc) {
         this.tietKetThuc = tietKetThuc;
+    }
+
+    public void setNamHoc(String namHoc) {
+        this.namHoc = namHoc;
+    }
+
+    public void setHocKy(int hocKy) {
+        this.hocKy = hocKy;
     }
     
 }

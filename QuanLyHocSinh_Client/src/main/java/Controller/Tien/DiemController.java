@@ -55,6 +55,12 @@ public class DiemController {
             hks.add(2);
         }
         view.setHocKyData(hks);
+        
+        List<String> nhs = dao.getDistinctNamHoc();
+        if (nhs.isEmpty()) {
+            nhs.add("2023-2024");
+        }
+        view.setNamHocData(nhs);
     }
 
     private void initEvents() {
@@ -119,11 +125,12 @@ public class DiemController {
             String maLop = view.getMaLopFilter();
             String maMon = view.getMaMonFilter();
             int hocKy = view.getHocKyFilter();
+            String namHoc = view.getNamHocFilter();
             
-            if (maLop.isEmpty() && maMon.isEmpty() && hocKy == 0) {
+            if (maLop.isEmpty() && maMon.isEmpty() && hocKy == 0 && namHoc.isEmpty()) {
                 list = dao.getAll();
             } else {
-                list = dao.getDiemByFilter(maLop, maMon, hocKy);
+                list = dao.getDiemByFilter(maLop, maMon, hocKy, namHoc);
             }
         }
         view.setTableData(list);

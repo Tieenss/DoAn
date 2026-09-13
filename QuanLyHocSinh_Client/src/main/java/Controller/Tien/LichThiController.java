@@ -36,6 +36,9 @@ public class LichThiController {
             List<String> kyThis = dao.getDistinctKyThi();
             view.setKyThiData(kyThis);
 
+            List<String> namHocs = dao.getDistinctNamHoc();
+            view.setNamHocData(namHocs);
+
             MonHocApiClient monApi = new MonHocApiClient();
             monHocList = monApi.getAll();
             List<String> tenMons = new ArrayList<>();
@@ -95,12 +98,13 @@ public class LichThiController {
 
         view.addBtnTimKiemListener(e -> {
             String kw = view.getKeyword();
-            if(kw.isEmpty()) { 
+            String namHoc = view.getLocNamHoc();
+            if(kw.isEmpty() && namHoc.isEmpty()) { 
                 loadAll();
                 return; 
             }
             
-            List<LichThi> list = dao.searchLichThi(kw);
+            List<LichThi> list = dao.searchLichThi(kw, namHoc);
             view.setTableData(list);
             
             if(list.isEmpty()) view.showMessage("Không tìm thấy kết quả nào!");

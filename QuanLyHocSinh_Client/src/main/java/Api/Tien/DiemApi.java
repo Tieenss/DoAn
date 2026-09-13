@@ -43,13 +43,14 @@ public class DiemApi {
         return new ArrayList<>();
     }
 
-    public List<Diem> getDiemByFilter(String maLop, String maMH, int hocKy) {
+    public List<Diem> getDiemByFilter(String maLop, String maMH, int hocKy, String namHoc) {
         try {
-            String url = String.format("%s/filter?maLop=%s&maMH=%s&hocKy=%d", 
+            String url = String.format("%s/filter?maLop=%s&maMH=%s&hocKy=%d&namHoc=%s", 
                 BASE_URL,
                 URLEncoder.encode(maLop, StandardCharsets.UTF_8),
                 URLEncoder.encode(maMH, StandardCharsets.UTF_8),
-                hocKy);
+                hocKy,
+                URLEncoder.encode(namHoc != null ? namHoc : "", StandardCharsets.UTF_8));
                 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
@@ -109,6 +110,22 @@ public class DiemApi {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 200) {
                 return gson.fromJson(response.body(), new TypeToken<List<Integer>>(){}.getType());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
+    }
+
+    public List<String> getDistinctNamHoc() {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(BASE_URL + "/namhoc"))
+                    .GET()
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                return gson.fromJson(response.body(), new TypeToken<List<String>>(){}.getType());
             }
         } catch (Exception e) {
             e.printStackTrace();

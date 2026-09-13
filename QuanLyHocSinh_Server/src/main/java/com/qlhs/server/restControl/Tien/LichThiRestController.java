@@ -20,13 +20,20 @@ public class LichThiRestController {
     }
 
     @GetMapping("/search")
-    public List<LichThi> search(@RequestParam String keyword) {
-        return lichThiService.searchLichThi(keyword);
+    public List<LichThi> search(
+            @RequestParam String keyword,
+            @RequestParam(required = false, defaultValue = "") String namHoc) {
+        return lichThiService.searchLichThi(keyword, namHoc);
     }
 
     @GetMapping("/kythi")
     public List<String> getDistinctKyThi() {
         return lichThiService.getDistinctKyThi();
+    }
+
+    @GetMapping("/namhoc")
+    public List<String> getDistinctNamHoc() {
+        return lichThiService.getDistinctNamHoc();
     }
 
     @GetMapping("/filter")

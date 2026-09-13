@@ -17,8 +17,8 @@ public class DiemService {
         return diemRepository.findAllDiemWithDetails();
     }
 
-    public List<Diem> getDiemByFilter(String maLop, String maMH, int hocKy) {
-        return diemRepository.findDiemByFilter(maLop, maMH, hocKy);
+    public List<Diem> getDiemByFilter(String maLop, String maMH, int hocKy, String namHoc) {
+        return diemRepository.findDiemByFilter(maLop, maMH, hocKy, namHoc);
     }
 
     public List<Diem> searchDiem(String keyword) {
@@ -31,6 +31,10 @@ public class DiemService {
 
     public List<Integer> getDistinctHocKy() {
         return diemRepository.findDistinctHocKy();
+    }
+
+    public List<String> getDistinctNamHoc() {
+        return diemRepository.findDistinctNamHoc();
     }
 
     public Diem saveDiem(Diem diem) {

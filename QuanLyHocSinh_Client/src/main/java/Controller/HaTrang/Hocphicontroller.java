@@ -21,6 +21,14 @@ public class Hocphicontroller {
         this.dao = new HocPhiApiClient();
         initEvents();
         loadTatCaDuLieu();
+        loadComboNamHoc();
+    }
+
+    private void loadComboNamHoc() {
+        List<String> namHocs = dao.getAllNamHoc();
+        if (namHocs != null) {
+            view.setNamHocData(namHocs);
+        }
     }
 
     private void initEvents() {
@@ -144,7 +152,9 @@ public class Hocphicontroller {
             Object cboHocKySelected = view.getCboHocKy().getSelectedItem();
             String maLop = view.getTxtMaLop().getText().trim().toUpperCase();
             String hocKyStr = (cboHocKySelected != null) ? cboHocKySelected.toString().trim() : "";
-            String namHoc = view.getTxtNamHoc().getText().trim();
+            Object cboNamHocObj = view.getCboLocNamHoc().getSelectedItem();
+            String namHoc = (cboNamHocObj != null) ? cboNamHocObj.toString().trim() : "";
+            if (namHoc.equals("Tất cả")) namHoc = "";
 
             if (maLop.isEmpty() && hocKyStr.isEmpty() && namHoc.isEmpty()) {
                 loadTatCaDuLieu();

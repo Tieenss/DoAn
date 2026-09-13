@@ -22,8 +22,8 @@ public class HocPhiService {
         return hocPhiRepository.findById(maHP);
     }
 
-    public List<HocPhi> search(String keyword) {
-        return hocPhiRepository.searchByKeyword(keyword);
+    public List<HocPhi> search(String keyword, String namHoc) {
+        return hocPhiRepository.searchByKeyword(keyword, namHoc);
     }
 
     public List<HocPhi> filter(String maLop,int hocKy,String namHoc){
@@ -53,6 +53,10 @@ public class HocPhiService {
                 .distinct()
                 .toList();
 
+    }
+
+    public List<String> getDistinctNamHoc() {
+        return hocPhiRepository.getDistinctNamHoc();
     }
 
     public HocPhi saveHP(HocPhi hocPhi) {

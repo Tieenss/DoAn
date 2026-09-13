@@ -15,6 +15,8 @@ public class Diem {
     private String tenMH;
     @SerializedName(value = "hocKy", alternate = {"HocKy", "HOCKY", "hocky"})
     private int hocKy;
+    @SerializedName(value = "namHoc", alternate = {"NamHoc", "NAMHOC", "namhoc"})
+    private String namHoc;
 
     @SerializedName(value = "diem15p", alternate = {"Diem15p", "DIEM15P", "diem15P"})
     private double diem15p;
@@ -54,6 +56,9 @@ public class Diem {
 
     public int getHocKy() { return hocKy; }
     public void setHocKy(int hocKy) { this.hocKy = hocKy; }
+
+    public String getNamHoc() { return namHoc; }
+    public void setNamHoc(String namHoc) { this.namHoc = namHoc; }
 
     public double getDiem15p() { return diem15p; }
     public void setDiem15p(double diem15p) { this.diem15p = diem15p; }

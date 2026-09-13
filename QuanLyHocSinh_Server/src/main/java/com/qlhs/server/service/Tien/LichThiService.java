@@ -16,12 +16,16 @@ public class LichThiService {
         return lichThiRepository.getAllLichThiWithTenMon();
     }
 
-    public List<LichThi> searchLichThi(String keyword) {
-        return lichThiRepository.searchLichThiNative(keyword);
+    public List<LichThi> searchLichThi(String keyword, String namHoc) {
+        return lichThiRepository.searchLichThiNative(keyword, namHoc);
     }
 
     public List<String> getDistinctKyThi() {
         return lichThiRepository.getDistinctKyThi();
+    }
+
+    public List<String> getDistinctNamHoc() {
+        return lichThiRepository.getDistinctNamHoc();
     }
 
     public List<LichThi> getLichThiByFilter(String tenKyThi, String maMH, String maPhong, String maLop) {

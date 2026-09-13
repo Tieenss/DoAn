@@ -14,7 +14,7 @@ public class QuanLyLopPanel extends JPanel {
     private DefaultTableModel tableModel;
 
     private JTextField txtMaLop, txtTenLop;
-    private JComboBox<String> cboNienKhoa;
+    private JComboBox<String> cboNienKhoa, cboLocNienKhoa;
     private JComboBox<Giaovien> cboGVCN;
 
     private JTextField txtTimKiem;
@@ -48,6 +48,11 @@ public class QuanLyLopPanel extends JPanel {
         ButtonStyleHelper.styleButtonSearch(btnTimKiem);
 
         pnlSearch.add(txtTimKiem);
+
+        pnlSearch.add(new JLabel("  Niên Khóa:"));
+        cboLocNienKhoa = new JComboBox<>();
+        pnlSearch.add(cboLocNienKhoa);
+
         pnlSearch.add(btnTimKiem);
 
         pnlNorth.add(pnlSearch, BorderLayout.CENTER);
@@ -87,6 +92,7 @@ public class QuanLyLopPanel extends JPanel {
         pnlInput.add(new JLabel("Niên Khóa:"), gbc);
         gbc.gridx = 1;
         cboNienKhoa = new JComboBox<>();
+        cboNienKhoa.setEditable(true);
         cboNienKhoa.setPrototypeDisplayValue("2024-2025");
         pnlInput.add(cboNienKhoa, gbc);
 
@@ -138,6 +144,7 @@ public class QuanLyLopPanel extends JPanel {
     public JTextField getTxtMaLop() { return txtMaLop; }
     public JTextField getTxtTenLop() { return txtTenLop; }
     public JComboBox<String> getCboNienKhoa() { return cboNienKhoa; }
+    public JComboBox<String> getCboLocNienKhoa() { return cboLocNienKhoa; }
 
     public JComboBox<Giaovien> getCboGVCN() { return cboGVCN; }
 

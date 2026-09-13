@@ -32,4 +32,7 @@ public class HocSinh {
 
     @Column(name = "maDT", length = 50)
     private String maDT;
+
+    @Column(name = "NienKhoa", length = 20)
+    private String nienKhoa;
 }

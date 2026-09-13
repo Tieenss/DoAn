@@ -18,7 +18,7 @@ public class LichThiPanel extends JPanel {
 
     private JTextField txtTimKiem;
     private JButton btnTimKiem, btnXemTatCa, btnLocDanhSach;
-    private JComboBox<String> cboLocKyThi, cboLocMon, cboLocPhong, cboLocLop;
+    private JComboBox<String> cboLocKyThi, cboLocMon, cboLocPhong, cboLocLop, cboLocNamHoc;
 
     private JTable table;
     private DefaultTableModel model;
@@ -69,9 +69,11 @@ public class LichThiPanel extends JPanel {
         pnlFilter.add(btnLocDanhSach);
 
         JPanel pnlSearch = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
-        pnlSearch.setBorder(new TitledBorder("Tìm kiếm nhanh"));
-        pnlSearch.add(new JLabel("Nhập Tên Môn hoặc Kỳ thi:"));
+        pnlSearch.add(new JLabel("Từ khóa:"));
         txtTimKiem = new JTextField(20); pnlSearch.add(txtTimKiem);
+        
+        pnlSearch.add(new JLabel("Năm học:"));
+        cboLocNamHoc = new JComboBox<>(); pnlSearch.add(cboLocNamHoc);
         
         btnTimKiem = new JButton("Tìm Kiếm");
         btnXemTatCa = new JButton("Xem Tất Cả");
@@ -235,8 +237,23 @@ public class LichThiPanel extends JPanel {
             for(int i = 0; i < cboTenKyThi.getItemCount(); i++) {
                 if(k.equals(cboTenKyThi.getItemAt(i))) { exists = true; break; }
             }
-            if(!exists) cboTenKyThi.addItem(k);
         }
+    }
+
+    public void setNamHocData(List<String> namHocs) {
+        cboLocNamHoc.removeAllItems();
+        cboLocNamHoc.addItem("Tất cả");
+
+        for (String n : namHocs) {
+            cboLocNamHoc.addItem(n);
+        }
+    }
+
+    public String getLocNamHoc() {
+        if (cboLocNamHoc.getSelectedItem() == null) return "";
+        String val = cboLocNamHoc.getSelectedItem().toString();
+        if (val.equals("Tất cả")) return "";
+        return val;
     }
 
     public void setMonHocData(List<String> monHocs) {

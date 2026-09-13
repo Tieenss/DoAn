@@ -30,6 +30,12 @@ public class LichThi {
     @SerializedName(value = "maLop", alternate = {"MaLop", "MALOP", "malop"})
     private String maLop;
 
+    @SerializedName(value = "namHoc", alternate = {"NamHoc", "NAMHOC", "namhoc"})
+    private String namHoc;
+    
+    @SerializedName(value = "hocKy", alternate = {"HocKy", "HOCKY", "hocky"})
+    private int hocKy;
+
     @SerializedName(value = "tenLop", alternate = {"TenLop", "TENLOP", "tenlop"})
     private String tenLop;
 
@@ -71,6 +77,12 @@ public class LichThi {
 
     public String getMaLop() { return maLop; }
     public void setMaLop(String maLop) { this.maLop = maLop; }
+
+    public String getNamHoc() { return namHoc; }
+    public void setNamHoc(String namHoc) { this.namHoc = namHoc; }
+
+    public int getHocKy() { return hocKy; }
+    public void setHocKy(int hocKy) { this.hocKy = hocKy; }
 
     public String getTenLop() { return tenLop; }
     public void setTenLop(String tenLop) { this.tenLop = tenLop; }

@@ -14,7 +14,8 @@ import TienIch.ButtonStyleHelper;
 import TienIch.TableSortHelper;
 
 public class QuanLyHocPhiPanel extends JPanel {
-    private JTextField txtMaLop, txtNamHoc;
+    private JTextField txtMaLop;
+    private JComboBox<String> cboLocNamHoc;
     private JComboBox<String> cboHocKy;
     private JTextField txtMaLopCT;
     private JComboBox<String> cboHocKyCT;
@@ -83,8 +84,8 @@ public class QuanLyHocPhiPanel extends JPanel {
         pnlFilter.add(cboHocKy);
 
         pnlFilter.add(new JLabel("Năm Học:"));
-        txtNamHoc = new JTextField(10);
-        pnlFilter.add(txtNamHoc);
+        cboLocNamHoc = new JComboBox<>();
+        pnlFilter.add(cboLocNamHoc);
 
         btnLoc = new JButton("Tìm Kiếm"); 
         ButtonStyleHelper.styleButtonSearch(btnLoc); 
@@ -373,8 +374,18 @@ public class QuanLyHocPhiPanel extends JPanel {
         tableHocPhi.clearSelection();
 
         txtMaLop.setText("");
-        txtNamHoc.setText("");
+        if (cboLocNamHoc.getItemCount() > 0) {
+            cboLocNamHoc.setSelectedIndex(0);
+        }
         cboHocKy.setSelectedIndex(0);
+    }
+
+    public void setNamHocData(List<String> namHocs) {
+        cboLocNamHoc.removeAllItems();
+        cboLocNamHoc.addItem("Tất cả");
+        for (String n : namHocs) {
+            cboLocNamHoc.addItem(n);
+        }
     }
 
     public void setInputEditable(boolean editable) {
@@ -391,8 +402,9 @@ public class QuanLyHocPhiPanel extends JPanel {
 
     public JTextField getTxtMaLop() {return txtMaLop;}
     public JComboBox<String> getCboHocKy() { return cboHocKy; }
-    public JTextField getTxtNamHoc() {return txtNamHoc;}
-    public JTextField getTxtMaLopCT() {return txtMaLopCT;}
+    public JComboBox<String> getCboLocNamHoc() {
+        return cboLocNamHoc;
+    }public JTextField getTxtMaLopCT() {return txtMaLopCT;}
     public JComboBox<String> getCboHocKyCT() {return cboHocKyCT;}
     public JTextField getTxtNamHocCT() {return txtNamHocCT;}
     public JButton getBtnLoc() { return btnLoc; }

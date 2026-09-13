@@ -143,10 +143,11 @@ public class LopApi {
         return false;
     }
 
-    public List<LopGVCN> search(String keyword) {
+    public List<LopGVCN> search(String keyword, String nienKhoa) {
         try {
             String url = BASE_URL + "/search?keyword="
-                    + URLEncoder.encode(keyword, StandardCharsets.UTF_8);
+                    + URLEncoder.encode(keyword, StandardCharsets.UTF_8)
+                    + "&nienKhoa=" + URLEncoder.encode(nienKhoa, StandardCharsets.UTF_8);
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))

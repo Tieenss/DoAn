@@ -17,6 +17,12 @@ public interface HocPhiRepository extends JpaRepository<HocPhi, Integer> {
     List<HocPhi> findByMaHS(@Param("maHS") String maHS);
 
     @Query("SELECT t FROM HocPhi t JOIN FETCH t.hocSinh WHERE " +
-            "LOWER(t.hocSinh.maLop) LIKE LOWER(CONCAT('%', :keyword, '%'))")
-    List<HocPhi> searchByKeyword(@Param("keyword") String keyword);
+            "(:namHoc = '' OR t.namHoc = :namHoc) AND " +
+            "(LOWER(t.hocSinh.maLop) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(t.hocSinh.hoTen) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(t.maHS) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    List<HocPhi> searchByKeyword(@Param("keyword") String keyword, @Param("namHoc") String namHoc);
+
+    @Query("SELECT DISTINCT t.namHoc FROM HocPhi t WHERE t.namHoc IS NOT NULL ORDER BY t.namHoc")
+    List<String> getDistinctNamHoc();
 }

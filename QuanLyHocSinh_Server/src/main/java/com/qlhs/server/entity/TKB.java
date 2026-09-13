@@ -35,6 +35,12 @@ public class TKB {
     @Column(name = "TietKetThuc")
     private Integer tietKetThuc;
 
+    @Column(name = "NamHoc", length = 20)
+    private String namHoc;
+
+    @Column(name = "HocKy")
+    private Integer hocKy;
+
     @Transient
     private String tenMH;
 }

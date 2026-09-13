@@ -15,8 +15,8 @@ public interface DiemRepository extends JpaRepository<Diem, Diem.DiemId> {
     List<Diem> findAllDiemWithDetails();
 
     @Query("SELECT d FROM Diem d JOIN FETCH d.hocSinh hs JOIN FETCH d.monHoc " +
-            "WHERE (:maLop = '' OR hs.maLop = :maLop) AND (:maMH = '' OR d.maMH = :maMH) AND (:hocKy = 0 OR d.hocKy = :hocKy)")
-    List<Diem> findDiemByFilter(@Param("maLop") String maLop, @Param("maMH") String maMH, @Param("hocKy") int hocKy);
+            "WHERE (:maLop = '' OR hs.maLop = :maLop) AND (:maMH = '' OR d.maMH = :maMH) AND (:hocKy = 0 OR d.hocKy = :hocKy) AND (:namHoc = '' OR d.namHoc = :namHoc)")
+    List<Diem> findDiemByFilter(@Param("maLop") String maLop, @Param("maMH") String maMH, @Param("hocKy") int hocKy, @Param("namHoc") String namHoc);
 
     @Query("SELECT d FROM Diem d JOIN FETCH d.hocSinh hs JOIN FETCH d.monHoc " +
             "WHERE d.maHS LIKE %:keyword% OR hs.hoTen LIKE %:keyword%")
@@ -28,4 +28,7 @@ public interface DiemRepository extends JpaRepository<Diem, Diem.DiemId> {
 
     @Query("SELECT DISTINCT d.hocKy FROM Diem d ORDER BY d.hocKy")
     List<Integer> findDistinctHocKy();
+
+    @Query("SELECT DISTINCT d.namHoc FROM Diem d ORDER BY d.namHoc")
+    List<String> findDistinctNamHoc();
 }

@@ -50,9 +50,10 @@ public class HocSinhController {
 
     @GetMapping("/search")
     public List<HocSinh> search(
-            @RequestParam String keyword) {
+            @RequestParam String keyword,
+            @RequestParam(required = false, defaultValue = "") String nienKhoa) {
 
-        return service.search(keyword);
+        return service.search(keyword, nienKhoa);
 
     }
 
@@ -68,6 +69,11 @@ public class HocSinhController {
 
         return service.getAllMaDT();
 
+    }
+
+    @GetMapping("/nienkhoa")
+    public List<String> getDistinctNienKhoa() {
+        return service.getDistinctNienKhoa();
     }
 
 }

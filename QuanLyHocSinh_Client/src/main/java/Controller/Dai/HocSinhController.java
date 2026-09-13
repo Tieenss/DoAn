@@ -48,7 +48,8 @@ public class HocSinhController {
                     hs.getGioiTinh(),
                     hs.getDiaChi(),
                     hs.getMaLop(),
-                    hs.getMaDT()
+                    hs.getMaDT(),
+                    hs.getNienKhoa()
             });
 
         }
@@ -105,11 +106,15 @@ public class HocSinhController {
 
     }
 
-    public boolean timKiem(String keyword, DefaultTableModel model) {
+    public boolean timKiem(String keyword, String nienKhoa, DefaultTableModel model) {
 
         model.setRowCount(0);
 
-        List<HocSinh> list = api.search(keyword);
+        if (nienKhoa.equals("Tất cả")) {
+            nienKhoa = "";
+        }
+
+        List<HocSinh> list = api.search(keyword, nienKhoa);
 
         if (list == null) {
             throw new RuntimeException("Không thể kết nối tới Server.");
@@ -127,11 +132,27 @@ public class HocSinhController {
                 hs.getGioiTinh(),
                 hs.getDiaChi(),
                 hs.getMaLop(),
-                hs.getMaDT()
+                hs.getMaDT(),
+                hs.getNienKhoa()
             });
         }
 
         return true;
+    }
+
+    public void loadComboLocNienKhoa(JComboBox<String> cbo) {
+
+        cbo.removeAllItems();
+        cbo.addItem("Tất cả");
+
+        List<String> list = api.getDistinctNienKhoa();
+
+        if (list == null) return;
+
+        for (String nk : list) {
+            cbo.addItem(nk);
+        }
+
     }
 
     public HocSinh getThongTinCaNhan() {

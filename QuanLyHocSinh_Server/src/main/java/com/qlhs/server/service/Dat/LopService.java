@@ -18,8 +18,8 @@ public class LopService {
         return lopRepository.findAllLopWithGVCN();
     }
 
-    public List<Map<String, Object>> searchLop(String keyword) {
-        return lopRepository.searchLop(keyword);
+    public List<Map<String, Object>> searchLop(String keyword, String nienKhoa) {
+        return lopRepository.searchLop(keyword, nienKhoa);
     }
 
     public Map<String, Object> getLopById(String maLop) {
@@ -27,6 +27,11 @@ public class LopService {
     }
 
     public Lop saveLop(Lop lop) {
+        if (lop.getNienKhoa() != null && !lop.getNienKhoa().trim().isEmpty()) {
+            if (!lop.getNienKhoa().matches("^\\d{4}-\\d{4}$")) {
+                throw new IllegalArgumentException("Niên khóa không đúng định dạng YYYY-YYYY (Ví dụ: 2021-2024)");
+            }
+        }
         return lopRepository.save(lop);
     }
 

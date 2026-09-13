@@ -138,4 +138,19 @@ public class HocPhiApiClient {
             return new ArrayList<>();
         }
     }
+
+    public List<String> getAllNamHoc() {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(BASE_URL + "/allnamhoc"))
+                    .GET()
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            Type type = new TypeToken<List<String>>() {}.getType();
+            return gson.fromJson(response.body(), type);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
 }

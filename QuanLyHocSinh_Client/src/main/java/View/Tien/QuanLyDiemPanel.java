@@ -12,14 +12,14 @@ import TienIch.ButtonStyleHelper;
 import javax.swing.table.DefaultTableCellRenderer;
 public class QuanLyDiemPanel extends JPanel {
 
-    private JComboBox<String> cboLocMaLop, cboLocMon, cboLocHocKy;
+    private JComboBox<String> cboLocMaLop, cboLocMon, cboLocHocKy, cboLocNamHoc;
     private JButton btnLocDuLieu;
 
     private JTable tableDiem;
     private DefaultTableModel tableModel;
 
     private JTextField txtMaHS, txtTenHS, txtDiem15p, txtDiem1Tiet, txtDiemGiuaKy, txtDiemCuoiKy;
-    private JComboBox<String> cboHocKyInput;
+    private JComboBox<String> cboHocKyInput, cboNamHocInput;
     private JComboBox<String> cboMonHocInput;
     private JButton btnCapNhat;
 
@@ -58,6 +58,10 @@ public class QuanLyDiemPanel extends JPanel {
         cboLocMon = new JComboBox<>(); 
         pnlFilter.add(cboLocMon);
 
+        pnlFilter.add(new JLabel("Năm Học:"));
+        cboLocNamHoc = new JComboBox<>();
+        pnlFilter.add(cboLocNamHoc);
+
         pnlFilter.add(new JLabel("Học Kỳ:"));
         cboLocHocKy = new JComboBox<>(); 
         pnlFilter.add(cboLocHocKy);
@@ -84,7 +88,7 @@ public class QuanLyDiemPanel extends JPanel {
         pnlNorth.add(pnlToolBar, BorderLayout.CENTER);
         this.add(pnlNorth, BorderLayout.NORTH);
 
-        String[] columnNames = {"Mã HS", "Họ Tên", "Mã Lớp", "Môn", "HK", "Điểm 15p", "1 Tiết", "Giữa Kỳ", "Cuối Kỳ", "Tổng Kết"};
+        String[] columnNames = {"Mã HS", "Họ Tên", "Mã Lớp", "Môn", "Năm Học", "HK", "Điểm 15p", "1 Tiết", "Giữa Kỳ", "Cuối Kỳ", "Tổng Kết"};
         tableModel = new DefaultTableModel(columnNames, 0);
         tableDiem = new JTable(tableModel);
         tableDiem.setFont(new Font("Segoe UI", Font.PLAIN, 14));
@@ -100,7 +104,7 @@ public class QuanLyDiemPanel extends JPanel {
                 return c;
             }
         };
-        tableDiem.getColumnModel().getColumn(9).setCellRenderer(tongKetRenderer);
+        tableDiem.getColumnModel().getColumn(10).setCellRenderer(tongKetRenderer);
         
         this.add(new JScrollPane(tableDiem), BorderLayout.CENTER);
 
@@ -128,13 +132,18 @@ public class QuanLyDiemPanel extends JPanel {
         gbc.gridx=2; gbc.gridy=2; pnlInput.add(new JLabel("Điểm Cuối Kỳ:"), gbc);
         gbc.gridx=3; gbc.gridy=2; txtDiemCuoiKy=new JTextField(); pnlInput.add(txtDiemCuoiKy, gbc);
 
-        gbc.gridx=0; gbc.gridy=3; pnlInput.add(new JLabel("Học Kỳ:"), gbc);
-        cboHocKyInput = new JComboBox<>(new String[]{"1", "2"});
-        gbc.gridx=1; gbc.gridy=3; pnlInput.add(cboHocKyInput, gbc);
+        gbc.gridx=0; gbc.gridy=3; pnlInput.add(new JLabel("Năm Học:"), gbc);
+        cboNamHocInput = new JComboBox<>();
+        gbc.gridx=1; gbc.gridy=3; pnlInput.add(cboNamHocInput, gbc);
 
-        gbc.gridx=2; gbc.gridy=3; pnlInput.add(new JLabel("Môn Học:"), gbc);
+        gbc.gridx=2; gbc.gridy=3; pnlInput.add(new JLabel("Học Kỳ:"), gbc);
+        cboHocKyInput = new JComboBox<>(new String[]{"1", "2"});
+        gbc.gridx=3; gbc.gridy=3; pnlInput.add(cboHocKyInput, gbc);
+
+        gbc.gridx=0; gbc.gridy=4; pnlInput.add(new JLabel("Môn Học:"), gbc);
         cboMonHocInput = new JComboBox<>();
-        gbc.gridx=3; gbc.gridy=3; pnlInput.add(cboMonHocInput, gbc);
+        gbc.gridx=1; gbc.gridy=4; gbc.gridwidth=3; pnlInput.add(cboMonHocInput, gbc);
+        gbc.gridwidth=1;
 
         pnlSouth.add(pnlInput, BorderLayout.CENTER);
 
@@ -182,6 +191,11 @@ public class QuanLyDiemPanel extends JPanel {
             return 0;
         }
     }
+    public String getNamHocFilter() {
+        if (cboLocNamHoc.getSelectedItem() == null) return "";
+        String val = cboLocNamHoc.getSelectedItem().toString();
+        return val.equals("Tất cả") ? "" : val;
+    }
     public String getTuKhoaTimKiem() { return txtTimKiem.getText().trim(); }
 
     public void setMaLopData(List<String> lops) {
@@ -215,6 +229,16 @@ public class QuanLyDiemPanel extends JPanel {
         }
     }
 
+    public void setNamHocData(List<String> nhs) {
+        cboLocNamHoc.removeAllItems();
+        cboLocNamHoc.addItem("Tất cả");
+        if(cboNamHocInput != null) cboNamHocInput.removeAllItems();
+        for (String nh : nhs) {
+            cboLocNamHoc.addItem(nh);
+            if(cboNamHocInput != null) cboNamHocInput.addItem(nh);
+        }
+    }
+
     public Diem getDiemInput() {
         Diem d = new Diem();
         d.setMaHS(txtMaHS.getText());
@@ -238,6 +262,7 @@ public class QuanLyDiemPanel extends JPanel {
             }
         } catch (Exception e) {}
         d.setHocKy(hocKy); 
+        d.setNamHoc(cboNamHocInput.getSelectedItem() != null ? cboNamHocInput.getSelectedItem().toString() : "");
         try {
             
             d.setDiem15p(Double.parseDouble(txtDiem15p.getText()));
@@ -258,6 +283,7 @@ public class QuanLyDiemPanel extends JPanel {
                 d.getTenHS(), 
                 d.getMaLop(), 
                 d.getTenMH() != null ? d.getTenMH() : d.getMaMH(), 
+                d.getNamHoc(),
                 d.getHocKy(),
                 d.getDiem15p(), 
                 d.getDiem1Tiet(),   
@@ -276,13 +302,16 @@ public class QuanLyDiemPanel extends JPanel {
             Object tenMonObj = tableModel.getValueAt(row, 3);
             if(tenMonObj != null) cboMonHocInput.setSelectedItem(tenMonObj.toString());
             
-            Object hkObj = tableModel.getValueAt(row, 4);
+            Object nhObj = tableModel.getValueAt(row, 4);
+            if(nhObj != null) cboNamHocInput.setSelectedItem(nhObj.toString());
+
+            Object hkObj = tableModel.getValueAt(row, 5);
             if(hkObj != null) cboHocKyInput.setSelectedItem(hkObj.toString());
 
-            txtDiem15p.setText(tableModel.getValueAt(row, 5).toString());
-            txtDiem1Tiet.setText(tableModel.getValueAt(row, 6).toString());
-            txtDiemGiuaKy.setText(tableModel.getValueAt(row, 7).toString());
-            txtDiemCuoiKy.setText(tableModel.getValueAt(row, 8).toString());
+            txtDiem15p.setText(tableModel.getValueAt(row, 6).toString());
+            txtDiem1Tiet.setText(tableModel.getValueAt(row, 7).toString());
+            txtDiemGiuaKy.setText(tableModel.getValueAt(row, 8).toString());
+            txtDiemCuoiKy.setText(tableModel.getValueAt(row, 9).toString());
         }
     }
 

@@ -55,6 +55,8 @@ public class LopController {
     private void loadComboBox() {
         view.getCboGVCN().removeAllItems();
         view.getCboNienKhoa().removeAllItems();
+        view.getCboLocNienKhoa().removeAllItems();
+        view.getCboLocNienKhoa().addItem("Tất cả");
 
         List<String> dsNienKhoa = dao.getDistinctNienKhoa();
         if (dsNienKhoa.isEmpty()) {
@@ -62,6 +64,7 @@ public class LopController {
         } else {
             for (String nienKhoa : dsNienKhoa) {
                 view.getCboNienKhoa().addItem(nienKhoa);
+                view.getCboLocNienKhoa().addItem(nienKhoa);
             }
         }
         try {
@@ -231,14 +234,17 @@ public class LopController {
 
     private void searchData() {
         String keyword = view.getTxtTimKiem().getText().trim();
-        System.out.println("KEYWORD = [" + keyword + "]");
+        String nienKhoa = view.getCboLocNienKhoa().getSelectedItem() != null ? view.getCboLocNienKhoa().getSelectedItem().toString() : "";
+        if (nienKhoa.equals("Tất cả")) {
+            nienKhoa = "";
+        }
 
-        if (keyword.isEmpty()) {
+        if (keyword.isEmpty() && nienKhoa.isEmpty()) {
             loadTable();
             return;
         }
 
-        List<LopGVCN> list = dao.search(keyword);
+        List<LopGVCN> list = dao.search(keyword, nienKhoa);
 
         view.getTableModel().setRowCount(0);
         for (LopGVCN l : list) {

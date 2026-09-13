@@ -20,14 +20,15 @@ public class QuanLyHocSinhPanel extends JPanel {
     private JTable tableHS;
     private DefaultTableModel tableModel;
 
-    private JTextField txtMaHS, txtHoTen, txtDiaChi;
+    private JTextField txtMaHS, txtHoTen, txtDiaChi, txtNienKhoa;
  
     private JSpinner spNgaySinh; 
     
     private JComboBox<String> cboGioiTinh,cboMaLop, cboMaDT;
 
     private JTextField txtTimKiem;
-    private JButton btnTim, btnHienThiTatCa;
+    private JComboBox<String> cboLocNienKhoa;
+    private JButton btnTimKiem, btnHienThiTatCa;
 
     private JButton btnThem, btnSua, btnXoa, btnLuu, btnHuy;
     
@@ -65,15 +66,20 @@ public class QuanLyHocSinhPanel extends JPanel {
         pnlSearch.setBorder(new TitledBorder("Tìm kiếm"));
 
         txtTimKiem = new JTextField(20);
-        btnTim = new JButton("Tìm");
+        btnTimKiem = new JButton("Tìm");
         btnHienThiTatCa = new JButton("Hiển thị tất cả");
 
-        ButtonStyleHelper.styleButtonSearch(btnTim);
+        ButtonStyleHelper.styleButtonSearch(btnTimKiem);
         ButtonStyleHelper.styleButtonView(btnHienThiTatCa);
 
         pnlSearch.add(new JLabel("Từ khóa:"));
         pnlSearch.add(txtTimKiem);
-        pnlSearch.add(btnTim);
+
+        pnlSearch.add(new JLabel("  Niên khóa:"));
+        cboLocNienKhoa = new JComboBox<>();
+        pnlSearch.add(cboLocNienKhoa);
+
+        pnlSearch.add(btnTimKiem);
         pnlSearch.add(btnHienThiTatCa);
 
         pnlNorth.add(pnlSearch);
@@ -81,7 +87,7 @@ public class QuanLyHocSinhPanel extends JPanel {
 
         String[] cols = {
             "Mã HS", "Họ tên", "Ngày sinh", "Giới tính",
-            "Địa chỉ", "Mã lớp", "Mã đối tượng"
+            "Địa chỉ", "Mã lớp", "Mã đối tượng", "Niên khóa"
         };
 
         tableModel = new DefaultTableModel(cols, 0);
@@ -96,6 +102,8 @@ public class QuanLyHocSinhPanel extends JPanel {
                 doDuLieuVaoForm();
             }
         });
+
+        controller.loadComboLocNienKhoa(cboLocNienKhoa);
 
         add(new JScrollPane(tableHS), BorderLayout.CENTER);
 
@@ -164,6 +172,13 @@ public class QuanLyHocSinhPanel extends JPanel {
         cboMaDT = new JComboBox<>();
         pnlRight.add(cboMaDT, gbc);
 
+        y++;
+        gbc.gridx = 0; gbc.gridy = y;
+        pnlRight.add(new JLabel("Niên khóa:"), gbc);
+        gbc.gridx = 1;
+        txtNienKhoa = new JTextField(20);
+        pnlRight.add(txtNienKhoa, gbc);
+
         pnlSouth.add(pnlInput, BorderLayout.CENTER);
 
         JPanel pnlButton = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
@@ -194,7 +209,7 @@ public class QuanLyHocSinhPanel extends JPanel {
         btnLuu.addActionListener(e -> luu());
         btnHuy.addActionListener(e -> huy());
 
-        btnTim.addActionListener(e -> timKiem());
+        btnTimKiem.addActionListener(e -> timKiem());
         btnHienThiTatCa.addActionListener(e -> hienThiTatCa());
         
         if (Model.Auth.isHocSinh()) {
@@ -285,6 +300,7 @@ public class QuanLyHocSinhPanel extends JPanel {
         txtDiaChi.setEnabled(enabled);
         cboMaLop.setEnabled(enabled);
         cboMaDT.setEnabled(enabled);
+        txtNienKhoa.setEnabled(enabled);
 
         btnLuu.setEnabled(enabled);
         btnHuy.setEnabled(enabled);
@@ -310,8 +326,10 @@ public class QuanLyHocSinhPanel extends JPanel {
             return;
         }
 
+        String nienKhoa = cboLocNienKhoa.getSelectedItem() != null ? cboLocNienKhoa.getSelectedItem().toString() : "";
+
         try {
-            boolean found = controller.timKiem(keyword, tableModel);
+            boolean found = controller.timKiem(keyword, nienKhoa, tableModel);
 
             if (!found) {
                 JOptionPane.showMessageDialog(
@@ -335,6 +353,9 @@ public class QuanLyHocSinhPanel extends JPanel {
     private void hienThiTatCa() {
 
         txtTimKiem.setText("");
+        if (cboLocNienKhoa.getItemCount() > 0) {
+            cboLocNienKhoa.setSelectedIndex(0);
+        }
 
         tableHS.clearSelection();
 
@@ -365,6 +386,7 @@ public class QuanLyHocSinhPanel extends JPanel {
             txtDiaChi.setText(tableModel.getValueAt(r, 4).toString());
             cboMaLop.setSelectedItem(tableModel.getValueAt(r, 5).toString());
             cboMaDT.setSelectedItem(tableModel.getValueAt(r, 6).toString());
+            txtNienKhoa.setText(tableModel.getValueAt(r, 7) != null ? tableModel.getValueAt(r, 7).toString() : "");
 
         }
     }
@@ -376,7 +398,7 @@ public class QuanLyHocSinhPanel extends JPanel {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             String strNgaySinh = sdf.format(d);
 
-            return new HocSinh(
+            HocSinh hs = new HocSinh(
                 txtMaHS.getText(),
                 txtHoTen.getText(),
                 strNgaySinh,
@@ -385,6 +407,8 @@ public class QuanLyHocSinhPanel extends JPanel {
                 cboMaLop.getSelectedItem().toString(),
                 cboMaDT.getSelectedItem().toString()
             );
+            hs.setNienKhoa(txtNienKhoa.getText());
+            return hs;
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Lỗi định dạng ngày tháng!");
             return null;
@@ -399,6 +423,7 @@ public class QuanLyHocSinhPanel extends JPanel {
         txtDiaChi.setText("");
         cboMaLop.setSelectedIndex(-1);
         cboMaDT.setSelectedIndex(-1);
+        txtNienKhoa.setText("");
 
     }
     
@@ -425,6 +450,7 @@ public class QuanLyHocSinhPanel extends JPanel {
             txtDiaChi.setText(hs.getDiaChi());
             cboMaLop.setSelectedItem(hs.getMaLop());
             cboMaDT.setSelectedItem(hs.getMaDT());
+            txtNienKhoa.setText(hs.getNienKhoa());
         }
     }
 }
