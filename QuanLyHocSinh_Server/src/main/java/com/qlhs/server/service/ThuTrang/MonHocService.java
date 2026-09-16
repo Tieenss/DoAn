@@ -23,10 +23,21 @@ public class MonHocService {
 
     public void deleteMH(String maMH) { monHocRepository.deleteById(maMH); }
 
-    public boolean existsMH(String maMH) { return monHocRepository.existsById(maMH); }
+    public boolean existsMH(String maMH) {
+        if (maMH == null) return false;
+        return monHocRepository.existsById(maMH);
+    }
 
     public boolean existsByTenMH(String tenMH) {
+        if (tenMH == null) return false;
         return monHocRepository.findAll().stream()
-                .anyMatch(m -> m.getTenMH().equalsIgnoreCase(tenMH));
+                .anyMatch(m -> m.getTenMH() != null && m.getTenMH().trim().equalsIgnoreCase(tenMH.trim()));
+    }
+
+    public boolean existsByTenMHExcluding(String maMH, String tenMH) {
+        if (tenMH == null) return false;
+        return monHocRepository.findAll().stream()
+                .anyMatch(m -> (maMH == null || !m.getMaMH().equalsIgnoreCase(maMH))
+                        && m.getTenMH() != null && m.getTenMH().trim().equalsIgnoreCase(tenMH.trim()));
     }
 }

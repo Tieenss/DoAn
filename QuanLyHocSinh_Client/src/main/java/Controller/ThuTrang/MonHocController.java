@@ -27,17 +27,31 @@ public class MonHocController {
         Runnable setEditState    = () -> view.setCrudButtonState(false, true, true, true, true);
         setIdleState.run();
 
-        view.addBtnTimKiemListener(e -> {
+        Runnable doSearch = () -> {
             String key = view.getTuKhoa();
             try {
                 List<MonHoc> list = key.isEmpty()
                         ? apiClient.getAll()
                         : apiClient.search(key);
                 view.setTableData(list);
-                if (!key.isEmpty() && list.isEmpty())
-                    view.showMessage("Không tìm thấy môn học");
-            } catch (Exception ex) {
-                view.showMessage("Lỗi tìm kiếm: " + ex.getMessage());
+            } catch (Exception ignored) {
+            }
+        };
+
+        view.addTimKiemLiveListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { doSearch.run(); }
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { doSearch.run(); }
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { doSearch.run(); }
+        });
+
+        view.addBtnTimKiemListener(e -> {
+            doSearch.run();
+            String key = view.getTuKhoa();
+            if (!key.isEmpty() && view.getTable().getRowCount() == 0) {
+                view.showMessage("Không tìm thấy môn học");
             }
         });
 
@@ -83,7 +97,11 @@ public class MonHocController {
         view.addBtnLuuListener(e -> {
             MonHoc m = view.getMonHocInput();
             if (m.getMaMH().isEmpty()) {
-                view.showMessage("Mã môn không được rỗng");
+                view.showMessage("Mã môn không được để trống!");
+                return;
+            }
+            if (m.getTenMH().isEmpty()) {
+                view.showMessage("Tên môn không được để trống!");
                 return;
             }
             try {
@@ -98,7 +116,12 @@ public class MonHocController {
                 editMode[0] = false;
                 setIdleState.run();
             } catch (Exception ex) {
-                view.showMessage("Lỗi: " + ex.getMessage());
+                String msg = ex.getMessage();
+                if (msg != null && (msg.contains("tồn tại") || msg.startsWith("Lỗi"))) {
+                    view.showMessage(msg);
+                } else {
+                    view.showMessage("Lỗi: " + msg);
+                }
             }
         });
 

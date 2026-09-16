@@ -27,7 +27,7 @@ public class PhongHocController {
         Runnable setEditState    = () -> view.setCrudButtonState(false, true, true, true, true);
         setIdleState.run();
 
-        view.addBtnTimListener(e -> {
+        Runnable doSearch = () -> {
             try {
                 String ma = view.getMaPhongTim();
                 String loai = view.getLoaiPhongTim();
@@ -38,42 +38,22 @@ public class PhongHocController {
                     List<PhongHoc> list = apiClient.search(ma, loai, tinhTrang);
                     view.setTableData(list);
                 }
-            } catch (Exception ex) {
-                view.showMessage("Lỗi tìm kiếm: " + ex.getMessage());
+            } catch (Exception ignored) {
             }
+        };
+
+        view.addMaPhongTimLiveListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { doSearch.run(); }
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { doSearch.run(); }
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { doSearch.run(); }
         });
 
-        view.addCboLoaiPhongTimListener(e -> {
-            try {
-                String ma = view.getMaPhongTim();
-                String loai = view.getLoaiPhongTim();
-                String tinhTrang = view.getTinhTrangTim();
-                if (ma.isEmpty() && (loai.isEmpty() || loai.equals("Tất cả")) && (tinhTrang.isEmpty() || tinhTrang.equals("Tất cả"))) {
-                    loadData();
-                } else {
-                    List<PhongHoc> list = apiClient.search(ma, loai, tinhTrang);
-                    view.setTableData(list);
-                }
-            } catch (Exception ex) {
-                view.showMessage("Lỗi tìm kiếm: " + ex.getMessage());
-            }
-        });
-
-        view.addCboTinhTrangTimListener(e -> {
-            try {
-                String ma = view.getMaPhongTim();
-                String loai = view.getLoaiPhongTim();
-                String tinhTrang = view.getTinhTrangTim();
-                if (ma.isEmpty() && (loai.isEmpty() || loai.equals("Tất cả")) && (tinhTrang.isEmpty() || tinhTrang.equals("Tất cả"))) {
-                    loadData();
-                } else {
-                    List<PhongHoc> list = apiClient.search(ma, loai, tinhTrang);
-                    view.setTableData(list);
-                }
-            } catch (Exception ex) {
-                view.showMessage("Lỗi tìm kiếm: " + ex.getMessage());
-            }
-        });
+        view.addBtnTimListener(e -> doSearch.run());
+        view.addCboLoaiPhongTimListener(e -> doSearch.run());
+        view.addCboTinhTrangTimListener(e -> doSearch.run());
 
         view.addBtnThemListener(e -> {
             editMode[0] = false;
@@ -117,7 +97,11 @@ public class PhongHocController {
             try {
                 PhongHoc p = view.getPhongHocInput();
                 if (p.getMaPhong().isEmpty()) {
-                    view.showMessage("Mã phòng không được để trống");
+                    view.showMessage("Mã phòng không được để trống!");
+                    return;
+                }
+                if (p.getTenPhong().isEmpty()) {
+                    view.showMessage("Tên phòng không được để trống!");
                     return;
                 }
                 if (editMode[0]) {
@@ -132,9 +116,14 @@ public class PhongHocController {
                 editMode[0] = false;
                 setIdleState.run();
             } catch (NumberFormatException ex) {
-                view.showMessage("Sức chứa phải là số");
+                view.showMessage("Sức chứa phải là số!");
             } catch (Exception ex) {
-                view.showMessage("Lỗi: " + ex.getMessage());
+                String msg = ex.getMessage();
+                if (msg != null && (msg.contains("tồn tại") || msg.startsWith("Lỗi"))) {
+                    view.showMessage(msg);
+                } else {
+                    view.showMessage("Lỗi: " + msg);
+                }
             }
         });
 

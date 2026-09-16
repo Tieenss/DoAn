@@ -39,14 +39,35 @@ public class TKBApiClient {
     }
 
     public List<TKB> getByFilter(String maLop, String maMH, int thu) throws Exception {
-        String url = BASE_URL + "/filter?maLop=" + URLEncoder.encode(maLop, StandardCharsets.UTF_8)
-                + "&maMH=" + URLEncoder.encode(maMH, StandardCharsets.UTF_8)
-                + "&thu=" + thu;
+        return getByFilter(maLop, maMH, thu, "", 0);
+    }
+
+    public List<TKB> getByFilter(String maLop, String maMH, int thu, String namHoc, int hocKy) throws Exception {
+        String url = BASE_URL + "/filter?maLop=" + URLEncoder.encode(maLop != null ? maLop : "", StandardCharsets.UTF_8)
+                + "&maMH=" + URLEncoder.encode(maMH != null ? maMH : "", StandardCharsets.UTF_8)
+                + "&thu=" + thu
+                + "&namHoc=" + URLEncoder.encode(namHoc != null ? namHoc : "", StandardCharsets.UTF_8)
+                + "&hocKy=" + hocKy;
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .GET().build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 200) {
+            throw new Exception("Lỗi server (" + response.statusCode() + "): " + response.body());
+        }
         Type type = new TypeToken<List<TKB>>(){}.getType();
+        return gson.fromJson(response.body(), type);
+    }
+
+    public List<String> getDanhSachNamHoc() throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + "/danhsachnamhoc"))
+                .GET().build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 200) {
+            return new java.util.ArrayList<>();
+        }
+        Type type = new TypeToken<List<String>>(){}.getType();
         return gson.fromJson(response.body(), type);
     }
 
@@ -90,11 +111,20 @@ public class TKBApiClient {
         String json = gson.toJson(tkb);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .header("Content-Type", "application/json; charset=UTF-8")
+                .POST(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8))
                 .build();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() == 409) throw new Exception("Trùng tiết học (lớp, GV hoặc phòng đã có lịch)");
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        if (response.statusCode() == 409) {
+            String msg = response.body();
+            if (msg == null || msg.trim().isEmpty()) {
+                msg = "Trùng lịch học (lớp, GV hoặc phòng đã có lịch)!";
+            }
+            throw new Exception(msg);
+        }
+        if (response.statusCode() != 200 && response.statusCode() != 201) {
+            throw new Exception("Lỗi khi thêm: " + response.body());
+        }
         return gson.fromJson(response.body(), TKB.class);
     }
 
@@ -102,11 +132,21 @@ public class TKBApiClient {
         String json = gson.toJson(tkb);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/" + maTKB))
-                .header("Content-Type", "application/json")
-                .PUT(HttpRequest.BodyPublishers.ofString(json))
+                .header("Content-Type", "application/json; charset=UTF-8")
+                .PUT(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8))
                 .build();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        if (response.statusCode() == 409) {
+            String msg = response.body();
+            if (msg == null || msg.trim().isEmpty()) {
+                msg = "Trùng lịch học (lớp, GV hoặc phòng đã có lịch)!";
+            }
+            throw new Exception(msg);
+        }
         if (response.statusCode() == 404) throw new Exception("Không tìm thấy TKB");
+        if (response.statusCode() != 200) {
+            throw new Exception("Lỗi khi cập nhật: " + response.body());
+        }
         return gson.fromJson(response.body(), TKB.class);
     }
 
