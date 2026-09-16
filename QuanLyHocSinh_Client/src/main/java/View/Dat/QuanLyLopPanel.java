@@ -51,6 +51,7 @@ public class QuanLyLopPanel extends JPanel {
 
         pnlSearch.add(new JLabel("  Niên Khóa:"));
         cboLocNienKhoa = new JComboBox<>();
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboLocNienKhoa);
         pnlSearch.add(cboLocNienKhoa);
 
         pnlSearch.add(btnTimKiem);
@@ -92,7 +93,7 @@ public class QuanLyLopPanel extends JPanel {
         pnlInput.add(new JLabel("Niên Khóa:"), gbc);
         gbc.gridx = 1;
         cboNienKhoa = new JComboBox<>();
-        cboNienKhoa.setEditable(true);
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboNienKhoa);
         cboNienKhoa.setPrototypeDisplayValue("2024-2025");
         pnlInput.add(cboNienKhoa, gbc);
 
@@ -100,6 +101,7 @@ public class QuanLyLopPanel extends JPanel {
         pnlInput.add(new JLabel("GV Chủ Nhiệm:"), gbc);
         gbc.gridx = 3;
         cboGVCN = new JComboBox<>();
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboGVCN);
         pnlInput.add(cboGVCN, gbc);
 
         gbc.gridx = 4;

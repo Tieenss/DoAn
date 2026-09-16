@@ -29,4 +29,35 @@ public interface LichThiRepository extends JpaRepository<LichThi, Integer> {
 
     @Query("SELECT l FROM LichThi l JOIN FETCH l.monHoc LEFT JOIN FETCH l.lop WHERE (:namHoc = '' OR l.namHoc = :namHoc) AND (l.tenKyThi LIKE %:keyword% OR l.monHoc.tenMH LIKE %:keyword% OR l.maMH LIKE %:keyword% OR l.maLop LIKE %:keyword% OR l.lop.tenLop LIKE %:keyword%)")
     List<LichThi> searchLichThiNative(@Param("keyword") String keyword, @Param("namHoc") String namHoc);
+
+    @Query("SELECT l FROM LichThi l JOIN FETCH l.monHoc LEFT JOIN FETCH l.lop " +
+           "WHERE l.ngayThi = :ngayThi AND l.maPhong = :maPhong AND l.maLT != :excludeId " +
+           "AND l.gioBatDau < :gioKetThuc AND l.gioKetThuc > :gioBatDau")
+    List<LichThi> findRoomConflicts(
+            @Param("ngayThi") java.time.LocalDate ngayThi,
+            @Param("maPhong") String maPhong,
+            @Param("gioBatDau") java.time.LocalTime gioBatDau,
+            @Param("gioKetThuc") java.time.LocalTime gioKetThuc,
+            @Param("excludeId") int excludeId);
+
+    @Query("SELECT l FROM LichThi l JOIN FETCH l.monHoc LEFT JOIN FETCH l.lop " +
+           "WHERE l.ngayThi = :ngayThi AND l.maLop = :maLop AND l.maLT != :excludeId " +
+           "AND l.gioBatDau < :gioKetThuc AND l.gioKetThuc > :gioBatDau")
+    List<LichThi> findClassConflicts(
+            @Param("ngayThi") java.time.LocalDate ngayThi,
+            @Param("maLop") String maLop,
+            @Param("gioBatDau") java.time.LocalTime gioBatDau,
+            @Param("gioKetThuc") java.time.LocalTime gioKetThuc,
+            @Param("excludeId") int excludeId);
+
+    @Query("SELECT l FROM LichThi l JOIN FETCH l.monHoc LEFT JOIN FETCH l.lop " +
+           "WHERE l.maLop = :maLop AND l.maMH = :maMH AND l.tenKyThi = :tenKyThi " +
+           "AND l.namHoc = :namHoc AND l.hocKy = :hocKy AND l.maLT != :excludeId")
+    List<LichThi> findSubjectConflicts(
+            @Param("maLop") String maLop,
+            @Param("maMH") String maMH,
+            @Param("tenKyThi") String tenKyThi,
+            @Param("namHoc") String namHoc,
+            @Param("hocKy") int hocKy,
+            @Param("excludeId") int excludeId);
 }

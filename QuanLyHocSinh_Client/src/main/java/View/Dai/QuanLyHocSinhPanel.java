@@ -77,6 +77,7 @@ public class QuanLyHocSinhPanel extends JPanel {
 
         pnlSearch.add(new JLabel("  Niên khóa:"));
         cboLocNienKhoa = new JComboBox<>();
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboLocNienKhoa);
         pnlSearch.add(cboLocNienKhoa);
 
         pnlSearch.add(btnTimKiem);
@@ -149,6 +150,7 @@ public class QuanLyHocSinhPanel extends JPanel {
         pnlLeft.add(new JLabel("Giới tính:"), gbc);
         gbc.gridx = 1;
         cboGioiTinh = new JComboBox<>(new String[]{"Nam", "Nữ"});
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboGioiTinh);
         pnlLeft.add(cboGioiTinh, gbc);
 
         y = 0;
@@ -163,6 +165,7 @@ public class QuanLyHocSinhPanel extends JPanel {
         pnlRight.add(new JLabel("Mã lớp:"), gbc);
         gbc.gridx = 1;
         cboMaLop = new JComboBox<>();
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboMaLop);
         pnlRight.add(cboMaLop, gbc);
 
         y++;
@@ -170,6 +173,7 @@ public class QuanLyHocSinhPanel extends JPanel {
         pnlRight.add(new JLabel("Mã đối tượng:"), gbc);
         gbc.gridx = 1;
         cboMaDT = new JComboBox<>();
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboMaDT);
         pnlRight.add(cboMaDT, gbc);
 
         y++;

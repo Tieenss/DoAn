@@ -222,48 +222,100 @@ public class LichThiController {
             }
 
             if (editMode[0]) {
-                if(dao.updateLichThi(lt)) {
-                    view.showMessage("Cập nhật thành công!");
+                // SỬA LỊCH THI -> CẢNH BÁO NGUY HIỂM 2 BƯỚC
+                int row = view.getTable().getSelectedRow();
+                String oldNgay = row >= 0 && view.getTable().getValueAt(row, 3) != null ? view.getTable().getValueAt(row, 3).toString() : "";
+                String oldGioBD = row >= 0 && view.getTable().getValueAt(row, 4) != null ? view.getTable().getValueAt(row, 4).toString() : "";
+                String oldGioKT = row >= 0 && view.getTable().getValueAt(row, 5) != null ? view.getTable().getValueAt(row, 5).toString() : "";
+                String oldPhong = row >= 0 && view.getTable().getValueAt(row, 6) != null ? view.getTable().getValueAt(row, 6).toString() : "";
+                String oldLop = row >= 0 && view.getTable().getValueAt(row, 7) != null ? view.getTable().getValueAt(row, 7).toString() : "";
+
+                List<String[]> changes = new ArrayList<>();
+                changes.add(new String[]{"Ngày thi", oldNgay, lt.getNgayThi()});
+                changes.add(new String[]{"Giờ bắt đầu", oldGioBD, lt.getGioBatDau()});
+                changes.add(new String[]{"Giờ kết thúc", oldGioKT, lt.getGioKetThuc()});
+                changes.add(new String[]{"Phòng thi", oldPhong, lt.getMaPhong()});
+                changes.add(new String[]{"Lớp thi", oldLop, lt.getMaLop()});
+
+                List<String> impacts = java.util.Arrays.asList(
+                    "Làm thay đổi thời gian và địa điểm thi của toàn bộ học sinh trong lớp.",
+                    "Ảnh hưởng trực tiếp đến lịch phân công cán bộ, giáo viên coi thi (giám thị).",
+                    "Có thể gây xung đột lịch thi hoặc lịch học các môn khác nếu không thông báo sớm.",
+                    "Yêu cầu thông báo khẩn cấp tới giáo viên bộ môn và học sinh lớp này."
+                );
+
+                String entityInfo = String.format("Mã LT: %d | Kỳ thi: %s | Môn: %s | Lớp: %s",
+                        lt.getMaLT(), lt.getTenKyThi(), lt.getMaMH(), lt.getMaLop());
+
+                boolean pass = TienIch.DangerConfirmDialog.showUpdateConfirmation(
+                        view, "CẢNH BÁO NGUY HIỂM: SỬA LỊCH THI", entityInfo, changes, impacts);
+
+                if (!pass) {
+                    return;
+                }
+
+                String err = dao.updateLichThiResult(lt);
+                if (err == null) {
+                    view.showMessage("Cập nhật lịch thi thành công!");
                     loadAll();
                     view.clearForm();
                     editMode[0] = false;
                     setIdleState.run();
                 } else {
-                    view.showMessage("Cập nhật thất bại!");
+                    view.showMessage("Cập nhật thất bại:\n" + err);
                 }
             } else {
-                if(dao.addLichThi(lt)) {
+                String err = dao.addLichThiResult(lt);
+                if (err == null) {
                     view.showMessage("Thêm lịch thi thành công!");
                     loadAll();
                     view.clearForm();
                     editMode[0] = false;
                     setIdleState.run();
                 } else {
-                    view.showMessage("Thêm thất bại! (Kiểm tra xem Mã Môn/Mã Phòng có tồn tại chưa)");
+                    view.showMessage("Thêm thất bại:\n" + err);
                 }
             }
         });
         view.addBtnXoaListener(e -> {
             LichThi lt = view.getLichThiInput();
-            if(lt.getMaLT() == 0) {
+            if (lt.getMaLT() == 0) {
                  view.showMessage("Vui lòng chọn dòng cần xóa!"); 
                  return;
             }
-            int cf = JOptionPane.showConfirmDialog(
-                view, "Bạn có chắc muốn xóa lịch thi này?", "Xác nhận",
-                JOptionPane.YES_NO_OPTION
+
+            int row = view.getTable().getSelectedRow();
+            String kyThi = row >= 0 && view.getTable().getValueAt(row, 1) != null ? view.getTable().getValueAt(row, 1).toString() : "";
+            String mon = row >= 0 && view.getTable().getValueAt(row, 2) != null ? view.getTable().getValueAt(row, 2).toString() : "";
+            String ngay = row >= 0 && view.getTable().getValueAt(row, 3) != null ? view.getTable().getValueAt(row, 3).toString() : "";
+            String lop = row >= 0 && view.getTable().getValueAt(row, 7) != null ? view.getTable().getValueAt(row, 7).toString() : "";
+
+            String entityInfo = String.format("Mã LT: %d | Kỳ thi: %s | Môn: %s | Lớp: %s | Ngày: %s",
+                    lt.getMaLT(), kyThi, mon, lop, ngay);
+
+            List<String> impacts = java.util.Arrays.asList(
+                "Ca thi của môn học này đối với lớp sẽ bị HỦY HOÀN TOÀN khỏi hệ thống.",
+                "Phòng thi đã phân công sẽ bị trống, mất thông tin buổi thi của học sinh.",
+                "Học sinh sẽ không có lịch thi môn này nếu không được xếp lịch bù kịp thời.",
+                "Thao tác này KHÔNG THỂ KHÔI PHỤC tự động!"
             );
-            
-            if(cf == JOptionPane.YES_OPTION) {
-                if(dao.deleteLichThi(lt.getMaLT())) {
-                    view.showMessage("Xóa thành công!");
-                    loadAll();
-                    view.clearForm();
-                    editMode[0] = false;
-                    setIdleState.run();
-                } else {
-                    view.showMessage("Xóa thất bại!");
-                }
+
+            boolean pass = TienIch.DangerConfirmDialog.showDeleteConfirmation(
+                    view, "CẢNH BÁO NGUY HIỂM: XÓA LỊCH THI", entityInfo, impacts);
+
+            if (!pass) {
+                return;
+            }
+
+            String delErr = dao.deleteLichThiResult(lt.getMaLT());
+            if (delErr == null) {
+                view.showMessage("Xóa lịch thi thành công!");
+                loadAll();
+                view.clearForm();
+                editMode[0] = false;
+                setIdleState.run();
+            } else {
+                view.showMessage("Xóa thất bại:\n" + delErr);
             }
         });
         view.addBtnHuyListener(e -> {

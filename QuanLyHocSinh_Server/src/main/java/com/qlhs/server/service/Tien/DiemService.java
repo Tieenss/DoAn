@@ -37,6 +37,14 @@ public class DiemService {
         return diemRepository.findDistinctNamHoc();
     }
 
+    public boolean exists(String maHS, String maMH, int hocKy, String namHoc) {
+        return diemRepository.existsById(new Diem.DiemId(maHS, maMH, hocKy, namHoc));
+    }
+
+    public void delete(String maHS, String maMH, int hocKy, String namHoc) {
+        diemRepository.deleteById(new Diem.DiemId(maHS, maMH, hocKy, namHoc));
+    }
+
     public Diem saveDiem(Diem diem) {
         return diemRepository.save(diem);
     }

@@ -45,17 +45,24 @@ public class LichThiRestController {
     }
 
     @PostMapping
-    public ResponseEntity<LichThi> add(@RequestBody LichThi lt) {
-        
+    public ResponseEntity<?> add(@RequestBody LichThi lt) {
+        String conflict = lichThiService.checkConflict(lt);
+        if (conflict != null) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.CONFLICT).body(conflict);
+        }
         return ResponseEntity.ok(lichThiService.save(lt));
     }
 
     @PutMapping("/{maLT}")
-    public ResponseEntity<LichThi> update(@PathVariable int maLT, @RequestBody LichThi lt) {
+    public ResponseEntity<?> update(@PathVariable int maLT, @RequestBody LichThi lt) {
         if (!lichThiService.exists(maLT)) {
             return ResponseEntity.notFound().build();
         }
         lt.setMaLT(maLT);
+        String conflict = lichThiService.checkConflict(lt);
+        if (conflict != null) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.CONFLICT).body(conflict);
+        }
         return ResponseEntity.ok(lichThiService.save(lt));
     }
 

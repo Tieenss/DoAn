@@ -39,19 +39,19 @@ public class Diem {
     private String namHoc;
 
     @Column(name = "Diem15p")
-    private double diem15p;
+    private Double diem15p;
 
     @Column(name = "Diem1Tiet")
-    private double diem1Tiet;
+    private Double diem1Tiet;
 
     @Column(name = "DiemGiuaKy")
-    private double diemGiuaKy;
+    private Double diemGiuaKy;
 
     @Column(name = "DiemCuoiKy")
-    private double diemCuoiKy;
+    private Double diemCuoiKy;
 
     @Column(name = "DiemTongKet")
-    private double diemTongKet;
+    private Double diemTongKet;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaHS", insertable = false, updatable = false)

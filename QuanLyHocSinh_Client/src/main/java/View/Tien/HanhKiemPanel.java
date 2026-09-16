@@ -51,18 +51,21 @@ public class HanhKiemPanel extends JPanel {
         
         pnlFilter.add(new JLabel("Mã Lớp:"));
         cboLocMaLop = new JComboBox<>();
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboLocMaLop);
         cboLocMaLop.addItem("Tất cả");
         
         pnlFilter.add(cboLocMaLop); 
         
         pnlFilter.add(new JLabel("Năm Học:"));
         cboLocNamHoc = new JComboBox<>();
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboLocNamHoc);
         cboLocNamHoc.addItem("");
         cboLocNamHoc.setSelectedIndex(0);
         pnlFilter.add(cboLocNamHoc);
         
         pnlFilter.add(new JLabel("Học Kỳ:"));
         cboLocHocKy = new JComboBox<>(new String[]{"", "1", "2"}); 
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboLocHocKy);
         cboLocHocKy.setSelectedIndex(0);
         pnlFilter.add(cboLocHocKy);
         
@@ -113,19 +116,26 @@ public class HanhKiemPanel extends JPanel {
 
         gbc.gridx=0; gbc.gridy=1; pnlInput.add(new JLabel("Mã Lớp:"), gbc);
         gbc.gridx=1; gbc.gridy=1; 
-        cboMaLopInput = new JComboBox<>(); pnlInput.add(cboMaLopInput, gbc);
+        cboMaLopInput = new JComboBox<>(); 
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboMaLopInput);
+        pnlInput.add(cboMaLopInput, gbc);
         
         gbc.gridx=2; gbc.gridy=1; pnlInput.add(new JLabel("Năm Học:"), gbc);
         gbc.gridx=3; gbc.gridy=1; 
-        cboNamHocInput = new JComboBox<>(); cboNamHocInput.setEditable(true); pnlInput.add(cboNamHocInput, gbc);
+        cboNamHocInput = new JComboBox<>(); 
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboNamHocInput);
+        pnlInput.add(cboNamHocInput, gbc);
 
         gbc.gridx=0; gbc.gridy=2; pnlInput.add(new JLabel("Học Kỳ:"), gbc);
         gbc.gridx=1; gbc.gridy=2; 
-        cboHocKyInput = new JComboBox<>(new String[]{"1", "2"}); pnlInput.add(cboHocKyInput, gbc);
+        cboHocKyInput = new JComboBox<>(new String[]{"1", "2"}); 
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboHocKyInput);
+        pnlInput.add(cboHocKyInput, gbc);
 
         gbc.gridx=2; gbc.gridy=2; pnlInput.add(new JLabel("Xếp Loại:"), gbc);
         gbc.gridx=3; gbc.gridy=2; 
         cboXepLoai = new JComboBox<>(new String[]{"", "Tốt", "Khá", "Trung bình", "Yếu"}); 
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboXepLoai);
         pnlInput.add(cboXepLoai, gbc);
 
         gbc.gridx=0; gbc.gridy=3; pnlInput.add(new JLabel("Nhận Xét:"), gbc);

@@ -70,41 +70,113 @@ public class HanhKiemController {
         });
         view.addBtnLuuListener(e -> {
             HanhKiem hk = view.getHanhKiemInput();
-            if(hk.getMaHS().isEmpty()) {
-                view.showMessage("Vui lòng chọn học sinh trên bảng để đánh giá!");
+            if (hk.getMaHS().isEmpty()) {
+                view.showMessage("Vui lòng chọn hoặc nhập mã học sinh để đánh giá!");
                 return;
             }
-            if (dao.saveHanhKiem(hk)) {
-                view.showMessage("Lưu hạnh kiểm thành công!");
-                loadData();
-                view.clearForm();
-                editMode[0] = false;
-                setIdleState.run();
-            } else {
-                view.showMessage("Lưu thất bại! Có lỗi xảy ra.");
+            if (hk.getXepLoai() == null || hk.getXepLoai().trim().isEmpty()) {
+                view.showMessage("Vui lòng chọn Xếp loại hạnh kiểm (Tốt, Khá, Trung bình, Yếu)!");
+                return;
             }
-        });
-        view.addBtnXoaListener(e -> {
-            HanhKiem hk = view.getHanhKiemInput();
-            if(hk.getMaHS().isEmpty()) {
-                 view.showMessage("Vui lòng chọn dòng cần xóa!"); 
-                 return;
-            }
-            int confirm = javax.swing.JOptionPane.showConfirmDialog(
-                view, "Bạn có chắc chắn muốn xóa?", "Xác nhận",
-                javax.swing.JOptionPane.YES_NO_OPTION
-            );
-            
-            if (confirm == javax.swing.JOptionPane.YES_OPTION) {
-                if (dao.deleteHanhKiem(hk.getMaHS(), hk.getNamHoc(), hk.getHocKy())) {
-                    view.showMessage("Xóa thành công!");
+
+            if (!editMode[0]) {
+                // 1. THÊM MỚI (INSERT) -> CHECK TRÙNG LẶP
+                boolean exists = dao.checkExists(hk.getMaHS(), hk.getNamHoc(), hk.getHocKy());
+                if (exists) {
+                    view.showMessage(String.format("LỖI TRÙNG LẶP DỮ LIỆU:\nHọc sinh '%s' đã có đánh giá hạnh kiểm trong Học kỳ %d - Năm học %s!\n" +
+                            "Hệ thống không cho phép nhập trùng. Vui lòng chọn dòng trên bảng và bấm 'Sửa' để cập nhật.",
+                            hk.getMaHS(), hk.getHocKy(), hk.getNamHoc()));
+                    return;
+                }
+
+                String err = dao.addHanhKiemResult(hk);
+                if (err == null) {
+                    view.showMessage("Thêm hạnh kiểm học sinh thành công!");
                     loadData();
                     view.clearForm();
                     editMode[0] = false;
                     setIdleState.run();
                 } else {
-                    view.showMessage("Xóa thất bại!");
+                    view.showMessage("Thêm thất bại:\n" + err);
                 }
+            } else {
+                // 2. SỬA DỮ LIỆU (UPDATE) -> CẢNH BÁO NGUY HIỂM 2 BƯỚC
+                int row = view.getTable().getSelectedRow();
+                String tenHS = row >= 0 && view.getTable().getValueAt(row, 1) != null ? view.getTable().getValueAt(row, 1).toString() : "";
+                String oldXepLoai = row >= 0 && view.getTable().getValueAt(row, 5) != null ? view.getTable().getValueAt(row, 5).toString() : "";
+                String oldNhanXet = row >= 0 && view.getTable().getValueAt(row, 6) != null ? view.getTable().getValueAt(row, 6).toString() : "";
+
+                List<String[]> changes = new ArrayList<>();
+                changes.add(new String[]{"Xếp loại hạnh kiểm", oldXepLoai, hk.getXepLoai()});
+                changes.add(new String[]{"Nhận xét rèn luyện", oldNhanXet, hk.getNhanXet()});
+
+                List<String> impacts = java.util.Arrays.asList(
+                    "Làm thay đổi xếp loại rèn luyện đạo đức trong học kỳ và cả năm của học sinh.",
+                    "Ảnh hưởng trực tiếp đến việc xét công nhận Danh hiệu Học sinh Giỏi / Học sinh Tiên tiến (yêu cầu hạnh kiểm Tốt/Khá).",
+                    "Tác động trực tiếp đến điều kiện xét cấp Học bổng khuyến khích học tập.",
+                    "Ảnh hưởng đến hồ sơ học bạ và kết quả xét Tốt nghiệp THPT / THCS."
+                );
+
+                String entityInfo = String.format("Mã HS: %s (%s) | Lớp: %s | HK: %d | Năm: %s",
+                        hk.getMaHS(), tenHS, hk.getMaLop(), hk.getHocKy(), hk.getNamHoc());
+
+                boolean pass = TienIch.DangerConfirmDialog.showUpdateConfirmation(
+                        view, "CẢNH BÁO NGUY HIỂM: SỬA HẠNH KIỂM HỌC SINH", entityInfo, changes, impacts);
+
+                if (!pass) {
+                    return;
+                }
+
+                String updateErr = dao.updateHanhKiemResult(hk);
+                if (updateErr == null) {
+                    view.showMessage("Cập nhật hạnh kiểm thành công!");
+                    loadData();
+                    view.clearForm();
+                    editMode[0] = false;
+                    setIdleState.run();
+                } else {
+                    view.showMessage("Cập nhật thất bại:\n" + updateErr);
+                }
+            }
+        });
+
+        view.addBtnXoaListener(e -> {
+            HanhKiem hk = view.getHanhKiemInput();
+            if (hk.getMaHS().isEmpty()) {
+                 view.showMessage("Vui lòng chọn dòng cần xóa!"); 
+                 return;
+            }
+
+            int row = view.getTable().getSelectedRow();
+            String tenHS = row >= 0 && view.getTable().getValueAt(row, 1) != null ? view.getTable().getValueAt(row, 1).toString() : "";
+            String oldXepLoai = row >= 0 && view.getTable().getValueAt(row, 5) != null ? view.getTable().getValueAt(row, 5).toString() : "";
+
+            String entityInfo = String.format("Học sinh: %s (%s) | Xếp loại: %s | HK: %d | Năm: %s",
+                    tenHS, hk.getMaHS(), oldXepLoai, hk.getHocKy(), hk.getNamHoc());
+
+            List<String> impacts = java.util.Arrays.asList(
+                "Hồ sơ đánh giá rèn luyện hạnh kiểm của học sinh trong học kỳ này sẽ bị XÓA VĨNH VIỄN.",
+                "Học sinh sẽ bị thiếu tiêu chí hạnh kiểm -> Không đủ điều kiện xét danh hiệu thi đua và học bổng.",
+                "Không thể tổng kết xếp loại cả năm nếu thiếu hạnh kiểm một trong hai học kỳ.",
+                "Thao tác này KHÔNG THỂ KHÔI PHỤC tự động!"
+            );
+
+            boolean pass = TienIch.DangerConfirmDialog.showDeleteConfirmation(
+                    view, "CẢNH BÁO NGUY HIỂM: XÓA HẠNH KIỂM", entityInfo, impacts);
+
+            if (!pass) {
+                return;
+            }
+
+            String delErr = dao.deleteHanhKiemResult(hk.getMaHS(), hk.getNamHoc(), hk.getHocKy());
+            if (delErr == null) {
+                view.showMessage("Xóa hạnh kiểm thành công!");
+                loadData();
+                view.clearForm();
+                editMode[0] = false;
+                setIdleState.run();
+            } else {
+                view.showMessage("Xóa thất bại:\n" + delErr);
             }
         });
         view.addTableMouseListener(new MouseAdapter() {

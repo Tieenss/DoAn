@@ -126,6 +126,7 @@ public class QuanLyGiaoVienPanel extends JPanel {
         pnlInput.add(new JLabel("Tổ Bộ Môn:"), gbc);
         gbc.gridx = 1;
         cboMaToHop = new JComboBox<>();
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboMaToHop);
         pnlInput.add(cboMaToHop, gbc);
 
         gbc.gridx = 3;

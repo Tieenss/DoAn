@@ -78,6 +78,7 @@ public class QuanLyPhucKhaoPanel extends JPanel {
         gbc.gridx = 0; gbc.gridy = 2; pnlInput.add(lblTrangThai, gbc);
         gbc.gridx = 1;
         cboTrangThai = new JComboBox<>(new String[]{"Chờ xử lý", "Đang xử lý", "Đã xử lý", "Từ chối"});
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboTrangThai);
         cboTrangThai.setPreferredSize(new Dimension(250, 28));
         pnlInput.add(cboTrangThai, gbc);
 

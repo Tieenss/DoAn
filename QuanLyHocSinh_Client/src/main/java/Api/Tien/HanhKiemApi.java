@@ -74,31 +74,80 @@ public class HanhKiemApi {
         return new ArrayList<>();
     }
 
-    public boolean saveHanhKiem(HanhKiem hk) {
-        if (!Auth.canEditData(hk.getMaHS())) {
-            System.out.println("Bạn không có quyền cập nhật hạnh kiểm cho học sinh này!");
-            return false;
+    public boolean checkExists(String maHS, String namHoc, int hocKy) {
+        try {
+            String url = String.format("%s/exists?maHS=%s&namHoc=%s&hocKy=%d",
+                    BASE_URL,
+                    URLEncoder.encode(maHS, StandardCharsets.UTF_8),
+                    URLEncoder.encode(namHoc != null ? namHoc : "", StandardCharsets.UTF_8),
+                    hocKy);
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .GET()
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                return Boolean.parseBoolean(response.body().trim());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        return false;
+    }
 
+    public String addHanhKiemResult(HanhKiem hk) {
+        if (!Auth.canEditData(hk.getMaHS())) {
+            return "Bạn không có quyền cập nhật hạnh kiểm cho học sinh này!";
+        }
         try {
             String json = gson.toJson(hk);
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(BASE_URL))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .header("Content-Type", "application/json; charset=UTF-8")
+                    .POST(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8))
                     .build();
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return response.statusCode() == 200;
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (response.statusCode() == 200) {
+                return null; // Thành công
+            } else {
+                return response.body();
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return "Lỗi kết nối máy chủ: " + e.getMessage();
         }
     }
 
-    public boolean deleteHanhKiem(String maHS, String namHoc, int hocKy) {
+    public String updateHanhKiemResult(HanhKiem hk) {
+        if (!Auth.canEditData(hk.getMaHS())) {
+            return "Bạn không có quyền cập nhật hạnh kiểm cho học sinh này!";
+        }
+        try {
+            String json = gson.toJson(hk);
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(BASE_URL))
+                    .header("Content-Type", "application/json; charset=UTF-8")
+                    .PUT(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8))
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (response.statusCode() == 200) {
+                return null; // Thành công
+            } else {
+                return response.body();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Lỗi kết nối máy chủ: " + e.getMessage();
+        }
+    }
+
+    public boolean saveHanhKiem(HanhKiem hk) {
+        return addHanhKiemResult(hk) == null;
+    }
+
+    public String deleteHanhKiemResult(String maHS, String namHoc, int hocKy) {
         if (!Auth.canEditData(maHS)) {
-            System.out.println("Bạn không có quyền xóa hạnh kiểm cho học sinh này!");
-            return false;
+            return "Bạn không có quyền xóa hạnh kiểm cho học sinh này!";
         }
 
         try {
@@ -111,12 +160,20 @@ public class HanhKiemApi {
                     .uri(URI.create(url))
                     .DELETE()
                     .build();
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return response.statusCode() == 200;
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (response.statusCode() == 200) {
+                return null;
+            } else {
+                return "Lỗi xóa (" + response.statusCode() + "): " + response.body();
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return "Lỗi kết nối: " + e.getMessage();
         }
+    }
+
+    public boolean deleteHanhKiem(String maHS, String namHoc, int hocKy) {
+        return deleteHanhKiemResult(maHS, namHoc, hocKy) == null;
     }
 
     public List<String> getDistinctNamHoc() {

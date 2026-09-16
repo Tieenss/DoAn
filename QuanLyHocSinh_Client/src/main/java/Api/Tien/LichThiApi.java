@@ -132,49 +132,73 @@ public class LichThiApi {
         return rawTime;
     }
 
-    public boolean addLichThi(LichThi lt) {
+    public String addLichThiResult(LichThi lt) {
         try {
             String json = gson.toJson(lt);
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(BASE_URL))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .header("Content-Type", "application/json; charset=UTF-8")
+                    .POST(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8))
                     .build();
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return response.statusCode() == 200;
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (response.statusCode() == 200) {
+                return null;
+            } else {
+                return response.body();
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return "Lỗi kết nối máy chủ: " + e.getMessage();
         }
     }
 
-    public boolean updateLichThi(LichThi lt) {
+    public boolean addLichThi(LichThi lt) {
+        return addLichThiResult(lt) == null;
+    }
+
+    public String updateLichThiResult(LichThi lt) {
         try {
             String json = gson.toJson(lt);
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(BASE_URL + "/" + lt.getMaLT()))
-                    .header("Content-Type", "application/json")
-                    .PUT(HttpRequest.BodyPublishers.ofString(json))
+                    .header("Content-Type", "application/json; charset=UTF-8")
+                    .PUT(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8))
                     .build();
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return response.statusCode() == 200;
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (response.statusCode() == 200) {
+                return null;
+            } else {
+                return response.body();
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return "Lỗi kết nối máy chủ: " + e.getMessage();
         }
     }
 
-    public boolean deleteLichThi(int maLT) {
+    public boolean updateLichThi(LichThi lt) {
+        return updateLichThiResult(lt) == null;
+    }
+
+    public String deleteLichThiResult(int maLT) {
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(BASE_URL + "/" + maLT))
                     .DELETE()
                     .build();
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return response.statusCode() == 200;
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (response.statusCode() == 200) {
+                return null;
+            } else {
+                return "Lỗi xóa (" + response.statusCode() + "): " + response.body();
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return "Lỗi kết nối: " + e.getMessage();
         }
+    }
+
+    public boolean deleteLichThi(int maLT) {
+        return deleteLichThiResult(maLT) == null;
     }
 }
