@@ -26,7 +26,7 @@ public class LichThiPanel extends JPanel {
 
     private JButton btnXuatExcel;
 
-    private JComboBox<String> cboMaLT, cboTenMH, cboTenPhong, cboTenKyThi, cboLop;
+    private JComboBox<String> cboMaLT, cboTenMH, cboTenPhong, cboTenKyThi, cboLop, cboNamHocInput;
     private JDateChooser dateNgayThi;
     private JSpinner spinGioBatDau, spinGioKetThuc;
 
@@ -53,16 +53,16 @@ public class LichThiPanel extends JPanel {
         pnlFilter.setBorder(new TitledBorder("Bộ Lọc Lịch Thi"));
         
         pnlFilter.add(new JLabel("Kỳ Thi:"));
-        cboLocKyThi = new JComboBox<>(); pnlFilter.add(cboLocKyThi);
+        cboLocKyThi = new JComboBox<>(); TienIch.ComboBoxUtil.makeSearchableAndEditable(cboLocKyThi); pnlFilter.add(cboLocKyThi);
         
         pnlFilter.add(new JLabel("Môn:"));
-        cboLocMon = new JComboBox<>(); pnlFilter.add(cboLocMon);
+        cboLocMon = new JComboBox<>(); TienIch.ComboBoxUtil.makeSearchableAndEditable(cboLocMon); pnlFilter.add(cboLocMon);
         
         pnlFilter.add(new JLabel("Phòng:"));
-        cboLocPhong = new JComboBox<>(); pnlFilter.add(cboLocPhong);
+        cboLocPhong = new JComboBox<>(); TienIch.ComboBoxUtil.makeSearchableAndEditable(cboLocPhong); pnlFilter.add(cboLocPhong);
 
         pnlFilter.add(new JLabel("Lớp:"));
-        cboLocLop = new JComboBox<>(); pnlFilter.add(cboLocLop);
+        cboLocLop = new JComboBox<>(); TienIch.ComboBoxUtil.makeSearchableAndEditable(cboLocLop); pnlFilter.add(cboLocLop);
         
         btnLocDanhSach = new JButton("Lọc Danh Sách");
         ButtonStyleHelper.styleButtonFilter(btnLocDanhSach);
@@ -73,7 +73,7 @@ public class LichThiPanel extends JPanel {
         txtTimKiem = new JTextField(20); pnlSearch.add(txtTimKiem);
         
         pnlSearch.add(new JLabel("Năm học:"));
-        cboLocNamHoc = new JComboBox<>(); pnlSearch.add(cboLocNamHoc);
+        cboLocNamHoc = new JComboBox<>(); TienIch.ComboBoxUtil.makeSearchableAndEditable(cboLocNamHoc); pnlSearch.add(cboLocNamHoc);
         
         btnTimKiem = new JButton("Tìm Kiếm");
         btnXemTatCa = new JButton("Xem Tất Cả");
@@ -109,14 +109,14 @@ public class LichThiPanel extends JPanel {
         pnlInput.add(new JLabel("Mã LT:"), gbc);
         
         gbc.gridx=1; gbc.gridy=0; gbc.weightx = 1.0; 
-        cboMaLT=new JComboBox<>(); cboMaLT.setEditable(true); pnlInput.add(cboMaLT, gbc);
+        cboMaLT=new JComboBox<>(); TienIch.ComboBoxUtil.makeSearchableAndEditable(cboMaLT); pnlInput.add(cboMaLT, gbc);
         
         gbc.gridx=2; gbc.gridy=0; gbc.weightx = 0;
         pnlInput.add(new JLabel("Kỳ Thi:"), gbc);
         
         gbc.gridx=3; gbc.gridy=0; gbc.weightx = 1.0; 
         cboTenKyThi = new JComboBox<>(new String[]{"Giữa Kỳ 1", "Cuối Kỳ 1", "Giữa Kỳ 2", "Cuối Kỳ 2"});
-        cboTenKyThi.setEditable(true);
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboTenKyThi);
         cboTenKyThi.setSelectedIndex(0);
         pnlInput.add(cboTenKyThi, gbc);
 
@@ -124,7 +124,7 @@ public class LichThiPanel extends JPanel {
         pnlInput.add(new JLabel("Tên Môn:"), gbc);
         
         gbc.gridx=1; gbc.gridy=1; gbc.weightx = 1.0;
-        cboTenMH=new JComboBox<>(); cboTenMH.setEditable(true); pnlInput.add(cboTenMH, gbc);
+        cboTenMH=new JComboBox<>(); TienIch.ComboBoxUtil.makeSearchableAndEditable(cboTenMH); pnlInput.add(cboTenMH, gbc);
 
         gbc.gridx=2; gbc.gridy=1; gbc.weightx = 0;
         pnlInput.add(new JLabel("Ngày Thi (yyyy-mm-dd):"), gbc);
@@ -160,13 +160,19 @@ public class LichThiPanel extends JPanel {
         pnlInput.add(new JLabel("Tên Phòng:"), gbc);
         
         gbc.gridx=1; gbc.gridy=3; gbc.weightx = 1.0;
-        cboTenPhong=new JComboBox<>(); cboTenPhong.setEditable(true); pnlInput.add(cboTenPhong, gbc);
+        cboTenPhong=new JComboBox<>(); TienIch.ComboBoxUtil.makeSearchableAndEditable(cboTenPhong); pnlInput.add(cboTenPhong, gbc);
 
         gbc.gridx=2; gbc.gridy=3; gbc.weightx = 0;
         pnlInput.add(new JLabel("Lớp:"), gbc);
 
         gbc.gridx=3; gbc.gridy=3; gbc.weightx = 1.0;
-        cboLop = new JComboBox<>(); cboLop.setEditable(true); pnlInput.add(cboLop, gbc);
+        cboLop = new JComboBox<>(); TienIch.ComboBoxUtil.makeSearchableAndEditable(cboLop); pnlInput.add(cboLop, gbc);
+
+        gbc.gridx=0; gbc.gridy=4; gbc.weightx = 0;
+        pnlInput.add(new JLabel("Năm Học:"), gbc);
+        
+        gbc.gridx=1; gbc.gridy=4; gbc.weightx = 1.0;
+        cboNamHocInput = new JComboBox<>(); TienIch.ComboBoxUtil.makeSearchableAndEditable(cboNamHocInput); pnlInput.add(cboNamHocInput, gbc);
 
         pnlSouth.add(pnlInput, BorderLayout.CENTER);
 
@@ -243,9 +249,16 @@ public class LichThiPanel extends JPanel {
     public void setNamHocData(List<String> namHocs) {
         cboLocNamHoc.removeAllItems();
         cboLocNamHoc.addItem("Tất cả");
+        
+        if (cboNamHocInput != null) {
+            cboNamHocInput.removeAllItems();
+        }
 
         for (String n : namHocs) {
             cboLocNamHoc.addItem(n);
+            if (cboNamHocInput != null) {
+                cboNamHocInput.addItem(n);
+            }
         }
     }
 
@@ -334,6 +347,13 @@ public class LichThiPanel extends JPanel {
         }
         lt.setMaLop(lopStr);
 
+        Object namHocObj = cboNamHocInput.getSelectedItem();
+        String namHocStr = namHocObj != null ? namHocObj.toString() : "";
+        if (cboNamHocInput.getEditor().getItem() != null) {
+            namHocStr = cboNamHocInput.getEditor().getItem().toString();
+        }
+        lt.setNamHoc(namHocStr);
+
         return lt;
     }
 
@@ -403,6 +423,11 @@ public class LichThiPanel extends JPanel {
 
             cboLop.setSelectedItem(lt.getMaLop());
             cboLop.getEditor().setItem(lt.getMaLop());
+            
+            cboNamHocInput.setSelectedItem(lt.getNamHoc());
+            if (cboNamHocInput.getEditor() != null) {
+                cboNamHocInput.getEditor().setItem(lt.getNamHoc() != null ? lt.getNamHoc() : "");
+            }
         }
     }
 
@@ -414,6 +439,7 @@ public class LichThiPanel extends JPanel {
         spinGioKetThuc.setValue(new java.util.Date()); 
         cboTenPhong.setSelectedItem(""); cboTenPhong.getEditor().setItem("");
         cboLop.setSelectedItem(""); cboLop.getEditor().setItem("");
+        cboNamHocInput.setSelectedItem(""); if (cboNamHocInput.getEditor() != null) cboNamHocInput.getEditor().setItem("");
     }
 
     public void showMessage(String msg) { JOptionPane.showMessageDialog(this, msg); }
@@ -448,6 +474,7 @@ public class LichThiPanel extends JPanel {
         cboTenPhong.setEnabled(enabled);
         cboTenKyThi.setEnabled(enabled);
         cboLop.setEnabled(enabled);
+        cboNamHocInput.setEnabled(enabled);
     }
     
     public void setCrudButtonState(boolean them, boolean sua, boolean xoa, boolean luu, boolean huy) {

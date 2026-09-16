@@ -57,6 +57,7 @@ public class FrmTKB extends JPanel {
 
         JLabel lblLop = new JLabel("Lớp:");
         cboLocMaLop = new JComboBox<>();
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboLocMaLop);
         cboLocMaLop.addItem("Tất cả");
         pnlSearch.add(lblLop);
         pnlSearch.add(cboLocMaLop);
@@ -67,6 +68,7 @@ public class FrmTKB extends JPanel {
 
         pnlSearch.add(new JLabel("Thứ:"));
         cboLocThu = new JComboBox<>(new String[]{"Tất cả", "2", "3", "4", "5", "6", "7"});
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboLocThu);
         pnlSearch.add(cboLocThu);
 
         int curYear = java.time.Year.now().getValue();
@@ -132,14 +134,21 @@ public class FrmTKB extends JPanel {
         JPanel pnlInput = new JPanel(new GridLayout(5, 4, 10, 8));
 
         cboMaLop = new JComboBox<>();
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboMaLop);
         cboMaMH = new JComboBox<>();
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboMaMH);
         cboMaGV = new JComboBox<>();
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboMaGV);
         cboMaPhong = new JComboBox<>();
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboMaPhong);
         cboThuThem = new JComboBox<>(new Integer[]{2, 3, 4, 5, 6, 7});
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboThuThem);
 
         Integer[] tiet = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
         cboTietBD = new JComboBox<>(tiet);
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboTietBD);
         cboTietKT = new JComboBox<>(tiet);
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboTietKT);
 
         cboHocKyThem = new JComboBox<>(new Integer[]{1, 2});
 

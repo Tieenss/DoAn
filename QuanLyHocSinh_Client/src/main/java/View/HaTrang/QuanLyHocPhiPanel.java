@@ -47,6 +47,7 @@ public class QuanLyHocPhiPanel extends JPanel {
         txtMaLopCT = new JTextField();
         txtMaLopCT.setEditable(false);
         cboHocKyCT = new JComboBox<>(new String[]{"1","2"});
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboHocKyCT);
         txtNamHocCT = new JTextField();
         txtTongTien = new JTextField();
         txtMienGiam = new JTextField();
@@ -54,6 +55,7 @@ public class QuanLyHocPhiPanel extends JPanel {
         txtPhaiDong.setEditable(false);
         txtPhaiDong.setBackground(new Color(245, 245, 245));
         cboTrangThai = new JComboBox<>(new String[]{"Chưa đóng", "Đã đóng", "Bảo lưu"});
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboTrangThai);
 
         btnThem = new JButton("Thêm");       ButtonStyleHelper.styleButtonAdd(btnThem);
         btnSua = new JButton("Sửa");         ButtonStyleHelper.styleButtonEdit(btnSua);
@@ -80,11 +82,13 @@ public class QuanLyHocPhiPanel extends JPanel {
 
         pnlFilter.add(new JLabel("Học Kỳ:"));
         cboHocKy = new JComboBox<>(new String[]{"", "1", "2"});
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboHocKy);
         cboHocKy.setSelectedIndex(0);
         pnlFilter.add(cboHocKy);
 
         pnlFilter.add(new JLabel("Năm Học:"));
         cboLocNamHoc = new JComboBox<>();
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboLocNamHoc);
         pnlFilter.add(cboLocNamHoc);
 
         btnLoc = new JButton("Tìm Kiếm"); 

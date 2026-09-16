@@ -21,7 +21,7 @@ public class QuanLyDiemPanel extends JPanel {
     private JTextField txtMaHS, txtTenHS, txtDiem15p, txtDiem1Tiet, txtDiemGiuaKy, txtDiemCuoiKy;
     private JComboBox<String> cboHocKyInput, cboNamHocInput;
     private JComboBox<String> cboMonHocInput;
-    private JButton btnCapNhat;
+    private JButton btnCapNhat, btnThem, btnSua, btnXoa, btnLuu, btnHuy;
 
     private JTextField txtTimKiem;
     private JButton btnTimKiem;
@@ -52,18 +52,22 @@ public class QuanLyDiemPanel extends JPanel {
         
         pnlFilter.add(new JLabel("Mã Lớp:"));
         cboLocMaLop = new JComboBox<>(); 
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboLocMaLop);
         pnlFilter.add(cboLocMaLop);
 
         pnlFilter.add(new JLabel("Môn:"));
         cboLocMon = new JComboBox<>(); 
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboLocMon);
         pnlFilter.add(cboLocMon);
 
         pnlFilter.add(new JLabel("Năm Học:"));
         cboLocNamHoc = new JComboBox<>();
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboLocNamHoc);
         pnlFilter.add(cboLocNamHoc);
 
         pnlFilter.add(new JLabel("Học Kỳ:"));
         cboLocHocKy = new JComboBox<>(); 
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboLocHocKy);
         pnlFilter.add(cboLocHocKy);
 
         btnLocDuLieu = new JButton("Lọc");
@@ -95,16 +99,40 @@ public class QuanLyDiemPanel extends JPanel {
         tableDiem.setRowHeight(25);
         tableDiem.getTableHeader().setDefaultRenderer(new TienIch.CustomTableHeaderRenderer());
 
-        DefaultTableCellRenderer tongKetRenderer = new DefaultTableCellRenderer() {
+        DefaultTableCellRenderer customRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                c.setFont(new Font("Segoe UI", Font.BOLD, 14));
-                c.setForeground(Color.RED);
+                
+                Object tongKetObj = table.getValueAt(row, 10);
+                boolean chuaNhapDiem = tongKetObj == null || "Chưa nhập".equals(tongKetObj.toString()) || "".equals(tongKetObj.toString().trim());
+
+                if (!isSelected) {
+                    if (chuaNhapDiem) {
+                        c.setBackground(new Color(255, 235, 238)); // Nền đỏ hồng pastel cảnh báo chưa nhập điểm
+                        c.setForeground(new Color(198, 40, 40));   // Chữ đỏ sẫm
+                    } else {
+                        c.setBackground(Color.WHITE);
+                        c.setForeground(Color.BLACK);
+                    }
+                } else {
+                    c.setBackground(new Color(187, 222, 251)); // Màu khi được chọn
+                    c.setForeground(Color.BLACK);
+                }
+
+                // Cột Tổng Kết (cột 10)
+                if (column == 10) {
+                    c.setFont(new Font("Segoe UI", Font.BOLD, 13));
+                    if (chuaNhapDiem) {
+                        c.setForeground(new Color(198, 40, 40));
+                    } else {
+                        c.setForeground(new Color(0, 102, 204));
+                    }
+                }
                 return c;
             }
         };
-        tableDiem.getColumnModel().getColumn(10).setCellRenderer(tongKetRenderer);
+        tableDiem.setDefaultRenderer(Object.class, customRenderer);
         
         this.add(new JScrollPane(tableDiem), BorderLayout.CENTER);
 
@@ -134,29 +162,54 @@ public class QuanLyDiemPanel extends JPanel {
 
         gbc.gridx=0; gbc.gridy=3; pnlInput.add(new JLabel("Năm Học:"), gbc);
         cboNamHocInput = new JComboBox<>();
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboNamHocInput);
         gbc.gridx=1; gbc.gridy=3; pnlInput.add(cboNamHocInput, gbc);
 
         gbc.gridx=2; gbc.gridy=3; pnlInput.add(new JLabel("Học Kỳ:"), gbc);
         cboHocKyInput = new JComboBox<>(new String[]{"1", "2"});
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboHocKyInput);
         gbc.gridx=3; gbc.gridy=3; pnlInput.add(cboHocKyInput, gbc);
 
         gbc.gridx=0; gbc.gridy=4; pnlInput.add(new JLabel("Môn Học:"), gbc);
         cboMonHocInput = new JComboBox<>();
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboMonHocInput);
         gbc.gridx=1; gbc.gridy=4; gbc.gridwidth=3; pnlInput.add(cboMonHocInput, gbc);
         gbc.gridwidth=1;
 
         pnlSouth.add(pnlInput, BorderLayout.CENTER);
 
-        JPanel pnlButton = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        btnCapNhat = new JButton("Lưu / Cập Nhật Điểm");
-        ButtonStyleHelper.styleButtonSave(btnCapNhat);
-        btnCapNhat.setPreferredSize(new Dimension(200, 40));
-        pnlButton.add(btnCapNhat);
+        JPanel pnlButton = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
+        Dimension sz = new Dimension(90, 36);
+
+        btnThem = new JButton("Thêm");
+        ButtonStyleHelper.styleButtonAdd(btnThem);
+        btnThem.setPreferredSize(sz);
+        pnlButton.add(btnThem);
+
+        btnSua = new JButton("Sửa");
+        ButtonStyleHelper.styleButtonEdit(btnSua);
+        btnSua.setPreferredSize(sz);
+        pnlButton.add(btnSua);
+
+        btnXoa = new JButton("Xóa");
+        ButtonStyleHelper.styleButtonDelete(btnXoa);
+        btnXoa.setPreferredSize(sz);
+        pnlButton.add(btnXoa);
+
+        btnLuu = new JButton("Lưu");
+        ButtonStyleHelper.styleButtonSave(btnLuu);
+        btnLuu.setPreferredSize(sz);
+        pnlButton.add(btnLuu);
+        btnCapNhat = btnLuu; // Tương thích ngược
+
+        btnHuy = new JButton("Hủy");
+        ButtonStyleHelper.styleButtonCancel(btnHuy);
+        btnHuy.setPreferredSize(sz);
+        pnlButton.add(btnHuy);
 
         btnXuatExcel = new JButton("Xuất Excel");
         ButtonStyleHelper.styleButtonExport(btnXuatExcel);
-
-        btnXuatExcel.setPreferredSize(new Dimension(130, 40));
+        btnXuatExcel.setPreferredSize(new Dimension(120, 36));
         pnlButton.add(btnXuatExcel);
         
         pnlSouth.add(pnlButton, BorderLayout.SOUTH);
@@ -166,6 +219,8 @@ public class QuanLyDiemPanel extends JPanel {
             pnlSearch.setVisible(false);
             pnlSouth.setVisible(false);
         }
+
+        setCrudButtonState(true, false, false, false, false);
     }
 
     public String getMaLopFilter() { 
@@ -264,11 +319,18 @@ public class QuanLyDiemPanel extends JPanel {
         d.setHocKy(hocKy); 
         d.setNamHoc(cboNamHocInput.getSelectedItem() != null ? cboNamHocInput.getSelectedItem().toString() : "");
         try {
-            
-            d.setDiem15p(Double.parseDouble(txtDiem15p.getText()));
-            d.setDiem1Tiet(Double.parseDouble(txtDiem1Tiet.getText()));
-            d.setDiemGiuaKy(Double.parseDouble(txtDiemGiuaKy.getText()));
-            d.setDiemCuoiKy(Double.parseDouble(txtDiemCuoiKy.getText()));
+            if (!txtDiem15p.getText().trim().isEmpty()) {
+                d.setDiem15p(Double.parseDouble(txtDiem15p.getText().trim()));
+            }
+            if (!txtDiem1Tiet.getText().trim().isEmpty()) {
+                d.setDiem1Tiet(Double.parseDouble(txtDiem1Tiet.getText().trim()));
+            }
+            if (!txtDiemGiuaKy.getText().trim().isEmpty()) {
+                d.setDiemGiuaKy(Double.parseDouble(txtDiemGiuaKy.getText().trim()));
+            }
+            if (!txtDiemCuoiKy.getText().trim().isEmpty()) {
+                d.setDiemCuoiKy(Double.parseDouble(txtDiemCuoiKy.getText().trim()));
+            }
         } catch (Exception e) { return null; }
         return d;
     }
@@ -276,8 +338,14 @@ public class QuanLyDiemPanel extends JPanel {
     public void setTableData(List<Diem> list) {
         tableModel.setRowCount(0);
         for (Diem d : list) {
-            
-            double dtb = Math.round(d.getDiemTongKet() * 100.0) / 100.0;
+            String str15p = d.getDiem15p() != null ? String.valueOf(d.getDiem15p()) : "";
+            String str1Tiet = d.getDiem1Tiet() != null ? String.valueOf(d.getDiem1Tiet()) : "";
+            String strGiuaKy = d.getDiemGiuaKy() != null ? String.valueOf(d.getDiemGiuaKy()) : "";
+            String strCuoiKy = d.getDiemCuoiKy() != null ? String.valueOf(d.getDiemCuoiKy()) : "";
+
+            Double dtb = d.getDiemTongKet();
+            String strTongKet = dtb != null ? String.valueOf(Math.round(dtb * 100.0) / 100.0) : "Chưa nhập";
+
             tableModel.addRow(new Object[]{
                 d.getMaHS(), 
                 d.getTenHS(), 
@@ -285,19 +353,19 @@ public class QuanLyDiemPanel extends JPanel {
                 d.getTenMH() != null ? d.getTenMH() : d.getMaMH(), 
                 d.getNamHoc(),
                 d.getHocKy(),
-                d.getDiem15p(), 
-                d.getDiem1Tiet(),   
-                d.getDiemGiuaKy(), 
-                d.getDiemCuoiKy(),   
-                dtb               
+                str15p, 
+                str1Tiet,   
+                strGiuaKy, 
+                strCuoiKy,   
+                strTongKet               
             });
         }
     }
 
     public void fillFormInput(int row) {
         if (row >= 0) {
-            txtMaHS.setText(tableModel.getValueAt(row, 0).toString());
-            txtTenHS.setText(tableModel.getValueAt(row, 1).toString());
+            txtMaHS.setText(tableModel.getValueAt(row, 0) != null ? tableModel.getValueAt(row, 0).toString() : "");
+            txtTenHS.setText(tableModel.getValueAt(row, 1) != null ? tableModel.getValueAt(row, 1).toString() : "");
             
             Object tenMonObj = tableModel.getValueAt(row, 3);
             if(tenMonObj != null) cboMonHocInput.setSelectedItem(tenMonObj.toString());
@@ -308,10 +376,64 @@ public class QuanLyDiemPanel extends JPanel {
             Object hkObj = tableModel.getValueAt(row, 5);
             if(hkObj != null) cboHocKyInput.setSelectedItem(hkObj.toString());
 
-            txtDiem15p.setText(tableModel.getValueAt(row, 6).toString());
-            txtDiem1Tiet.setText(tableModel.getValueAt(row, 7).toString());
-            txtDiemGiuaKy.setText(tableModel.getValueAt(row, 8).toString());
-            txtDiemCuoiKy.setText(tableModel.getValueAt(row, 9).toString());
+            Object d15 = tableModel.getValueAt(row, 6);
+            txtDiem15p.setText(d15 != null ? d15.toString() : "");
+
+            Object d1t = tableModel.getValueAt(row, 7);
+            txtDiem1Tiet.setText(d1t != null ? d1t.toString() : "");
+
+            Object dgk = tableModel.getValueAt(row, 8);
+            txtDiemGiuaKy.setText(dgk != null ? dgk.toString() : "");
+
+            Object dck = tableModel.getValueAt(row, 9);
+            txtDiemCuoiKy.setText(dck != null ? dck.toString() : "");
+        }
+    }
+
+    public void clearForm() {
+        txtMaHS.setText("");
+        txtTenHS.setText("");
+        txtDiem15p.setText("");
+        txtDiem1Tiet.setText("");
+        txtDiemGiuaKy.setText("");
+        txtDiemCuoiKy.setText("");
+        if (tableDiem != null) {
+            tableDiem.clearSelection();
+        }
+    }
+
+    public void setFormEnabled(boolean enabled) {
+        txtDiem15p.setEditable(enabled);
+        txtDiem1Tiet.setEditable(enabled);
+        txtDiemGiuaKy.setEditable(enabled);
+        txtDiemCuoiKy.setEditable(enabled);
+        cboNamHocInput.setEnabled(enabled);
+        cboHocKyInput.setEnabled(enabled);
+        cboMonHocInput.setEnabled(enabled);
+    }
+
+    public void setCrudButtonState(boolean them, boolean sua, boolean xoa, boolean luu, boolean huy) {
+        btnThem.setEnabled(them);
+        btnSua.setEnabled(sua);
+        btnXoa.setEnabled(xoa);
+        btnLuu.setEnabled(luu);
+        btnHuy.setEnabled(huy);
+
+        if (luu && !sua && !xoa) {
+            // Đang ở chế độ Thêm mới
+            txtMaHS.setEditable(true);
+            setFormEnabled(true);
+        } else if (luu && sua) {
+            // Đang ở chế độ Sửa
+            txtMaHS.setEditable(false);
+            setFormEnabled(true);
+            cboNamHocInput.setEnabled(false);
+            cboHocKyInput.setEnabled(false);
+            cboMonHocInput.setEnabled(false);
+        } else {
+            // Trạng thái chờ hoặc chỉ chọn dòng
+            txtMaHS.setEditable(false);
+            setFormEnabled(false);
         }
     }
 
@@ -320,14 +442,22 @@ public class QuanLyDiemPanel extends JPanel {
 
     public void addBtnXemListener(ActionListener action) { btnLocDuLieu.addActionListener(action); }
     public void addBtnTimKiemListener(ActionListener action) { btnTimKiem.addActionListener(action); } 
-    public void addBtnCapNhatListener(ActionListener action) { btnCapNhat.addActionListener(action); }
+    public void addBtnCapNhatListener(ActionListener action) { btnLuu.addActionListener(action); }
+    public void addBtnThemListener(ActionListener action) { btnThem.addActionListener(action); }
+    public void addBtnSuaListener(ActionListener action) { btnSua.addActionListener(action); }
+    public void addBtnXoaListener(ActionListener action) { btnXoa.addActionListener(action); }
+    public void addBtnLuuListener(ActionListener action) { btnLuu.addActionListener(action); }
+    public void addBtnHuyListener(ActionListener action) { btnHuy.addActionListener(action); }
     public void addTableMouseListener(MouseAdapter adapter) { tableDiem.addMouseListener(adapter); }
     public void addBtnXuatExcelListener(ActionListener ac) { btnXuatExcel.addActionListener(ac); }
+    public void addTxtMaHSFocusListener(java.awt.event.FocusAdapter adapter) { txtMaHS.addFocusListener(adapter); }
 
     public DefaultTableModel getTableModel() {
         return (DefaultTableModel) tableDiem.getModel();
     }
     public JButton getBtnCapNhat() {
-        return btnCapNhat;
+        return btnLuu;
     }
+    public String getMaHSInput() { return txtMaHS.getText().trim(); }
+    public void setTenHS(String ten) { txtTenHS.setText(ten); }
 }
