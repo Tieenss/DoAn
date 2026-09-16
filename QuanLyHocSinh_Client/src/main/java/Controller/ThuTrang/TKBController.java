@@ -24,6 +24,9 @@ public class TKBController {
             view.setDanhSachMon(apiClient.getDanhSachMon());
             view.setDanhSachGV(apiClient.getDanhSachGV());
             view.setDanhSachPhong(apiClient.getDanhSachPhong());
+            try {
+                view.setCboLocNamHoc(apiClient.getDanhSachNamHoc());
+            } catch (Exception ignored) {}
         } catch (Exception ex) {
             view.showMessage("Không thể tải danh sách: " + ex.getMessage());
         }
@@ -40,22 +43,39 @@ public class TKBController {
         Runnable setEditState    = () -> view.setCrudButtonState(false, true, true, true, true);
         setIdleState.run();
 
-        view.addBtnLocTimKiemListener(e -> {
+        Runnable doFilter = () -> {
             try {
                 String maLop = view.getLocMaLop();
                 String maMH = view.getLocMon();
                 int thu = view.getLocThu();
-                if ((maLop.isEmpty() || maLop.equals("Tất cả")) && maMH.isEmpty() && thu == 0) {
+                String namHoc = view.getLocNamHoc();
+                int hocKy = view.getLocHocKy();
+                if ((maLop.isEmpty() || maLop.equals("Tất cả")) && maMH.isEmpty() && thu == 0
+                        && (namHoc.isEmpty() || namHoc.equals("Tất cả")) && hocKy == 0) {
                     loadData();
                 } else {
-                    List<TKB> list = apiClient.getByFilter(maLop, maMH, thu);
+                    List<TKB> list = apiClient.getByFilter(maLop, maMH, thu, namHoc, hocKy);
                     list = filterByRole(list);
                     view.setTableData(list);
                 }
-            } catch (Exception ex) {
-                view.showMessage("Không thể kết nối server: " + ex.getMessage());
+            } catch (Exception ignored) {
             }
+        };
+
+        view.addLocMonLiveListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { doFilter.run(); }
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { doFilter.run(); }
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { doFilter.run(); }
         });
+
+        view.addCboLocMaLopListener(e -> doFilter.run());
+        view.addCboLocThuListener(e -> doFilter.run());
+        view.addCboLocNamHocListener(e -> doFilter.run());
+        view.addCboLocHocKyListener(e -> doFilter.run());
+        view.addBtnLocTimKiemListener(e -> doFilter.run());
 
         view.addBtnThemListener(e -> {
             editMode[0] = false;
@@ -101,6 +121,20 @@ public class TKBController {
                     view.showMessage("Vui lòng nhập đầy đủ thông tin");
                     return;
                 }
+                int namBD, namKT;
+                try {
+                    namBD = Integer.parseInt(view.getNamBatDau());
+                    namKT = Integer.parseInt(view.getNamKetThuc());
+                } catch (NumberFormatException ex) {
+                    view.showMessage("Năm bắt đầu và năm kết thúc phải là số hợp lệ!");
+                    return;
+                }
+
+                if (namKT < namBD) {
+                    view.showMessage("Lỗi: Năm kết thúc phải lớn hơn hoặc bằng năm bắt đầu!");
+                    return;
+                }
+
                 if (t.getTietBatDau() > t.getTietKetThuc()) {
                     view.showMessage("Tiết bắt đầu phải nhỏ hơn hoặc bằng tiết kết thúc");
                     return;
@@ -121,7 +155,12 @@ public class TKBController {
             } catch (NumberFormatException ex) {
                 view.showMessage("Tiết bắt đầu / kết thúc phải là số");
             } catch (Exception ex) {
-                view.showMessage("Lỗi: " + ex.getMessage());
+                String msg = ex.getMessage();
+                if (msg != null && (msg.startsWith("Trùng") || msg.startsWith("Lỗi:"))) {
+                    view.showMessage(msg);
+                } else {
+                    view.showMessage("Lỗi: " + msg);
+                }
             }
         });
 

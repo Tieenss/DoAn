@@ -45,12 +45,20 @@ public class PhongHocApiClient {
         String json = gson.toJson(phongHoc);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .header("Content-Type", "application/json; charset=UTF-8")
+                .POST(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8))
                 .build();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() == 409) throw new Exception("Mã phòng đã tồn tại");
-        if (response.statusCode() == 422) throw new Exception("Tên phòng đã tồn tại");
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        if (response.statusCode() == 409 || response.statusCode() == 422 || response.statusCode() == 400) {
+            String msg = response.body();
+            if (msg == null || msg.trim().isEmpty()) {
+                msg = (response.statusCode() == 409) ? "Mã phòng đã tồn tại!" : "Tên phòng đã tồn tại!";
+            }
+            throw new Exception(msg);
+        }
+        if (response.statusCode() != 200 && response.statusCode() != 201) {
+            throw new Exception("Lỗi khi thêm phòng học: " + response.body());
+        }
         return gson.fromJson(response.body(), PhongHoc.class);
     }
 
@@ -58,11 +66,21 @@ public class PhongHocApiClient {
         String json = gson.toJson(phongHoc);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/" + maPH))
-                .header("Content-Type", "application/json")
-                .PUT(HttpRequest.BodyPublishers.ofString(json))
+                .header("Content-Type", "application/json; charset=UTF-8")
+                .PUT(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8))
                 .build();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        if (response.statusCode() == 409 || response.statusCode() == 422 || response.statusCode() == 400) {
+            String msg = response.body();
+            if (msg == null || msg.trim().isEmpty()) {
+                msg = "Tên phòng đã tồn tại!";
+            }
+            throw new Exception(msg);
+        }
         if (response.statusCode() == 404) throw new Exception("Không tìm thấy phòng học");
+        if (response.statusCode() != 200) {
+            throw new Exception("Lỗi khi cập nhật phòng học: " + response.body());
+        }
         return gson.fromJson(response.body(), PhongHoc.class);
     }
 

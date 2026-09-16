@@ -32,19 +32,32 @@ public class MonHocRestController {
     }
 
     @PostMapping
-    public ResponseEntity<MonHoc> createMH(@RequestBody MonHoc monHoc) {
-        if (monHocService.existsMH(monHoc.getMaMH())) {
-            return ResponseEntity.status(409).body(null);
+    public ResponseEntity<?> createMH(@RequestBody MonHoc monHoc) {
+        if (monHoc.getMaMH() == null || monHoc.getMaMH().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Mã môn học không được để trống!");
         }
-        if (monHocService.existsByTenMH(monHoc.getTenMH())) {
-            return ResponseEntity.status(422).body(null);
+        if (monHoc.getTenMH() == null || monHoc.getTenMH().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Tên môn học không được để trống!");
+        }
+        if (monHocService.existsMH(monHoc.getMaMH().trim())) {
+            return ResponseEntity.status(409).body("Mã môn học đã tồn tại!");
+        }
+        if (monHocService.existsByTenMH(monHoc.getTenMH().trim())) {
+            return ResponseEntity.status(422).body("Tên môn học đã tồn tại!");
         }
         return ResponseEntity.ok(monHocService.saveMH(monHoc));
     }
+
     @PutMapping("/{maMH}")
-    public ResponseEntity<MonHoc>  updateMH(@PathVariable String maMH, @RequestBody MonHoc monHoc) {
+    public ResponseEntity<?> updateMH(@PathVariable String maMH, @RequestBody MonHoc monHoc) {
         if (!monHocService.existsMH(maMH)) {
             return ResponseEntity.notFound().build();
+        }
+        if (monHoc.getTenMH() == null || monHoc.getTenMH().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Tên môn học không được để trống!");
+        }
+        if (monHocService.existsByTenMHExcluding(maMH, monHoc.getTenMH().trim())) {
+            return ResponseEntity.status(422).body("Tên môn học đã tồn tại!");
         }
         monHoc.setMaMH(maMH);
         return ResponseEntity.ok(monHocService.saveMH(monHoc));

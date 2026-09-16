@@ -25,10 +25,21 @@ public class PhongHocService {
 
     public void delete(String maPhong) { phongHocRepository.deleteById(maPhong); }
 
-    public boolean existsPH(String maPhong) { return phongHocRepository.existsById(maPhong); }
+    public boolean existsPH(String maPhong) {
+        if (maPhong == null) return false;
+        return phongHocRepository.existsById(maPhong);
+    }
 
     public boolean existsByTenPhong(String tenPhong) {
+        if (tenPhong == null) return false;
         return phongHocRepository.findAll().stream()
-                .anyMatch(p -> p.getTenPhong().equalsIgnoreCase(tenPhong));
+                .anyMatch(p -> p.getTenPhong() != null && p.getTenPhong().trim().equalsIgnoreCase(tenPhong.trim()));
+    }
+
+    public boolean existsByTenPhongExcluding(String maPhong, String tenPhong) {
+        if (tenPhong == null) return false;
+        return phongHocRepository.findAll().stream()
+                .anyMatch(p -> (maPhong == null || !p.getMaPhong().equalsIgnoreCase(maPhong))
+                        && p.getTenPhong() != null && p.getTenPhong().trim().equalsIgnoreCase(tenPhong.trim()));
     }
 }

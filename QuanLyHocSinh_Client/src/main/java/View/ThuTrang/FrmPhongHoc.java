@@ -52,7 +52,7 @@ public class FrmPhongHoc extends JPanel {
         pnlSearch.add(cboLoaiPhongTim);
 
         pnlSearch.add(new JLabel("Tình trạng:"));
-        cboTinhTrangTim = new JComboBox<>(new String[]{"Tất cả", "Trống", "Đang học", "Bảo trì"});
+        cboTinhTrangTim = new JComboBox<>(new String[]{"Tất cả", "Hoạt động", "Bảo trì"});
         pnlSearch.add(cboTinhTrangTim);
 
         btnTim = new JButton("Tìm");
@@ -83,7 +83,7 @@ public class FrmPhongHoc extends JPanel {
         txtTenPhong = new JTextField(35);
         txtSucChua  = new JTextField(15);
         cboLoaiPhong = new JComboBox<>(new String[]{"Lý thuyết", "Thực hành"});
-        cboTinhTrang = new JComboBox<>(new String[]{"Trống", "Đang học", "Bảo trì"});
+        cboTinhTrang = new JComboBox<>(new String[]{"Hoạt động", "Bảo trì"});
 
         gbc.gridx = 0; gbc.gridy = 0; pnlInput.add(new JLabel("Mã phòng"), gbc);
         gbc.gridx = 1; pnlInput.add(txtMaPhong, gbc);
@@ -149,12 +149,20 @@ public class FrmPhongHoc extends JPanel {
         txtTenPhong.setText(model.getValueAt(row, 1).toString());
         txtSucChua.setText(model.getValueAt(row, 2).toString());
         cboLoaiPhong.setSelectedItem(model.getValueAt(row, 3).toString());
-        cboTinhTrang.setSelectedItem(model.getValueAt(row, 4).toString());
+        Object tt = model.getValueAt(row, 4);
+        if (tt != null && "Bảo trì".equalsIgnoreCase(tt.toString().trim())) {
+            cboTinhTrang.setSelectedItem("Bảo trì");
+        } else {
+            cboTinhTrang.setSelectedItem("Hoạt động");
+        }
+        txtMaPhong.setEditable(false);
     }
 
     public void clearForm() {
         txtMaPhong.setText(""); txtTenPhong.setText(""); txtSucChua.setText("");
-        cboLoaiPhong.setSelectedIndex(0); cboTinhTrang.setSelectedIndex(0);
+        cboLoaiPhong.setSelectedIndex(0);
+        cboTinhTrang.setSelectedItem("Hoạt động");
+        txtMaPhong.setEditable(true);
     }
 
     public void showMessage(String msg) { JOptionPane.showMessageDialog(this, msg); }
@@ -171,6 +179,9 @@ public class FrmPhongHoc extends JPanel {
     }
 
     public void addBtnTimListener(ActionListener l)     { btnTim.addActionListener(l); }
+    public void addMaPhongTimLiveListener(javax.swing.event.DocumentListener l) {
+        txtMaPhongTim.getDocument().addDocumentListener(l);
+    }
     public void addBtnThemListener(ActionListener l)    { btnThem.addActionListener(l); }
     public void addBtnSuaListener(ActionListener l)     { btnSua.addActionListener(l); }
     public void addBtnXoaListener(ActionListener l)     { btnXoa.addActionListener(l); }

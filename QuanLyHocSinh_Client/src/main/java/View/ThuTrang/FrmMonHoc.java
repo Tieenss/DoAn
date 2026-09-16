@@ -125,6 +125,9 @@ public class FrmMonHoc extends JPanel {
     }
 
     public void addBtnTimKiemListener(ActionListener l) { btnTimKiem.addActionListener(l); }
+    public void addTimKiemLiveListener(javax.swing.event.DocumentListener l) {
+        txtTimKiem.getDocument().addDocumentListener(l);
+    }
     public void addBtnThemListener(ActionListener l)    { btnThem.addActionListener(l); }
     public void addBtnSuaListener(ActionListener l)     { btnSua.addActionListener(l); }
     public void addBtnXoaListener(ActionListener l)     { btnXoa.addActionListener(l); }

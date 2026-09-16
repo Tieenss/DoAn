@@ -3,6 +3,7 @@ package com.qlhs.server.restControl.ThuTrang;
 import com.qlhs.server.entity.TKB;
 import com.qlhs.server.service.ThuTrang.TKBService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -68,22 +69,33 @@ public class TKBRestController {
     public List<TKB> filter(
             @RequestParam(defaultValue = "") String maLop,
             @RequestParam(defaultValue = "") String maMH,
-            @RequestParam(defaultValue = "0") Integer thu) {
+            @RequestParam(defaultValue = "0") Integer thu,
+            @RequestParam(defaultValue = "") String namHoc,
+            @RequestParam(defaultValue = "0") Integer hocKy) {
             
         if (maLop.equals("Tất cả")) {
             maLop = "";
         }
+        if (namHoc.equals("Tất cả")) {
+            namHoc = "";
+        }
 
-        if (maLop.isEmpty() && maMH.isEmpty() && (thu == null || thu == 0)) {
+        if (maLop.isEmpty() && maMH.isEmpty() && (thu == null || thu == 0)
+                && namHoc.isEmpty() && (hocKy == null || hocKy == 0)) {
             return tkbService.getAllTKB();
         }
 
-        return tkbService.filter(maLop, maMH, thu);
+        return tkbService.filter(maLop, maMH, thu, namHoc, hocKy);
     }
 
     @GetMapping("/danhsachlop")
     public List<String> getDanhSachLop() {
         return tkbService.getDistinctMaLop();
+    }
+
+    @GetMapping("/danhsachnamhoc")
+    public List<String> getDanhSachNamHoc() {
+        return tkbService.getDistinctNamHoc();
     }
 
     @GetMapping("/danhsachlop/tatca")
@@ -108,12 +120,14 @@ public class TKBRestController {
 
     @GetMapping("/danhsachphong")
     public List<Map<String, String>> getDanhSachPhong() {
-        return phongHocRepository.findAll().stream().map(p -> {
-            Map<String, String> m = new HashMap<>();
-            m.put("ma", p.getMaPhong());
-            m.put("ten", p.getTenPhong());
-            return m;
-        }).collect(Collectors.toList());
+        return phongHocRepository.findAll().stream()
+                .filter(p -> p.getTinhTrang() == null || !p.getTinhTrang().equalsIgnoreCase("Bảo trì"))
+                .map(p -> {
+                    Map<String, String> m = new HashMap<>();
+                    m.put("ma", p.getMaPhong());
+                    m.put("ten", p.getTenPhong());
+                    return m;
+                }).collect(Collectors.toList());
     }
 
     @GetMapping("/danhsachmon")
@@ -127,19 +141,27 @@ public class TKBRestController {
     }
 
     @PostMapping
-    public ResponseEntity<TKB> create(@RequestBody TKB tkb) {
+    public ResponseEntity<?> create(@RequestBody TKB tkb) {
         if (tkb.getMaTKB() != null && tkbService.existsByIdTKB(tkb.getMaTKB())) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body("Mã TKB đã tồn tại");
+        }
+        String error = tkbService.checkTrungLich(tkb);
+        if (error != null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
         }
         return ResponseEntity.ok(tkbService.save(tkb));
     }
 
     @PutMapping("/{maTKB}")
-    public ResponseEntity<TKB> update(@PathVariable Integer maTKB, @RequestBody TKB tkb) {
+    public ResponseEntity<?> update(@PathVariable Integer maTKB, @RequestBody TKB tkb) {
         if (!tkbService.existsByIdTKB(maTKB)) {
             return ResponseEntity.notFound().build();
         }
         tkb.setMaTKB(maTKB);
+        String error = tkbService.checkTrungLich(tkb);
+        if (error != null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+        }
         return ResponseEntity.ok(tkbService.save(tkb));
     }
 
