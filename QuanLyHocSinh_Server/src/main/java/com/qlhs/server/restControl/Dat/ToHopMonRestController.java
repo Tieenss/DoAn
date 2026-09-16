@@ -39,6 +39,10 @@ public class ToHopMonRestController {
     public ResponseEntity<ToHopMon> create(
             @RequestBody ToHopMon toHopMon) {
 
+        if (toHopMonService.existsToHopMon(toHopMon.getMaToHop())) {
+            return ResponseEntity.status(409).build();
+        }
+
         return ResponseEntity.ok(
                 toHopMonService.saveToHopMon(toHopMon));
     }

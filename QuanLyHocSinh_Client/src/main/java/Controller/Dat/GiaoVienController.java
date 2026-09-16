@@ -1,18 +1,18 @@
 package Controller.Dat;
 
-import Api.Đat.GiaoVienApi;
-import Api.Đat.ToHopMonApi;
-
-import Model.Giaovien;
-import Model.ToBoMon;
-import View.Dat.QuanLyGiaoVienPanel;
-
-import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
+import javax.swing.JOptionPane;
+
+import Api.Đat.GiaoVienApi;
+import Api.Đat.ToHopMonApi;
+import Model.Giaovien;
+import Model.ToBoMon;
+import View.Dat.QuanLyGiaoVienPanel;
 
 public class GiaoVienController {
 
@@ -75,7 +75,7 @@ public class GiaoVienController {
 
         try {
             List<Giaovien> list = api.getAll();
-            
+
             if (Model.Auth.isGiaoVien()) {
                 list = list.stream().filter(gv -> gv.getMaGV().equals(Model.Auth.maNguoiDung)).collect(java.util.stream.Collectors.toList());
             }
@@ -85,11 +85,11 @@ public class GiaoVienController {
             for (Giaovien gv : list) {
 
                 view.getTableModel().addRow(new Object[]{
-                        gv.getMaGV(),
-                        gv.getHoTen(),
-                        gv.getNgaySinh(),
-                        gv.getSdt(),
-                        gv.getMaToHop()
+                    gv.getMaGV(),
+                    gv.getHoTen(),
+                    gv.getNgaySinh(),
+                    gv.getSdt(),
+                    gv.getMaToHop()
                 });
 
             }
@@ -107,33 +107,36 @@ public class GiaoVienController {
 
         int row = view.getTableGV().getSelectedRow();
 
-        if (row < 0) return;
+        if (row < 0) {
+            return;
+        }
 
         view.getTxtMaGV().setText(
-                view.getTableGV().getValueAt(row,0).toString());
+                view.getTableGV().getValueAt(row, 0).toString());
 
         view.getTxtHoTen().setText(
-                view.getTableGV().getValueAt(row,1).toString());
+                view.getTableGV().getValueAt(row, 1).toString());
 
         view.getTxtSDT().setText(
-                view.getTableGV().getValueAt(row,3).toString());
+                view.getTableGV().getValueAt(row, 3).toString());
 
         try {
 
             Date d = new SimpleDateFormat("yyyy-MM-dd")
-                    .parse(view.getTableGV().getValueAt(row,2).toString());
+                    .parse(view.getTableGV().getValueAt(row, 2).toString());
 
             view.getSpNgaySinh().setValue(d);
 
-        } catch (Exception ignored){}
+        } catch (Exception ignored) {
+        }
 
-        String maTH = view.getTableGV().getValueAt(row,4).toString();
+        String maTH = view.getTableGV().getValueAt(row, 4).toString();
 
-        for(int i=0;i<view.getCboMaToHop().getItemCount();i++){
+        for (int i = 0; i < view.getCboMaToHop().getItemCount(); i++) {
 
-            if(view.getCboMaToHop().getItemAt(i)
+            if (view.getCboMaToHop().getItemAt(i)
                     .getMaToHop()
-                    .equals(maTH)){
+                    .equals(maTH)) {
 
                 view.getCboMaToHop().setSelectedIndex(i);
 
@@ -144,11 +147,11 @@ public class GiaoVienController {
 
     }
 
-    private void them(){
+    private void them() {
 
         clearForm();
 
-        mode="ADD";
+        mode = "ADD";
 
         setButtonState(false);
 
@@ -162,9 +165,9 @@ public class GiaoVienController {
 
     }
 
-    private void sua(){
+    private void sua() {
 
-        if(view.getTableGV().getSelectedRow()==-1){
+        if (view.getTableGV().getSelectedRow() == -1) {
 
             JOptionPane.showMessageDialog(view,
                     "Chọn giáo viên cần sửa");
@@ -173,7 +176,7 @@ public class GiaoVienController {
 
         }
 
-        mode="EDIT";
+        mode = "EDIT";
 
         setButtonState(false);
 
@@ -181,9 +184,9 @@ public class GiaoVienController {
 
     }
 
-    private void xoa(){
+    private void xoa() {
 
-        if(view.getTableGV().getSelectedRow()==-1){
+        if (view.getTableGV().getSelectedRow() == -1) {
 
             JOptionPane.showMessageDialog(view,
                     "Chọn giáo viên cần xóa");
@@ -192,14 +195,16 @@ public class GiaoVienController {
 
         }
 
-        int c=JOptionPane.showConfirmDialog(view,
+        int c = JOptionPane.showConfirmDialog(view,
                 "Bạn có chắc muốn xóa?",
                 "Xác nhận",
                 JOptionPane.YES_NO_OPTION);
 
-        if(c!=JOptionPane.YES_OPTION) return;
+        if (c != JOptionPane.YES_OPTION) {
+            return;
+        }
 
-        try{
+        try {
 
             api.delete(view.getTxtMaGV().getText());
 
@@ -210,7 +215,7 @@ public class GiaoVienController {
 
             clearForm();
 
-        }catch(Exception e){
+        } catch (Exception e) {
 
             JOptionPane.showMessageDialog(view,
                     "Xóa thất bại");
@@ -219,10 +224,10 @@ public class GiaoVienController {
 
     }
 
-    private void luu(){
+    private void luu() {
 
-        if(view.getTxtMaGV().getText().isEmpty()
-                ||view.getTxtHoTen().getText().isEmpty()){
+        if (view.getTxtMaGV().getText().isEmpty()
+                || view.getTxtHoTen().getText().isEmpty()) {
 
             JOptionPane.showMessageDialog(view,
                     "Nhập đầy đủ thông tin");
@@ -231,7 +236,7 @@ public class GiaoVienController {
 
         }
 
-        Giaovien gv=new Giaovien();
+        Giaovien gv = new Giaovien();
 
         gv.setMaGV(view.getTxtMaGV().getText());
 
@@ -244,24 +249,45 @@ public class GiaoVienController {
                         .format(view.getSpNgaySinh().getValue())
         );
 
-        ToBoMon tb=(ToBoMon)view.getCboMaToHop().getSelectedItem();
+        ToBoMon tb = (ToBoMon) view.getCboMaToHop().getSelectedItem();
 
-        if(tb!=null){
+        if (tb != null) {
 
             gv.setMaToHop(tb.getMaToHop());
 
         }
 
-        try{
+        try {
+            String ma = gv.getMaGV();
+            String sdt = gv.getSdt();
 
-            if(mode.equals("ADD")){
+            if (!sdt.startsWith("0") || sdt.length() != 10) {
+                JOptionPane.showMessageDialog(view, "Số điện thoại không tồn tại");
+                return;
+            }
 
+            if (mode.equals("ADD")) {
+                for (int i = 0; i < view.getTableGV().getRowCount(); i++) {
+                    if (view.getTableGV().getValueAt(i, 0).toString().equalsIgnoreCase(ma)) {
+                        JOptionPane.showMessageDialog(view, "Trùng mã giáo viên!");
+                        return;
+                    }
+                    if (view.getTableGV().getValueAt(i, 3).toString().equalsIgnoreCase(sdt)) {
+                        JOptionPane.showMessageDialog(view, "Trùng số điện thoại!");
+                        return;
+                    }
+                }
                 api.insert(gv);
-
-            }else{
-
+            } else {
+                for (int i = 0; i < view.getTableGV().getRowCount(); i++) {
+                    String existMa = view.getTableGV().getValueAt(i, 0).toString();
+                    String existSdt = view.getTableGV().getValueAt(i, 3).toString();
+                    if (!existMa.equalsIgnoreCase(ma) && existSdt.equalsIgnoreCase(sdt)) {
+                        JOptionPane.showMessageDialog(view, "Trùng số điện thoại!");
+                        return;
+                    }
+                }
                 api.update(gv);
-
             }
 
             JOptionPane.showMessageDialog(view,
@@ -273,7 +299,7 @@ public class GiaoVienController {
 
             setButtonState(true);
 
-        }catch(Exception e){
+        } catch (Exception e) {
 
             JOptionPane.showMessageDialog(view,
                     "Lưu thất bại");
@@ -282,13 +308,13 @@ public class GiaoVienController {
 
     }
 
-    private void search(){
+    private void search() {
 
-        try{
+        try {
 
-            String keyword=view.getTxtTimKiem().getText().trim();
+            String keyword = view.getTxtTimKiem().getText().trim();
 
-            if(keyword.isEmpty()){
+            if (keyword.isEmpty()) {
 
                 loadTable();
 
@@ -296,7 +322,7 @@ public class GiaoVienController {
 
             }
 
-            List<Giaovien> list=api.searchGiaoVien(keyword);
+            List<Giaovien> list = api.searchGiaoVien(keyword);
 
             if (Model.Auth.isGiaoVien()) {
                 list = list.stream().filter(gv -> gv.getMaGV().equals(Model.Auth.maNguoiDung)).collect(java.util.stream.Collectors.toList());
@@ -304,28 +330,27 @@ public class GiaoVienController {
 
             view.getTableModel().setRowCount(0);
 
-            for(Giaovien gv:list){
+            for (Giaovien gv : list) {
 
                 view.getTableModel().addRow(new Object[]{
-
-                        gv.getMaGV(),
-                        gv.getHoTen(),
-                        gv.getNgaySinh(),
-                        gv.getSdt(),
-                        gv.getMaToHop()
+                    gv.getMaGV(),
+                    gv.getHoTen(),
+                    gv.getNgaySinh(),
+                    gv.getSdt(),
+                    gv.getMaToHop()
 
                 });
 
             }
 
-            if(list.isEmpty()){
+            if (list.isEmpty()) {
 
                 JOptionPane.showMessageDialog(view,
                         "Không tìm thấy dữ liệu");
 
             }
 
-        }catch(Exception e){
+        } catch (Exception e) {
 
             JOptionPane.showMessageDialog(view,
                     "Lỗi tìm kiếm");
@@ -334,7 +359,7 @@ public class GiaoVienController {
 
     }
 
-    private void huy(){
+    private void huy() {
 
         clearForm();
 
@@ -349,7 +374,7 @@ public class GiaoVienController {
 
     }
 
-    private void clearForm(){
+    private void clearForm() {
 
         view.getTxtMaGV().setText("");
 
@@ -361,7 +386,7 @@ public class GiaoVienController {
 
     }
 
-    private void setButtonState(boolean normal){
+    private void setButtonState(boolean normal) {
 
         view.getBtnThem().setEnabled(normal);
 

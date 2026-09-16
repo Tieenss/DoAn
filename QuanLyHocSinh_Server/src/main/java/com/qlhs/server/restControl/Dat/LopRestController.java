@@ -43,6 +43,10 @@ public class LopRestController {
     public ResponseEntity<Lop> create(
             @RequestBody Lop lop) {
 
+        if (lopService.existsLop(lop.getMaLop())) {
+            return ResponseEntity.status(409).build();
+        }
+
         return ResponseEntity.ok(
                 lopService.saveLop(lop));
     }
