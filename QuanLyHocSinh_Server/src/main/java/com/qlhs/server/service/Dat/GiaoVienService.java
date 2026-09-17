@@ -33,4 +33,8 @@ public class GiaoVienService {
     public void deleteGiaoVien(String maGV) {
         giaoVienRepository.deleteById(maGV);
     }
+
+    public boolean existsGiaoVien(String maGV) {
+        return giaoVienRepository.existsById(maGV);
+    }
 }

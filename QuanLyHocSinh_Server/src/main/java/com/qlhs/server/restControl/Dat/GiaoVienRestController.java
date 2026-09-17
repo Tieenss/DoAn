@@ -37,6 +37,10 @@ public class GiaoVienRestController {
     public ResponseEntity<GiaoVien> create(
             @RequestBody GiaoVien giaoVien) {
 
+        if (giaoVienService.existsGiaoVien(giaoVien.getMaGV())) {
+            return ResponseEntity.status(409).build();
+        }
+
         return ResponseEntity.ok(
                 giaoVienService.saveGiaoVien(giaoVien));
     }

@@ -135,8 +135,6 @@ public class QuanLyToBoMonPanel extends JPanel {
         txtMaToHop.setText("");
         txtTenToHop.setText("");
         txtTimKiem.setText("");
-        txtMaToHop.setEnabled(true);
-        txtTenToHop.setEnabled(true);
     }
 
     public void setButtonState(boolean isNormalState) {
@@ -149,7 +147,11 @@ public class QuanLyToBoMonPanel extends JPanel {
         btnHuy.setEnabled(!isNormalState);
 
         txtTimKiem.setEnabled(isNormalState);
-        tableTBM.setEnabled(isNormalState);
+        tableTBM.setEnabled(true);
+
+        boolean formEnabled = !isNormalState;
+        txtMaToHop.setEnabled(formEnabled);
+        txtTenToHop.setEnabled(formEnabled);
     }
 
     public JTable getTableTBM() { return tableTBM; }
