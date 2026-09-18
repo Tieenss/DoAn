@@ -71,7 +71,7 @@ public class QuanLyGiaoVienPanel extends JPanel {
         DefaultTableCellRenderer dateRenderer = new DefaultTableCellRenderer() {
             @Override
             public java.awt.Component getTableCellRendererComponent(JTable table, Object value,
-                                                                    boolean isSelected, boolean hasFocus, int row, int column) {
+                    boolean isSelected, boolean hasFocus, int row, int column) {
                 if (value != null) {
                     if (value instanceof java.util.Date) {
                         value = sdf.format((java.util.Date) value);
@@ -79,7 +79,8 @@ public class QuanLyGiaoVienPanel extends JPanel {
                         try {
                             java.util.Date date = new java.text.SimpleDateFormat("yyyy-MM-dd").parse(value.toString());
                             value = sdf.format(date);
-                        } catch (Exception e) {}
+                        } catch (Exception e) {
+                        }
                     }
                 }
                 return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
@@ -97,7 +98,8 @@ public class QuanLyGiaoVienPanel extends JPanel {
         gbc.insets = new Insets(5, 10, 5, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        gbc.gridx = 0; gbc.gridy = 0;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
         pnlInput.add(new JLabel("Mã GV:"), gbc);
         gbc.gridx = 1;
         txtMaGV = new JTextField(15);
@@ -109,7 +111,8 @@ public class QuanLyGiaoVienPanel extends JPanel {
         txtHoTen = new JTextField(15);
         pnlInput.add(txtHoTen, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 1;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
         pnlInput.add(new JLabel("Ngày Sinh:"), gbc);
         gbc.gridx = 1;
         spNgaySinh = new JSpinner(new SpinnerDateModel());
@@ -122,7 +125,8 @@ public class QuanLyGiaoVienPanel extends JPanel {
         txtSDT = new JTextField(15);
         pnlInput.add(txtSDT, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 2;
+        gbc.gridx = 0;
+        gbc.gridy = 2;
         pnlInput.add(new JLabel("Tổ Bộ Môn:"), gbc);
         gbc.gridx = 1;
         cboMaToHop = new JComboBox<>();
@@ -139,13 +143,13 @@ public class QuanLyGiaoVienPanel extends JPanel {
         JPanel pnlBtn = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
         btnThem = new JButton("Thêm");
         ButtonStyleHelper.styleButtonAdd(btnThem);
-        btnSua  = new JButton("Sửa");
+        btnSua = new JButton("Sửa");
         ButtonStyleHelper.styleButtonEdit(btnSua);
-        btnXoa  = new JButton("Xóa");
+        btnXoa = new JButton("Xóa");
         ButtonStyleHelper.styleButtonDelete(btnXoa);
-        btnLuu  = new JButton("Lưu");
+        btnLuu = new JButton("Lưu");
         ButtonStyleHelper.styleButtonSave(btnLuu);
-        btnHuy  = new JButton("Hủy");
+        btnHuy = new JButton("Hủy");
         ButtonStyleHelper.styleButtonCancel(btnHuy);
 
         pnlBtn.add(btnThem);
@@ -173,7 +177,7 @@ public class QuanLyGiaoVienPanel extends JPanel {
     }
 
     public void setFormEnabled(boolean enabled) {
-        
+
         txtHoTen.setEnabled(enabled);
         spNgaySinh.setEnabled(enabled);
         txtSDT.setEnabled(enabled);
@@ -203,24 +207,68 @@ public class QuanLyGiaoVienPanel extends JPanel {
     public void loadThongTinCaNhan() {
     }
 
-    public JTable getTableGV() { return tableGV; }
-    public DefaultTableModel getTableModel() { return tableModel; }
+    public JTable getTableGV() {
+        return tableGV;
+    }
 
-    public JTextField getTxtMaGV() { return txtMaGV; }
-    public JTextField getTxtHoTen() { return txtHoTen; }
-    public JTextField getTxtSDT() { return txtSDT; }
-    public JSpinner getSpNgaySinh() { return spNgaySinh; }
-    public JComboBox<ToBoMon> getCboMaToHop() { return cboMaToHop; }
+    public DefaultTableModel getTableModel() {
+        return tableModel;
+    }
 
-    public JTextField getTxtTimKiem() { return txtTimKiem; }
-    public JButton getBtnTimKiem() { return btnTimKiem; }
-    public String getTuKhoaTuKiem(){ return txtTimKiem.getText();}
+    public JTextField getTxtMaGV() {
+        return txtMaGV;
+    }
 
-    public JButton getBtnThem() { return btnThem; }
-    public JButton getBtnSua() { return btnSua; }
-    public JButton getBtnXoa() { return btnXoa; }
-    public JButton getBtnLuu() { return btnLuu; }
-    public JButton getBtnHuy() { return btnHuy; }
-    public JButton getBtnXem() { return btnXem; }
+    public JTextField getTxtHoTen() {
+        return txtHoTen;
+    }
+
+    public JTextField getTxtSDT() {
+        return txtSDT;
+    }
+
+    public JSpinner getSpNgaySinh() {
+        return spNgaySinh;
+    }
+
+    public JComboBox<ToBoMon> getCboMaToHop() {
+        return cboMaToHop;
+    }
+
+    public JTextField getTxtTimKiem() {
+        return txtTimKiem;
+    }
+
+    public JButton getBtnTimKiem() {
+        return btnTimKiem;
+    }
+
+    public String getTuKhoaTuKiem() {
+        return txtTimKiem.getText();
+    }
+
+    public JButton getBtnThem() {
+        return btnThem;
+    }
+
+    public JButton getBtnSua() {
+        return btnSua;
+    }
+
+    public JButton getBtnXoa() {
+        return btnXoa;
+    }
+
+    public JButton getBtnLuu() {
+        return btnLuu;
+    }
+
+    public JButton getBtnHuy() {
+        return btnHuy;
+    }
+
+    public JButton getBtnXem() {
+        return btnXem;
+    }
 
 }

@@ -6,9 +6,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class ServerApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ServerApplication.class, args);
-		System.out.println("====== SERVER ĐANG CHẠY TRÊN PORT 8080 ======");
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(ServerApplication.class, args);
+        System.out.println("====== SERVER ĐANG CHẠY TRÊN PORT 8080 ======");
+    }
 
 }

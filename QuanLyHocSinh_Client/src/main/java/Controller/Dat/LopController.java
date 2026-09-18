@@ -1,16 +1,17 @@
 package Controller.Dat;
 
-import Api.Đat.LopApi;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.List;
+
+import javax.swing.JOptionPane;
+
 import Api.Đat.GiaoVienApi;
+import Api.Đat.LopApi;
 import Model.Giaovien;
 import Model.Lop;
 import Model.LopGVCN;
 import View.Dat.QuanLyLopPanel;
-
-import javax.swing.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.List;
 
 public class LopController {
 
@@ -86,19 +87,20 @@ public class LopController {
         List<LopGVCN> list = dao.getAllLop();
         view.getTableModel().setRowCount(0);
         for (LopGVCN l : list) {
-            view.getTableModel().addRow(new Object[] {
-                    l.getMaLop(),
-                    l.getTenLop(),
-                    l.getNienKhoa(),
-                    l.getTenGVCN()
+            view.getTableModel().addRow(new Object[]{
+                l.getMaLop(),
+                l.getTenLop(),
+                l.getNienKhoa(),
+                l.getTenGVCN()
             });
         }
     }
 
     private void fillForm() {
         int r = view.getTableLop().getSelectedRow();
-        if (r < 0)
+        if (r < 0) {
             return;
+        }
         view.getTxtMaLop().setText(view.getTableLop().getValueAt(r, 0).toString());
         view.getTxtTenLop().setText(view.getTableLop().getValueAt(r, 1).toString());
         String nienKhoa = view.getTableLop().getValueAt(r, 2).toString();
@@ -186,14 +188,38 @@ public class LopController {
         l.setNienKhoa(nienKhoa);
 
         Giaovien gv = (Giaovien) view.getCboGVCN().getSelectedItem();
-        if (gv != null)
+        if (gv != null) {
             l.setMaGVCN(gv.getMaGV());
+        }
 
         boolean ok = false;
-        if ("ADD".equals(currentMode))
-            ok = dao.create(l);
-        else if ("EDIT".equals(currentMode))
+        if ("ADD".equals(currentMode)) {
+            String newMa = l.getMaLop();
+            String newTen = l.getTenLop();
+            for (int i = 0; i < view.getTableLop().getRowCount(); i++) {
+                if (view.getTableLop().getValueAt(i, 0).toString().equalsIgnoreCase(newMa)) {
+                    JOptionPane.showMessageDialog(view, "Trùng mã lớp!");
+                    return;
+                }
+                if (view.getTableLop().getValueAt(i, 1).toString().equalsIgnoreCase(newTen)) {
+                    JOptionPane.showMessageDialog(view, "Trùng tên lớp!");
+                    return;
+                }
+            }
+            ok = dao.create(l); 
+        } else if ("EDIT".equals(currentMode)) {
+            String currentMa = l.getMaLop();
+            String newTen = l.getTenLop();
+            for (int i = 0; i < view.getTableLop().getRowCount(); i++) {
+                String existMa = view.getTableLop().getValueAt(i, 0).toString();
+                String existTen = view.getTableLop().getValueAt(i, 1).toString();
+                if (!existMa.equalsIgnoreCase(currentMa) && existTen.equalsIgnoreCase(newTen)) {
+                    JOptionPane.showMessageDialog(view, "Trùng tên lớp!");
+                    return;
+                }
+            }
             ok = dao.update(l);
+        }
 
         if (ok) {
             JOptionPane.showMessageDialog(view, "Thành công!");
@@ -202,7 +228,11 @@ public class LopController {
             setButtonState(true);
             clearForm();
         } else {
-            JOptionPane.showMessageDialog(view, "Thất bại! Kiểm tra lại mã lớp.");
+            if ("ADD".equals(currentMode)) {
+                JOptionPane.showMessageDialog(view, "Trùng mã lớp!");
+            } else {
+                JOptionPane.showMessageDialog(view, "Thất bại! Vui lòng kiểm tra lại thông tin.");
+            }
         }
         loadTable();
     }
@@ -219,7 +249,6 @@ public class LopController {
         if (view.getCboNienKhoa().getItemCount() > 0) {
             view.getCboNienKhoa().setSelectedIndex(0);
         }
-        view.getTxtMaLop().setEnabled(true);
     }
 
     private void setButtonState(boolean normal) {
@@ -228,8 +257,14 @@ public class LopController {
         view.getBtnXoa().setEnabled(normal);
         view.getBtnLuu().setEnabled(!normal);
         view.getBtnHuy().setEnabled(!normal);
-        view.getTableLop().setEnabled(normal);
+        view.getTableLop().setEnabled(true);
 
+        // Đóng/mở các ô nhập liệu trong form
+        boolean formEnabled = !normal;
+        view.getTxtMaLop().setEnabled(formEnabled);
+        view.getTxtTenLop().setEnabled(formEnabled);
+        view.getCboNienKhoa().setEnabled(formEnabled);
+        view.getCboGVCN().setEnabled(formEnabled);
     }
 
     private void searchData() {
@@ -248,11 +283,11 @@ public class LopController {
 
         view.getTableModel().setRowCount(0);
         for (LopGVCN l : list) {
-            view.getTableModel().addRow(new Object[] {
-                    l.getMaLop(),
-                    l.getTenLop(),
-                    l.getNienKhoa(),
-                    l.getTenGVCN()
+            view.getTableModel().addRow(new Object[]{
+                l.getMaLop(),
+                l.getTenLop(),
+                l.getNienKhoa(),
+                l.getTenGVCN()
             });
         }
 

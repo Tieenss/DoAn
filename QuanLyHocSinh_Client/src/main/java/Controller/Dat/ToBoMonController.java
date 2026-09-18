@@ -111,6 +111,20 @@ public class ToBoMonController {
             boolean kq = false;
 
             if ("ADD".equals(currentMode)) {
+                // Kiểm tra trùng mã trên giao diện
+                boolean isDuplicate = false;
+                for (int i = 0; i < view.getTableTBM().getRowCount(); i++) {
+                    if (view.getTableTBM().getValueAt(i, 0).toString().equalsIgnoreCase(ma)) {
+                        isDuplicate = true;
+                        break;
+                    }
+                }
+                
+                if (isDuplicate) {
+                    JOptionPane.showMessageDialog(view, "Trùng mã!");
+                    return;
+                }
+                
                 kq = dao.insert(tbm);
             } else if ("EDIT".equals(currentMode)) {
                 kq = dao.update(tbm);
@@ -123,7 +137,11 @@ public class ToBoMonController {
                 view.clearForm();
                 currentMode = "";
             } else {
-                JOptionPane.showMessageDialog(view, "Lưu thất bại! Có thể mã đã tồn tại.");
+                if ("ADD".equals(currentMode)) {
+                    JOptionPane.showMessageDialog(view, "Trùng mã!");
+                } else {
+                    JOptionPane.showMessageDialog(view, "Lưu thất bại!");
+                }
             }
         });
 

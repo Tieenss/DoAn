@@ -42,4 +42,8 @@ public class LopService {
     public List<String> getDistinctNienKhoa() {
         return lopRepository.findDistinctNienKhoa();
     }
+
+    public boolean existsLop(String maLop) {
+        return lopRepository.existsById(maLop);
+    }
 }
