@@ -50,6 +50,16 @@ public class TKBController {
                 int thu = view.getLocThu();
                 String namHoc = view.getLocNamHoc();
                 int hocKy = view.getLocHocKy();
+                
+                if (Model.Auth.isHocSinh() && !maLop.isEmpty() && !maLop.equals("Tất cả")) {
+                    Api.Đai.HocSinhApi hsApi = new Api.Đai.HocSinhApi();
+                    Model.HocSinh hs = hsApi.getHocSinh(Model.Auth.maNguoiDung);
+                    if (hs != null && !maLop.equals(hs.getMaLop())) {
+                        view.showMessage("Bạn không có quyền tìm kiếm TKB của lớp khác!");
+                        return;
+                    }
+                }
+
                 if ((maLop.isEmpty() || maLop.equals("Tất cả")) && maMH.isEmpty() && thu == 0
                         && (namHoc.isEmpty() || namHoc.equals("Tất cả")) && hocKy == 0) {
                     loadData();
@@ -75,7 +85,12 @@ public class TKBController {
         view.addCboLocThuListener(e -> doFilter.run());
         view.addCboLocNamHocListener(e -> doFilter.run());
         view.addCboLocHocKyListener(e -> doFilter.run());
-        view.addBtnLocTimKiemListener(e -> doFilter.run());
+        view.addBtnLocTimKiemListener(e -> {
+            doFilter.run();
+            if (view.getTable().getRowCount() == 0) {
+                view.showMessage("Không tìm thấy thời khóa biểu nào phù hợp!");
+            }
+        });
 
         view.addBtnThemListener(e -> {
             editMode[0] = false;
