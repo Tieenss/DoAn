@@ -127,7 +127,7 @@ public class LichThiPanel extends JPanel {
         cboTenMH=new JComboBox<>(); TienIch.ComboBoxUtil.makeSearchableAndEditable(cboTenMH); pnlInput.add(cboTenMH, gbc);
 
         gbc.gridx=2; gbc.gridy=1; gbc.weightx = 0;
-        pnlInput.add(new JLabel("Ngày Thi (yyyy-mm-dd):"), gbc);
+        pnlInput.add(new JLabel("Ngày Thi (dd/MM/yyyy):"), gbc);
         
         gbc.gridx=3; gbc.gridy=1; gbc.weightx = 1.0;
         dateNgayThi=new JDateChooser(); 
