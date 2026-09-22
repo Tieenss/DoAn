@@ -64,7 +64,7 @@ public class Auth {
 
     public static boolean canEditData(String maNguoiDungData) {
         
-        if (isAdmin()) {
+        if (isAdmin() || isGiaoVien()) {
             return true;
         }
         
