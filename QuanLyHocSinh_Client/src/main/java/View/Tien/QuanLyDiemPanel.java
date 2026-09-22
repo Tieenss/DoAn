@@ -216,7 +216,10 @@ public class QuanLyDiemPanel extends JPanel {
         this.add(pnlSouth, BorderLayout.SOUTH);
         
         if (Model.Auth.isHocSinh()) {
-            pnlSearch.setVisible(false);
+            pnlSearch.setBorder(new TitledBorder("Tìm kiếm môn học"));
+            if (pnlSearch.getComponentCount() > 0 && pnlSearch.getComponent(0) instanceof JLabel) {
+                ((JLabel) pnlSearch.getComponent(0)).setText("Nhập tên môn học:");
+            }
             pnlSouth.setVisible(false);
         }
 

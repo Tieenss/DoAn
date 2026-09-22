@@ -58,8 +58,16 @@ public class LichThiController {
             LopApi lopApi = new LopApi();
             List<LopGVCN> lopList = lopApi.getAllLop();
             List<String> maLops = new ArrayList<>();
-            for (LopGVCN l : lopList) {
-                maLops.add(l.getMaLop());
+            if (Model.Auth.isHocSinh()) {
+                Api.Đai.HocSinhApi hsApi = new Api.Đai.HocSinhApi();
+                Model.HocSinh hs = hsApi.getHocSinh(Model.Auth.maNguoiDung);
+                if (hs != null && hs.getMaLop() != null) {
+                    maLops.add(hs.getMaLop());
+                }
+            } else {
+                for (LopGVCN l : lopList) {
+                    maLops.add(l.getMaLop());
+                }
             }
             view.setLopData(maLops);
         } catch (Exception e) {
@@ -80,6 +88,16 @@ public class LichThiController {
             String tenMon = view.getMonFilter();
             String phong = view.getPhongFilter();
             String maLop = view.getLopFilter();
+            
+            if (Model.Auth.isHocSinh()) {
+                Api.Đai.HocSinhApi hsApi = new Api.Đai.HocSinhApi();
+                Model.HocSinh hs = hsApi.getHocSinh(Model.Auth.maNguoiDung);
+                if (hs != null && !maLop.isEmpty() && !maLop.equals(hs.getMaLop())) {
+                    view.showMessage("Bạn không có quyền tìm kiếm lịch thi của lớp khác!");
+                    return;
+                }
+                maLop = hs != null ? hs.getMaLop() : "";
+            }
 
             String maMH = "";
             if (!tenMon.isEmpty() && monHocList != null) {
@@ -91,7 +109,18 @@ public class LichThiController {
                 }
             }
             
-            List<LichThi> list = dao.getLichThiByFilter(kyThi, maMH, phong, maLop);
+            String maPhong = "";
+            if (!phong.isEmpty() && phongHocList != null) {
+                for (PhongHoc p : phongHocList) {
+                    if (p.getTenPhong() != null && p.getTenPhong().equals(phong)) {
+                        maPhong = p.getMaPhong();
+                        break;
+                    }
+                }
+            }
+            
+            List<LichThi> list = dao.getLichThiByFilter(kyThi, maMH, maPhong, maLop);
+            mapTenPhong(list);
             view.setTableData(list);
             if (list.isEmpty()) view.showMessage("Không tìm thấy lịch thi phù hợp!");
         });
@@ -105,6 +134,21 @@ public class LichThiController {
             }
             
             List<LichThi> list = dao.searchLichThi(kw, namHoc);
+
+            if (Model.Auth.isHocSinh()) {
+                Api.Đai.HocSinhApi hsApi = new Api.Đai.HocSinhApi();
+                Model.HocSinh hs = hsApi.getHocSinh(Model.Auth.maNguoiDung);
+                String maLopHS = hs != null ? hs.getMaLop() : "";
+                List<LichThi> filtered = new ArrayList<>();
+                for (LichThi lt : list) {
+                    if (lt.getMaLop() != null && lt.getMaLop().equals(maLopHS)) {
+                        filtered.add(lt);
+                    }
+                }
+                list = filtered;
+            }
+
+            mapTenPhong(list);
             view.setTableData(list);
             
             if(list.isEmpty()) view.showMessage("Không tìm thấy kết quả nào!");
@@ -340,7 +384,16 @@ public class LichThiController {
         });
     }
     private void loadAll() {
-        List<LichThi> all = dao.getAllLichThi();
+        List<LichThi> all;
+        if (Model.Auth.isHocSinh()) {
+            Api.Đai.HocSinhApi hsApi = new Api.Đai.HocSinhApi();
+            Model.HocSinh hs = hsApi.getHocSinh(Model.Auth.maNguoiDung);
+            String maLopHS = hs != null ? hs.getMaLop() : "";
+            all = dao.getLichThiByFilter("", "", "", maLopHS);
+        } else {
+            all = dao.getAllLichThi();
+        }
+        mapTenPhong(all);
         view.setTableData(all);
         
         List<Integer> listMaLT = new ArrayList<>();
@@ -348,5 +401,17 @@ public class LichThiController {
             listMaLT.add(lt.getMaLT());
         }
         view.setMaLTData(listMaLT);
+    }
+
+    private void mapTenPhong(List<LichThi> list) {
+        if (list == null || phongHocList == null) return;
+        for (LichThi lt : list) {
+            for (PhongHoc p : phongHocList) {
+                if (p.getMaPhong() != null && p.getMaPhong().equals(lt.getMaPhong())) {
+                    lt.setTenPhong(p.getTenPhong());
+                    break;
+                }
+            }
+        }
     }
 }

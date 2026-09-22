@@ -156,6 +156,15 @@ public class Hocphicontroller {
             String namHoc = (cboNamHocObj != null) ? cboNamHocObj.toString().trim() : "";
             if (namHoc.equals("Tất cả")) namHoc = "";
 
+            if (Auth.isHocSinh() && !maLop.isEmpty()) {
+                Api.Đai.HocSinhApi hsApi = new Api.Đai.HocSinhApi();
+                Model.HocSinh hs = hsApi.getHocSinh(Auth.maNguoiDung);
+                if (hs != null && !maLop.equals(hs.getMaLop())) {
+                    JOptionPane.showMessageDialog(view, "Bạn không có quyền tìm kiếm học phí của lớp khác!");
+                    return;
+                }
+            }
+
             if (maLop.isEmpty() && hocKyStr.isEmpty() && namHoc.isEmpty()) {
                 loadTatCaDuLieu();
                 return;
