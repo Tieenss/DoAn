@@ -49,7 +49,12 @@ public class HanhKiemController {
         Runnable setSelectedState = () -> view.setCrudButtonState(false, true, true, false, true);
         Runnable setEditState = () -> view.setCrudButtonState(false, true, true, true, true);
         setIdleState.run();
-        view.addBtnXemListener(e -> loadData());
+        view.addBtnXemListener(e -> {
+            loadData();
+            if (view.getTable().getRowCount() == 0) {
+                view.showMessage("Không tìm thấy hạnh kiểm nào phù hợp với bộ lọc!");
+            }
+        });
         view.addBtnTimKiemListener(e -> searchData());
         view.addBtnThemListener(e -> {
             editMode[0] = false;
@@ -218,16 +223,38 @@ public class HanhKiemController {
             List<HanhKiem> list;
 
             if (Auth.isHocSinh()) {
+                String maLop = view.getMaLopFilter();
+                if (!maLop.isEmpty()) {
+                    Api.Đai.HocSinhApi hsApi = new Api.Đai.HocSinhApi();
+                    Model.HocSinh hs = hsApi.getHocSinh(Auth.maNguoiDung);
+                    if (hs != null && !maLop.equals(hs.getMaLop())) {
+                        view.showMessage("Bạn không có quyền tìm kiếm hạnh kiểm của lớp khác!");
+                        return;
+                    }
+                }
 
-                list = dao.getHanhKiemByMaHS(Auth.maNguoiDung);
+                List<HanhKiem> allMyHK = dao.getHanhKiemByMaHS(Auth.maNguoiDung);
+                
+                String namHoc = view.getNamHocFilter();
+                int hocKy = view.getHocKyFilter();
+                
+                list = new ArrayList<>();
+                for (HanhKiem hk : allMyHK) {
+                    boolean matchHk = hocKy == 0 || hk.getHocKy() == hocKy;
+                    boolean matchNamHoc = namHoc.isEmpty() || (hk.getNamHoc() != null && hk.getNamHoc().equals(namHoc));
+                    if (matchHk && matchNamHoc) {
+                        list.add(hk);
+                    }
+                }
+                
                 view.hideButtonForStudent();
 
             } else {
 
-            String maLop = view.getMaLopFilter();
-            String namHoc = view.getNamHocFilter();
-            int hocKy = view.getHocKyFilter();
-            list = dao.getHanhKiemByFilter(maLop, namHoc, hocKy);
+                String maLop = view.getMaLopFilter();
+                String namHoc = view.getNamHocFilter();
+                int hocKy = view.getHocKyFilter();
+                list = dao.getHanhKiemByFilter(maLop, namHoc, hocKy);
             }
             view.setTableData(list);
             

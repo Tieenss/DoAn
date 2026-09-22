@@ -27,6 +27,9 @@ public class LichThi {
     @SerializedName(value = "maPhong", alternate = {"MaPhong", "MAPHONG", "maphong"})
     private String maPhong;
 
+    @SerializedName(value = "tenPhong", alternate = {"TenPhong", "TENPHONG", "tenphong"})
+    private String tenPhong;
+
     @SerializedName(value = "maLop", alternate = {"MaLop", "MALOP", "malop"})
     private String maLop;
 
@@ -74,6 +77,9 @@ public class LichThi {
 
     public String getMaPhong() { return maPhong; }
     public void setMaPhong(String maPhong) { this.maPhong = maPhong; }
+
+    public String getTenPhong() { return tenPhong; }
+    public void setTenPhong(String tenPhong) { this.tenPhong = tenPhong; }
 
     public String getMaLop() { return maLop; }
     public void setMaLop(String maLop) { this.maLop = maLop; }

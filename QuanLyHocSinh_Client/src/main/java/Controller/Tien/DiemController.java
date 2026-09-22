@@ -276,18 +276,32 @@ public class DiemController {
     }
 
     private void searchData() {
-        String keyword = view.getTuKhoaTimKiem();
+        String keyword = view.getTuKhoaTimKiem().toLowerCase();
 
         if (keyword.isEmpty()) {
             loadData(); 
             return;
         }
 
-        List<Diem> list = dao.searchDiem(keyword);
+        List<Diem> list;
+        if (Auth.isHocSinh()) {
+            String maHocSinh = Auth.maNguoiDung.toUpperCase();
+            List<Diem> allMyGrades = dao.getDiemByMaHS(maHocSinh);
+            list = new ArrayList<>();
+            for (Diem d : allMyGrades) {
+                if ((d.getTenMH() != null && d.getTenMH().toLowerCase().contains(keyword)) ||
+                    (d.getMaMH() != null && d.getMaMH().toLowerCase().contains(keyword))) {
+                    list.add(d);
+                }
+            }
+        } else {
+            list = dao.searchDiem(view.getTuKhoaTimKiem());
+        }
+
         view.setTableData(list);
 
         if (list.isEmpty()) {
-            view.showMessage("Không tìm thấy học sinh nào với từ khóa: " + keyword);
+            view.showMessage("Không tìm thấy kết quả nào với từ khóa: " + view.getTuKhoaTimKiem());
         }
     }
 
@@ -295,8 +309,34 @@ public class DiemController {
         List<Diem> list;
 
         if (Auth.isHocSinh()) {
+            String maLop = view.getMaLopFilter();
+            if (!maLop.isEmpty()) {
+                Api.Đai.HocSinhApi hsApi = new Api.Đai.HocSinhApi();
+                Model.HocSinh hs = hsApi.getHocSinh(Auth.maNguoiDung);
+                if (hs != null && !maLop.equals(hs.getMaLop())) {
+                    view.showMessage("Bạn không có quyền tìm kiếm điểm của lớp khác!");
+                    return;
+                }
+            }
+
             String maHocSinh = Auth.maNguoiDung.toUpperCase();
-            list = dao.getDiemByMaHS(maHocSinh);
+            List<Diem> allMyGrades = dao.getDiemByMaHS(maHocSinh);
+            
+            String maMon = view.getMaMonFilter();
+            int hocKy = view.getHocKyFilter();
+            String namHoc = view.getNamHocFilter();
+            
+            list = new ArrayList<>();
+            for (Diem d : allMyGrades) {
+                boolean matchMon = maMon.isEmpty() || (d.getMaMH() != null && d.getMaMH().equals(maMon));
+                boolean matchHk = hocKy == 0 || d.getHocKy() == hocKy;
+                boolean matchNamHoc = namHoc.isEmpty() || (d.getNamHoc() != null && d.getNamHoc().equals(namHoc));
+                
+                if (matchMon && matchHk && matchNamHoc) {
+                    list.add(d);
+                }
+            }
+
             if (view.getBtnCapNhat() != null) {
                 view.getBtnCapNhat().setVisible(false);
             }

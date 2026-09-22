@@ -379,9 +379,10 @@ public class LichThiPanel extends JPanel {
         for(LichThi lt : list) {
             String tenMon = lt.getTenMH() != null && !lt.getTenMH().isEmpty() ? lt.getTenMH() : lt.getMaMH();
             String lop = lt.getTenLop() != null && !lt.getTenLop().isEmpty() ? lt.getTenLop() : (lt.getMaLop() != null ? lt.getMaLop() : "");
+            String phong = lt.getTenPhong() != null && !lt.getTenPhong().isEmpty() ? lt.getTenPhong() : (lt.getMaPhong() != null ? lt.getMaPhong() : "");
             model.addRow(new Object[]{
                 lt.getMaLT(), lt.getTenKyThi(), tenMon, lop, formatToDDMMYYYY(lt.getNgayThi()), 
-                formatTime(lt.getGioBatDau()), formatTime(lt.getGioKetThuc()), lt.getMaPhong()
+                formatTime(lt.getGioBatDau()), formatTime(lt.getGioKetThuc()), phong
             });
         }
     }
