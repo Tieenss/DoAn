@@ -33,16 +33,28 @@ public class MonHocRestController {
 
     @PostMapping
     public ResponseEntity<?> createMH(@RequestBody MonHoc monHoc) {
-        if (monHoc.getMaMH() == null || monHoc.getMaMH().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body("Mã môn học không được để trống!");
+        String maMH = monHoc.getMaMH() == null ? "" : monHoc.getMaMH().trim();
+        String tenMH = monHoc.getTenMH() == null ? "" : monHoc.getTenMH().trim();
+        monHoc.setMaMH(maMH);
+        monHoc.setTenMH(tenMH);
+
+        if (maMH.length() < 2) {
+            return ResponseEntity.badRequest().body("Mã môn học: Vui lòng nhập từ 2 ký tự trở lên và không được để trống!");
         }
-        if (monHoc.getTenMH() == null || monHoc.getTenMH().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body("Tên môn học không được để trống!");
+        if (!maMH.matches("^[a-zA-Z0-9]+$")) {
+            return ResponseEntity.badRequest().body("Mã môn học: Không được chứa ký tự đặc biệt! Vui lòng nhập lại thông tin.");
         }
-        if (monHocService.existsMH(monHoc.getMaMH().trim())) {
+        if (tenMH.length() < 2) {
+            return ResponseEntity.badRequest().body("Tên môn học: Vui lòng nhập từ 2 ký tự trở lên và không được để trống!");
+        }
+        if (!tenMH.matches("^[a-zA-Z0-9\\p{L} ]+$")) {
+            return ResponseEntity.badRequest().body("Tên môn học: Không được chứa ký tự đặc biệt! Vui lòng nhập lại thông tin.");
+        }
+
+        if (monHocService.existsMH(maMH)) {
             return ResponseEntity.status(409).body("Mã môn học đã tồn tại!");
         }
-        if (monHocService.existsByTenMH(monHoc.getTenMH().trim())) {
+        if (monHocService.existsByTenMH(tenMH)) {
             return ResponseEntity.status(422).body("Tên môn học đã tồn tại!");
         }
         return ResponseEntity.ok(monHocService.saveMH(monHoc));
@@ -53,10 +65,17 @@ public class MonHocRestController {
         if (!monHocService.existsMH(maMH)) {
             return ResponseEntity.notFound().build();
         }
-        if (monHoc.getTenMH() == null || monHoc.getTenMH().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body("Tên môn học không được để trống!");
+        String tenMH = monHoc.getTenMH() == null ? "" : monHoc.getTenMH().trim();
+        monHoc.setTenMH(tenMH);
+
+        if (tenMH.length() < 2) {
+            return ResponseEntity.badRequest().body("Tên môn học: Vui lòng nhập từ 2 ký tự trở lên và không được để trống!");
         }
-        if (monHocService.existsByTenMHExcluding(maMH, monHoc.getTenMH().trim())) {
+        if (!tenMH.matches("^[a-zA-Z0-9\\p{L} ]+$")) {
+            return ResponseEntity.badRequest().body("Tên môn học: Không được chứa ký tự đặc biệt! Vui lòng nhập lại thông tin.");
+        }
+
+        if (monHocService.existsByTenMHExcluding(maMH, tenMH)) {
             return ResponseEntity.status(422).body("Tên môn học đã tồn tại!");
         }
         monHoc.setMaMH(maMH);

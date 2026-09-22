@@ -3,6 +3,7 @@ package Controller.ThuTrang;
 import Api.ThuTrang.TKBApiClient;
 import Api.Đai.HocSinhApi;
 import Model.TKB;
+import TienIch.ValidationUtil;
 import TienIch.XuatExcel;
 import View.ThuTrang.FrmTKB;
 
@@ -14,6 +15,7 @@ import java.util.List;
 public class TKBController {
     private FrmTKB view;
     private TKBApiClient apiClient;
+    private boolean isCustomOrder = false;
 
     public TKBController(FrmTKB view) {
         this.view = view;
@@ -56,6 +58,7 @@ public class TKBController {
                 } else {
                     List<TKB> list = apiClient.getByFilter(maLop, maMH, thu, namHoc, hocKy);
                     list = filterByRole(list);
+                    sortTKB(list);
                     view.setTableData(list);
                 }
             } catch (Exception ignored) {
@@ -77,7 +80,14 @@ public class TKBController {
         view.addCboLocHocKyListener(e -> doFilter.run());
         view.addBtnLocTimKiemListener(e -> doFilter.run());
 
+        Runnable restoreOrderIfNeeded = () -> {
+            if (isCustomOrder) {
+                loadData();
+            }
+        };
+
         view.addBtnThemListener(e -> {
+            restoreOrderIfNeeded.run();
             editMode[0] = false;
             view.clearForm();
             view.getTable().clearSelection();
@@ -100,7 +110,8 @@ public class TKBController {
                     "Xác nhận", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
                 try {
-                    String maTKB = view.getTable().getValueAt(row, 0).toString();
+                    String maTKB = view.getSelectedMaTKB();
+                    if (maTKB == null) return;
                     apiClient.delete(maTKB);
                     view.showMessage("Đã xóa");
                     loadData();
@@ -116,47 +127,84 @@ public class TKBController {
         view.addBtnLuuListener(e -> {
             try {
                 TKB t = view.getTKBInput();
-                if (t.getMaLop().isEmpty() || t.getMaMH().isEmpty()
-                        || t.getMaGV().isEmpty() || t.getMaPhong().isEmpty()) {
-                    view.showMessage("Vui lòng nhập đầy đủ thông tin");
+                if (t.getMaLop() == null || t.getMaLop().trim().isEmpty()) {
+                    view.showMessage("Vui lòng chọn Lớp học!");
                     return;
                 }
-                int namBD, namKT;
-                try {
-                    namBD = Integer.parseInt(view.getNamBatDau());
-                    namKT = Integer.parseInt(view.getNamKetThuc());
-                } catch (NumberFormatException ex) {
-                    view.showMessage("Năm bắt đầu và năm kết thúc phải là số hợp lệ!");
+                if (t.getMaMH() == null || t.getMaMH().trim().isEmpty()) {
+                    view.showMessage("Vui lòng chọn Môn học!");
                     return;
                 }
+                if (t.getMaGV() == null || t.getMaGV().trim().isEmpty()) {
+                    view.showMessage("Vui lòng chọn Giáo viên giảng dạy!");
+                    return;
+                }
+                if (t.getMaPhong() == null || t.getMaPhong().trim().isEmpty()) {
+                    view.showMessage("Vui lòng chọn Phòng học!");
+                    return;
+                }
+                if (t.getThu() <= 0) {
+                    view.showMessage("Vui lòng chọn Thứ!");
+                    return;
+                }
+                if (t.getHocKy() <= 0) {
+                    view.showMessage("Vui lòng chọn Học kỳ!");
+                    return;
+                }
+                if (t.getTietBatDau() <= 0 || t.getTietKetThuc() <= 0) {
+                    view.showMessage("Vui lòng chọn Tiết bắt đầu và Tiết kết thúc!");
+                    return;
+                }
+                if (t.getTietBatDau() > t.getTietKetThuc()) {
+                    view.showMessage("Lỗi: Tiết bắt đầu (" + t.getTietBatDau() + ") phải nhỏ hơn hoặc bằng tiết kết thúc (" + t.getTietKetThuc() + ")!");
+                    return;
+                }
+
+                String errNamBD = ValidationUtil.validateNam(view.getNamBatDau());
+                if (errNamBD != null) {
+                    view.showMessage("Năm bắt đầu: " + errNamBD);
+                    return;
+                }
+                String errNamKT = ValidationUtil.validateNam(view.getNamKetThuc());
+                if (errNamKT != null) {
+                    view.showMessage("Năm kết thúc: " + errNamKT);
+                    return;
+                }
+
+                int namBD = Integer.parseInt(view.getNamBatDau());
+                int namKT = Integer.parseInt(view.getNamKetThuc());
 
                 if (namKT < namBD) {
-                    view.showMessage("Lỗi: Năm kết thúc phải lớn hơn hoặc bằng năm bắt đầu!");
+                    view.showMessage("Lỗi: Năm kết thúc (" + namKT + ") phải lớn hơn hoặc bằng năm bắt đầu (" + namBD + ")!");
                     return;
                 }
 
-                if (t.getTietBatDau() > t.getTietKetThuc()) {
-                    view.showMessage("Tiết bắt đầu phải nhỏ hơn hoặc bằng tiết kết thúc");
-                    return;
-                }
+                Integer highlightId = null;
                 if (editMode[0]) {
-                    String maTKB = view.getTable().getValueAt(
-                            view.getTable().getSelectedRow(), 0).toString();
-                    apiClient.update(maTKB, t);
-                    view.showMessage("Cập nhật thành công");
+                    String maTKB = view.getSelectedMaTKB();
+                    if (maTKB == null) {
+                        view.showMessage("Vui lòng chọn một bản ghi để sửa!");
+                        return;
+                    }
+                    TKB updated = apiClient.update(maTKB, t);
+                    highlightId = updated != null ? updated.getMaTKB() : Integer.parseInt(maTKB);
+                    view.showMessage("Cập nhật thời khóa biểu thành công!");
                 } else {
-                    apiClient.create(t);
-                    view.showMessage("Thêm thành công");
+                    TKB created = apiClient.create(t);
+                    if (created != null) {
+                        highlightId = created.getMaTKB();
+                    }
+                    view.showMessage("Thêm thời khóa biểu thành công!");
                 }
-                loadData();
+                loadDataWithHighlight(highlightId);
                 view.clearForm();
                 editMode[0] = false;
                 setIdleState.run();
             } catch (NumberFormatException ex) {
-                view.showMessage("Tiết bắt đầu / kết thúc phải là số");
+                view.showMessage("Tiết bắt đầu / kết thúc hoặc năm học phải là số hợp lệ!");
             } catch (Exception ex) {
                 String msg = ex.getMessage();
-                if (msg != null && (msg.startsWith("Trùng") || msg.startsWith("Lỗi:"))) {
+                if (msg != null && (msg.startsWith("Trùng") || msg.startsWith("Phòng học") || msg.startsWith("Lỗi") || msg.contains("ký tự") || msg.contains("kí tự") || msg.contains("tồn tại"))) {
                     view.showMessage(msg);
                 } else {
                     view.showMessage("Lỗi: " + msg);
@@ -166,6 +214,8 @@ public class TKBController {
 
         view.addBtnMoiListener(e -> {
             view.clearForm();
+            view.resetBoLoc();
+            loadData();
             editMode[0] = false;
             view.getTable().clearSelection();
             setIdleState.run();
@@ -173,9 +223,20 @@ public class TKBController {
 
         view.addBtnHuyListener(e -> {
             view.clearForm();
+            loadData();
             editMode[0] = false;
             setIdleState.run();
         });
+
+        MouseAdapter formClickListener = new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                restoreOrderIfNeeded.run();
+            }
+        };
+        if (view.getPnlInput() != null) {
+            view.getPnlInput().addMouseListener(formClickListener);
+        }
 
         view.addTableMouseListener(new MouseAdapter() {
             @Override
@@ -192,11 +253,71 @@ public class TKBController {
         view.addBtnXuatExcelListener(e -> XuatExcel.xuatFileExcel(view.getTable(), view));
     }
 
+    private void sortTKB(List<TKB> list) {
+        if (list == null || list.isEmpty()) return;
+        java.text.Collator viCollator = java.text.Collator.getInstance(java.util.Locale.forLanguageTag("vi-VN"));
+        list.sort((t1, t2) -> {
+            String n1 = t1.getNamHoc() == null ? "" : t1.getNamHoc().trim();
+            String n2 = t2.getNamHoc() == null ? "" : t2.getNamHoc().trim();
+            int cmpNam = n2.compareToIgnoreCase(n1);
+            if (cmpNam != 0) return cmpNam;
+
+            int cmpHK = Integer.compare(t2.getHocKy(), t1.getHocKy());
+            if (cmpHK != 0) return cmpHK;
+
+            String l1 = t1.getMaLop() == null ? "" : t1.getMaLop().trim();
+            String l2 = t2.getMaLop() == null ? "" : t2.getMaLop().trim();
+            int cmpLop = l1.compareToIgnoreCase(l2);
+            if (cmpLop != 0) return cmpLop;
+
+            String tm1 = t1.getTenMH() == null ? "" : t1.getTenMH().trim();
+            String tm2 = t2.getTenMH() == null ? "" : t2.getTenMH().trim();
+            int cmpMon = viCollator.compare(tm1, tm2);
+            if (cmpMon != 0) return cmpMon;
+
+            int cmpThu = Integer.compare(t1.getThu(), t2.getThu());
+            if (cmpThu != 0) return cmpThu;
+
+            return Integer.compare(t1.getTietBatDau(), t2.getTietBatDau());
+        });
+    }
+
+    private void loadDataWithHighlight(Integer maTKB) {
+        try {
+            List<TKB> list = apiClient.getAll();
+            list = filterByRole(list);
+            sortTKB(list);
+            if (maTKB != null) {
+                TKB target = null;
+                for (TKB item : list) {
+                    if (maTKB.equals(item.getMaTKB())) {
+                        target = item;
+                        break;
+                    }
+                }
+                if (target != null) {
+                    list.remove(target);
+                    list.add(0, target);
+                }
+            }
+            view.setTableData(list);
+            if (view.getTable().getRowCount() > 0) {
+                view.getTable().setRowSelectionInterval(0, 0);
+                view.getTable().scrollRectToVisible(view.getTable().getCellRect(0, 0, true));
+            }
+            isCustomOrder = true;
+        } catch (Exception ex) {
+            view.showMessage("Không thể kết nối server: " + ex.getMessage());
+        }
+    }
+
     public void loadData() {
         try {
             List<TKB> list = apiClient.getAll();
             list = filterByRole(list);
+            sortTKB(list);
             view.setTableData(list);
+            isCustomOrder = false;
         } catch (Exception ex) {
             view.showMessage("Không thể kết nối server: " + ex.getMessage());
         }

@@ -2,6 +2,7 @@ package Controller.ThuTrang;
 
 import Api.ThuTrang.PhongHocApiClient;
 import Model.PhongHoc;
+import TienIch.ValidationUtil;
 import View.ThuTrang.FrmPhongHoc;
 
 import java.awt.event.MouseAdapter;
@@ -11,6 +12,7 @@ import java.util.List;
 public class PhongHocController {
     private FrmPhongHoc view;
     private PhongHocApiClient apiClient;
+    private boolean isCustomOrder = false;
 
     public PhongHocController(FrmPhongHoc view) {
         this.view = view;
@@ -36,6 +38,7 @@ public class PhongHocController {
                     loadData();
                 } else {
                     List<PhongHoc> list = apiClient.search(ma, loai, tinhTrang);
+                    list.sort((p1, p2) -> p1.getMaPhong().compareToIgnoreCase(p2.getMaPhong()));
                     view.setTableData(list);
                 }
             } catch (Exception ignored) {
@@ -55,7 +58,14 @@ public class PhongHocController {
         view.addCboLoaiPhongTimListener(e -> doSearch.run());
         view.addCboTinhTrangTimListener(e -> doSearch.run());
 
+        Runnable restoreOrderIfNeeded = () -> {
+            if (isCustomOrder) {
+                loadData();
+            }
+        };
+
         view.addBtnThemListener(e -> {
+            restoreOrderIfNeeded.run();
             editMode[0] = false;
             view.clearForm();
             view.getTable().clearSelection();
@@ -96,30 +106,37 @@ public class PhongHocController {
         view.addBtnLuuListener(e -> {
             try {
                 PhongHoc p = view.getPhongHocInput();
-                if (p.getMaPhong().isEmpty()) {
-                    view.showMessage("Mã phòng không được để trống!");
+                if (!editMode[0]) {
+                    String errMa = ValidationUtil.validateMa(p.getMaPhong(), "Mã phòng học");
+                    if (errMa != null) {
+                        view.showMessage(errMa);
+                        return;
+                    }
+                }
+                String errTen = ValidationUtil.validateTen(p.getTenPhong(), "Tên phòng học");
+                if (errTen != null) {
+                    view.showMessage(errTen);
                     return;
                 }
-                if (p.getTenPhong().isEmpty()) {
-                    view.showMessage("Tên phòng không được để trống!");
+                String errSucChua = ValidationUtil.validateSucChua(view.getSucChuaText());
+                if (errSucChua != null) {
+                    view.showMessage(errSucChua);
                     return;
                 }
                 if (editMode[0]) {
                     apiClient.update(p.getMaPhong(), p);
-                    view.showMessage("Cập nhật phòng học thành công");
+                    view.showMessage("Cập nhật phòng học thành công!");
                 } else {
                     apiClient.create(p);
-                    view.showMessage("Thêm phòng học thành công");
+                    view.showMessage("Thêm phòng học thành công!");
                 }
-                loadData();
+                loadDataWithHighlight(p.getMaPhong());
                 view.clearForm();
                 editMode[0] = false;
                 setIdleState.run();
-            } catch (NumberFormatException ex) {
-                view.showMessage("Sức chứa phải là số!");
             } catch (Exception ex) {
                 String msg = ex.getMessage();
-                if (msg != null && (msg.contains("tồn tại") || msg.startsWith("Lỗi"))) {
+                if (msg != null && (msg.contains("tồn tại") || msg.startsWith("Lỗi") || msg.contains("ký tự") || msg.contains("kí tự"))) {
                     view.showMessage(msg);
                 } else {
                     view.showMessage("Lỗi: " + msg);
@@ -129,10 +146,31 @@ public class PhongHocController {
 
         view.addBtnHuyListener(e -> {
             view.clearForm();
+            loadData();
             editMode[0] = false;
             view.getTable().clearSelection();
             setIdleState.run();
         });
+
+        view.addBtnMoiListener(e -> {
+            view.clearForm();
+            view.resetBoLoc();
+            loadData();
+            editMode[0] = false;
+            view.getTable().clearSelection();
+            setIdleState.run();
+        });
+
+        MouseAdapter formClickListener = new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                restoreOrderIfNeeded.run();
+            }
+        };
+        view.getTxtMaPhong().addMouseListener(formClickListener);
+        view.getTxtTenPhong().addMouseListener(formClickListener);
+        view.getTxtSucChua().addMouseListener(formClickListener);
+        view.getPnlInput().addMouseListener(formClickListener);
 
         view.addTableMouseListener(new MouseAdapter() {
             @Override
@@ -147,9 +185,40 @@ public class PhongHocController {
         });
     }
 
-    private void loadData() {
+    private void loadDataWithHighlight(String maPhong) {
         try {
-            view.setTableData(apiClient.getAll());
+            List<PhongHoc> list = apiClient.getAll();
+            list.sort((p1, p2) -> p1.getMaPhong().compareToIgnoreCase(p2.getMaPhong()));
+            if (maPhong != null && !maPhong.trim().isEmpty()) {
+                PhongHoc target = null;
+                for (PhongHoc item : list) {
+                    if (maPhong.trim().equalsIgnoreCase(item.getMaPhong())) {
+                        target = item;
+                        break;
+                    }
+                }
+                if (target != null) {
+                    list.remove(target);
+                    list.add(0, target);
+                }
+            }
+            view.setTableData(list);
+            if (view.getTable().getRowCount() > 0) {
+                view.getTable().setRowSelectionInterval(0, 0);
+                view.getTable().scrollRectToVisible(view.getTable().getCellRect(0, 0, true));
+            }
+            isCustomOrder = true;
+        } catch (Exception ex) {
+            view.showMessage("Không thể kết nối server: " + ex.getMessage());
+        }
+    }
+
+    public void loadData() {
+        try {
+            List<PhongHoc> list = apiClient.getAll();
+            list.sort((p1, p2) -> p1.getMaPhong().compareToIgnoreCase(p2.getMaPhong()));
+            view.setTableData(list);
+            isCustomOrder = false;
         } catch (Exception ex) {
             view.showMessage("Không thể kết nối server: " + ex.getMessage());
         }

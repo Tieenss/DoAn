@@ -11,6 +11,8 @@ import java.util.List;
 @Repository
 public interface MonHocRepository extends JpaRepository<MonHoc, String> {
 
-    @Query("SELECT m FROM MonHoc m WHERE m.maMH LIKE %:keyword% OR m.tenMH LIKE %:keyword%")
+    List<MonHoc> findAllByOrderByMaMHAsc();
+
+    @Query("SELECT m FROM MonHoc m WHERE m.maMH LIKE %:keyword% OR m.tenMH LIKE %:keyword% ORDER BY m.maMH ASC")
     List<MonHoc> searchMonHoc(@Param("keyword") String keyword);
 }
