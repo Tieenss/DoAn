@@ -22,7 +22,8 @@ public class FrmPhongHoc extends JPanel {
 
     private JTextField txtMaPhong, txtTenPhong, txtSucChua;
     private JComboBox<String> cboLoaiPhong, cboTinhTrang;
-    private JButton btnThem, btnSua, btnXoa, btnLuu, btnHuy;
+    private JButton btnThem, btnSua, btnXoa, btnLuu, btnHuy, btnMoi;
+    private JPanel pnlInput;
 
     public FrmPhongHoc() {
         initComponents();
@@ -74,7 +75,7 @@ public class FrmPhongHoc extends JPanel {
         JPanel pnlSouth = new JPanel(new BorderLayout());
         pnlSouth.setBorder(new TitledBorder("Cập nhật phòng học"));
 
-        JPanel pnlInput = new JPanel(new GridBagLayout());
+        pnlInput = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 10, 5, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -106,14 +107,15 @@ public class FrmPhongHoc extends JPanel {
         btnXoa  = new JButton("Xóa");  ButtonStyleHelper.styleButtonDelete(btnXoa);
         btnLuu  = new JButton("Lưu");  ButtonStyleHelper.styleButtonSave(btnLuu);
         btnHuy  = new JButton("Hủy");  ButtonStyleHelper.styleButtonCancel(btnHuy);
+        btnMoi  = new JButton("Làm Mới"); ButtonStyleHelper.styleButtonView(btnMoi);
 
         Dimension sz = new Dimension(90, 35);
         btnThem.setPreferredSize(sz); btnSua.setPreferredSize(sz);
         btnXoa.setPreferredSize(sz);  btnLuu.setPreferredSize(sz);
-        btnHuy.setPreferredSize(sz);
+        btnHuy.setPreferredSize(sz);  btnMoi.setPreferredSize(sz);
 
         pnlBtn.add(btnThem); pnlBtn.add(btnSua); pnlBtn.add(btnXoa);
-        pnlBtn.add(btnLuu);  pnlBtn.add(btnHuy);
+        pnlBtn.add(btnLuu);  pnlBtn.add(btnHuy); pnlBtn.add(btnMoi);
         pnlSouth.add(pnlBtn, BorderLayout.SOUTH);
         add(pnlSouth, BorderLayout.SOUTH);
 
@@ -124,11 +126,17 @@ public class FrmPhongHoc extends JPanel {
     public String getLoaiPhongTim() { return cboLoaiPhongTim.getSelectedItem().toString(); }
     public String getTinhTrangTim() { return cboTinhTrangTim.getSelectedItem().toString(); }
 
+    public String getSucChuaText() { return txtSucChua.getText().trim(); }
+
     public PhongHoc getPhongHocInput() {
         PhongHoc p = new PhongHoc();
         p.setMaPhong(txtMaPhong.getText().trim());
         p.setTenPhong(txtTenPhong.getText().trim());
-        p.setSucChua(Integer.parseInt(txtSucChua.getText()));
+        try {
+            p.setSucChua(Integer.parseInt(txtSucChua.getText().trim()));
+        } catch (NumberFormatException e) {
+            p.setSucChua(0);
+        }
         p.setLoaiPhong(cboLoaiPhong.getSelectedItem().toString());
         p.setTinhTrang(cboTinhTrang.getSelectedItem().toString());
         return p;
@@ -172,10 +180,22 @@ public class FrmPhongHoc extends JPanel {
     public JButton getBtnXoa()  { return btnXoa; }
     public JButton getBtnLuu()  { return btnLuu; }
     public JButton getBtnHuy()  { return btnHuy; }
+    public JButton getBtnMoi()  { return btnMoi; }
+    public JTextField getTxtMaPhong() { return txtMaPhong; }
+    public JTextField getTxtTenPhong() { return txtTenPhong; }
+    public JTextField getTxtSucChua() { return txtSucChua; }
+    public JPanel getPnlInput() { return pnlInput; }
+
+    public void resetBoLoc() {
+        txtMaPhongTim.setText("");
+        cboLoaiPhongTim.setSelectedIndex(0);
+        cboTinhTrangTim.setSelectedIndex(0);
+    }
 
     public void setCrudButtonState(boolean them, boolean sua, boolean xoa, boolean luu, boolean huy) {
         btnThem.setEnabled(them); btnSua.setEnabled(sua); btnXoa.setEnabled(xoa);
         btnLuu.setEnabled(luu);   btnHuy.setEnabled(huy);
+        btnMoi.setEnabled(true);
     }
 
     public void addBtnTimListener(ActionListener l)     { btnTim.addActionListener(l); }
@@ -187,6 +207,7 @@ public class FrmPhongHoc extends JPanel {
     public void addBtnXoaListener(ActionListener l)     { btnXoa.addActionListener(l); }
     public void addBtnLuuListener(ActionListener l)     { btnLuu.addActionListener(l); }
     public void addBtnHuyListener(ActionListener l)     { btnHuy.addActionListener(l); }
+    public void addBtnMoiListener(ActionListener l)     { btnMoi.addActionListener(l); }
     public void addTableMouseListener(MouseAdapter l)   { table.addMouseListener(l); }
     public void addCboLoaiPhongTimListener(ActionListener l) { cboLoaiPhongTim.addActionListener(l); }
     public void addCboTinhTrangTimListener(ActionListener l) { cboTinhTrangTim.addActionListener(l); }

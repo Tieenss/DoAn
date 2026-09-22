@@ -31,38 +31,79 @@ public class TKBService {
                 .ifPresent(m -> t.setTenMH(m.getTenMH())));
     }
 
+    private void sortTKB(List<TKB> list) {
+        if (list == null || list.isEmpty()) return;
+        java.text.Collator viCollator = java.text.Collator.getInstance(new java.util.Locale("vi", "VN"));
+        list.sort((t1, t2) -> {
+            String n1 = t1.getNamHoc() == null ? "" : t1.getNamHoc().trim();
+            String n2 = t2.getNamHoc() == null ? "" : t2.getNamHoc().trim();
+            int cmpNam = n2.compareToIgnoreCase(n1);
+            if (cmpNam != 0) return cmpNam;
+
+            int hk1 = t1.getHocKy() == null ? 0 : t1.getHocKy();
+            int hk2 = t2.getHocKy() == null ? 0 : t2.getHocKy();
+            int cmpHK = Integer.compare(hk2, hk1);
+            if (cmpHK != 0) return cmpHK;
+
+            String l1 = t1.getMaLop() == null ? "" : t1.getMaLop().trim();
+            String l2 = t2.getMaLop() == null ? "" : t2.getMaLop().trim();
+            int cmpLop = l1.compareToIgnoreCase(l2);
+            if (cmpLop != 0) return cmpLop;
+
+            String tm1 = t1.getTenMH() == null ? "" : t1.getTenMH().trim();
+            String tm2 = t2.getTenMH() == null ? "" : t2.getTenMH().trim();
+            int cmpMon = viCollator.compare(tm1, tm2);
+            if (cmpMon != 0) return cmpMon;
+
+            int thu1 = t1.getThu() == null ? 0 : t1.getThu();
+            int thu2 = t2.getThu() == null ? 0 : t2.getThu();
+            int cmpThu = Integer.compare(thu1, thu2);
+            if (cmpThu != 0) return cmpThu;
+
+            int tiet1 = t1.getTietBatDau() == null ? 0 : t1.getTietBatDau();
+            int tiet2 = t2.getTietBatDau() == null ? 0 : t2.getTietBatDau();
+            return Integer.compare(tiet1, tiet2);
+        });
+    }
+
     public List<TKB> getAllTKB() {
         List<TKB> list = tkbRepository.findAll();
         fillTenMH(list);
+        sortTKB(list);
         return list;
     }
     public List<TKB> getByMaLop(String maLop) {
         List<TKB> list = tkbRepository.findByMaLop(maLop);
         fillTenMH(list);
+        sortTKB(list);
         return list;
     }
 
     public List<TKB> getByMaMH(String maMH) {
         List<TKB> list = tkbRepository.findByMaMH(maMH);
         fillTenMH(list);
+        sortTKB(list);
         return list;
     }
 
     public List<TKB> getByMaPhong(String maPhong) {
         List<TKB> list = tkbRepository.findByMaPhong(maPhong);
         fillTenMH(list);
+        sortTKB(list);
         return list;
     }
 
     public List<TKB> getByMaGV(String maGV) {
         List<TKB> list = tkbRepository.findByMaGV(maGV);
         fillTenMH(list);
+        sortTKB(list);
         return list;
     }
 
     public List<TKB> filter(String maLop, String maMH, Integer thu, String namHoc, Integer hocKy) {
         List<TKB> list = tkbRepository.filterTKB(maLop, maMH, thu, namHoc, hocKy);
         fillTenMH(list);
+        sortTKB(list);
         return list;
     }
 

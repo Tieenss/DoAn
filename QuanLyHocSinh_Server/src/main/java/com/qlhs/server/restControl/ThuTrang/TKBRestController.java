@@ -145,6 +145,12 @@ public class TKBRestController {
         if (tkb.getMaTKB() != null && tkbService.existsByIdTKB(tkb.getMaTKB())) {
             return ResponseEntity.badRequest().body("Mã TKB đã tồn tại");
         }
+        if (tkb.getNamHoc() != null) {
+            tkb.setNamHoc(tkb.getNamHoc().trim());
+            if (!tkb.getNamHoc().matches("^\\d{4}-\\d{4}$")) {
+                return ResponseEntity.badRequest().body("Năm học phải có định dạng YYYY-YYYY và không chứa ký tự đặc biệt!");
+            }
+        }
         String error = tkbService.checkTrungLich(tkb);
         if (error != null) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
@@ -158,6 +164,12 @@ public class TKBRestController {
             return ResponseEntity.notFound().build();
         }
         tkb.setMaTKB(maTKB);
+        if (tkb.getNamHoc() != null) {
+            tkb.setNamHoc(tkb.getNamHoc().trim());
+            if (!tkb.getNamHoc().matches("^\\d{4}-\\d{4}$")) {
+                return ResponseEntity.badRequest().body("Năm học phải có định dạng YYYY-YYYY và không chứa ký tự đặc biệt!");
+            }
+        }
         String error = tkbService.checkTrungLich(tkb);
         if (error != null) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(error);

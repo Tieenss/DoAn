@@ -13,7 +13,7 @@ public class PhongHocService {
     @Autowired
     private PhongHocRepository phongHocRepository;
 
-    public List<PhongHoc> getAllPH() { return phongHocRepository.findAll(); }
+    public List<PhongHoc> getAllPH() { return phongHocRepository.findAllByOrderByMaPhongAsc(); }
 
     public Optional<PhongHoc> getByIdPH(String maPhong) { return phongHocRepository.findById(maPhong); }
 

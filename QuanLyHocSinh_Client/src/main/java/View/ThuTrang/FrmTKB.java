@@ -33,6 +33,7 @@ public class FrmTKB extends JPanel {
 
     private JButton btnThem, btnSua, btnXoa, btnLuu, btnHuy, btnMoi, btnXuatExcel;
     private JPanel pnlView;
+    private JPanel pnlInput;
     private boolean isUpdatingForm = false;
 
     public FrmTKB() {
@@ -98,40 +99,41 @@ public class FrmTKB extends JPanel {
                 new String[]{"ID", "Lớp", "Mã MH", "Tên MH", "Tên GV", "Phòng", "Thứ", "Tiết BD", "Tiết KT", "Năm Học", "Học Kỳ"}, 0
         );
         table = new JTable(model);
+        // Ẩn cột "Mã MH" (cột 2) và cột "ID" (cột 0) khỏi giao diện hiển thị
         table.removeColumn(table.getColumnModel().getColumn(2));
+        table.removeColumn(table.getColumnModel().getColumn(0));
+
         TableSortHelper.enableTableSorting(table);
         table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         table.setRowHeight(26);
         table.getTableHeader().setDefaultRenderer(new TienIch.CustomTableHeaderRenderer());
 
-        table.getColumnModel().getColumn(0).setPreferredWidth(45);
-        table.getColumnModel().getColumn(1).setPreferredWidth(70);
-        table.getColumnModel().getColumn(2).setPreferredWidth(130);
-        table.getColumnModel().getColumn(3).setPreferredWidth(140);
-        table.getColumnModel().getColumn(4).setPreferredWidth(70);
-        table.getColumnModel().getColumn(5).setPreferredWidth(50);
-        table.getColumnModel().getColumn(6).setPreferredWidth(60);
-        table.getColumnModel().getColumn(7).setPreferredWidth(60);
-        table.getColumnModel().getColumn(8).setPreferredWidth(90);
-        table.getColumnModel().getColumn(9).setPreferredWidth(65);
+        table.getColumnModel().getColumn(0).setPreferredWidth(75);  // Lớp
+        table.getColumnModel().getColumn(1).setPreferredWidth(140); // Tên MH
+        table.getColumnModel().getColumn(2).setPreferredWidth(150); // Tên GV
+        table.getColumnModel().getColumn(3).setPreferredWidth(80);  // Phòng
+        table.getColumnModel().getColumn(4).setPreferredWidth(55);  // Thứ
+        table.getColumnModel().getColumn(5).setPreferredWidth(65);  // Tiết BD
+        table.getColumnModel().getColumn(6).setPreferredWidth(65);  // Tiết KT
+        table.getColumnModel().getColumn(7).setPreferredWidth(100); // Năm Học
+        table.getColumnModel().getColumn(8).setPreferredWidth(70);  // Học Kỳ
         
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-        table.getColumnModel().getColumn(0).setCellRenderer(centerRenderer); // ID
-        table.getColumnModel().getColumn(1).setCellRenderer(centerRenderer); // Lớp
-        table.getColumnModel().getColumn(4).setCellRenderer(centerRenderer); // Phòng
-        table.getColumnModel().getColumn(5).setCellRenderer(centerRenderer); // Thứ
-        table.getColumnModel().getColumn(6).setCellRenderer(centerRenderer); // Tiết BD
-        table.getColumnModel().getColumn(7).setCellRenderer(centerRenderer); // Tiết KT
-        table.getColumnModel().getColumn(8).setCellRenderer(centerRenderer); // Năm Học
-        table.getColumnModel().getColumn(9).setCellRenderer(centerRenderer); // Học Kỳ
+        table.getColumnModel().getColumn(0).setCellRenderer(centerRenderer); // Lớp
+        table.getColumnModel().getColumn(3).setCellRenderer(centerRenderer); // Phòng
+        table.getColumnModel().getColumn(4).setCellRenderer(centerRenderer); // Thứ
+        table.getColumnModel().getColumn(5).setCellRenderer(centerRenderer); // Tiết BD
+        table.getColumnModel().getColumn(6).setCellRenderer(centerRenderer); // Tiết KT
+        table.getColumnModel().getColumn(7).setCellRenderer(centerRenderer); // Năm Học
+        table.getColumnModel().getColumn(8).setCellRenderer(centerRenderer); // Học Kỳ
 
         add(new JScrollPane(table), BorderLayout.CENTER);
 
         JPanel pnlSouth = new JPanel(new BorderLayout());
         pnlSouth.setBorder(new TitledBorder("Thêm / Cập nhật TKB"));
 
-        JPanel pnlInput = new JPanel(new GridLayout(5, 4, 10, 8));
+        pnlInput = new JPanel(new GridLayout(5, 4, 10, 8));
 
         cboMaLop = new JComboBox<>();
         TienIch.ComboBoxUtil.makeSearchableAndEditable(cboMaLop);
@@ -233,11 +235,48 @@ public class FrmTKB extends JPanel {
         for (Map<String, String> m : list) cboMaPhong.addItem(m.get("ten"));
     }
 
-    private String getMaFromTen(List<Map<String, String>> list, String ten) {
-        return list.stream()
-                .filter(m -> m.get("ten").equals(ten))
-                .map(m -> m.get("ma"))
-                .findFirst().orElse("");
+    private String getMaFromTen(List<Map<String, String>> list, String val) {
+        if (val == null) return "";
+        String s = val.trim();
+        if (s.isEmpty()) return "";
+        if (list == null || list.isEmpty()) return s;
+
+        // 1. So khớp chính xác theo tên
+        for (Map<String, String> m : list) {
+            String ten = m.getOrDefault("ten", "").trim();
+            if (s.equalsIgnoreCase(ten)) {
+                return m.getOrDefault("ma", s);
+            }
+        }
+        // 2. So khớp chính xác theo mã
+        for (Map<String, String> m : list) {
+            String ma = m.getOrDefault("ma", "").trim();
+            if (s.equalsIgnoreCase(ma)) {
+                return ma;
+            }
+        }
+        // 3. So khớp định dạng "Mã - Tên" hoặc "Tên (Mã)"
+        for (Map<String, String> m : list) {
+            String ma = m.getOrDefault("ma", "").trim();
+            String ten = m.getOrDefault("ten", "").trim();
+            if (s.equalsIgnoreCase(ma + " - " + ten) || s.equalsIgnoreCase(ten + " (" + ma + ")")) {
+                return ma;
+            }
+        }
+        // 4. Fallback: trả về chính giá trị đã nhập
+        return s;
+    }
+
+    private String getTenFromMa(List<Map<String, String>> list, String ma) {
+        if (ma == null) return "";
+        String s = ma.trim();
+        if (s.isEmpty() || list == null) return s;
+        for (Map<String, String> m : list) {
+            if (s.equalsIgnoreCase(m.getOrDefault("ma", "").trim())) {
+                return m.getOrDefault("ten", s);
+            }
+        }
+        return s;
     }
 
     public TKB getTKBInput() {
@@ -261,12 +300,14 @@ public class FrmTKB extends JPanel {
         java.util.Set<String> namHocSet = new java.util.TreeSet<>(java.util.Collections.reverseOrder());
         for (TKB t : list) {
             String tenGV = (danhSachGV != null) ? danhSachGV.stream()
-                    .filter(m -> m.get("ma").equals(t.getMaGV()))
+                    .filter(m -> m.get("ma").equalsIgnoreCase(t.getMaGV()))
                     .map(m -> m.get("ten")).findFirst().orElse(t.getMaGV()) : t.getMaGV();
+
+            String tenPhong = getTenFromMa(danhSachPhong, t.getMaPhong());
 
             model.addRow(new Object[]{
                     t.getMaTKB(), t.getMaLop(), t.getMaMH(), t.getTenMH(),
-                    tenGV, t.getMaPhong(), t.getThu(), t.getTietBatDau(), t.getTietKetThuc(),
+                    tenGV, tenPhong, t.getThu(), t.getTietBatDau(), t.getTietKetThuc(),
                     t.getNamHoc(), t.getHocKy()
             });
 
@@ -296,15 +337,66 @@ public class FrmTKB extends JPanel {
         try {
             int row = table.convertRowIndexToModel(viewRow);
 
-            String tenLop = model.getValueAt(row, 1).toString();
+            String lopVal = model.getValueAt(row, 1).toString();
             String tenMH = model.getValueAt(row, 3).toString();
             String tenGV = model.getValueAt(row, 4).toString();
-            String tenPhong = model.getValueAt(row, 5).toString();
+            String phongVal = model.getValueAt(row, 5).toString();
 
-            cboMaLop.setSelectedItem(tenLop);
-            cboMaMH.setSelectedItem(tenMH);
-            cboMaGV.setSelectedItem(tenGV);
-            cboMaPhong.setSelectedItem(tenPhong);
+            // Chọn đúng item trong cboMaLop
+            boolean matchedLop = false;
+            if (danhSachLop != null) {
+                for (Map<String, String> m : danhSachLop) {
+                    if (lopVal.equalsIgnoreCase(m.getOrDefault("ten", "").trim())
+                            || lopVal.equalsIgnoreCase(m.getOrDefault("ma", "").trim())) {
+                        cboMaLop.setSelectedItem(m.get("ten"));
+                        matchedLop = true;
+                        break;
+                    }
+                }
+            }
+            if (!matchedLop) cboMaLop.setSelectedItem(lopVal);
+
+            // Chọn đúng item trong cboMaMH
+            boolean matchedMH = false;
+            if (danhSachMon != null) {
+                for (Map<String, String> m : danhSachMon) {
+                    if (tenMH.equalsIgnoreCase(m.getOrDefault("ten", "").trim())
+                            || tenMH.equalsIgnoreCase(m.getOrDefault("ma", "").trim())) {
+                        cboMaMH.setSelectedItem(m.get("ten"));
+                        matchedMH = true;
+                        break;
+                    }
+                }
+            }
+            if (!matchedMH) cboMaMH.setSelectedItem(tenMH);
+
+            // Chọn đúng item trong cboMaGV
+            boolean matchedGV = false;
+            if (danhSachGV != null) {
+                for (Map<String, String> m : danhSachGV) {
+                    if (tenGV.equalsIgnoreCase(m.getOrDefault("ten", "").trim())
+                            || tenGV.equalsIgnoreCase(m.getOrDefault("ma", "").trim())) {
+                        cboMaGV.setSelectedItem(m.get("ten"));
+                        matchedGV = true;
+                        break;
+                    }
+                }
+            }
+            if (!matchedGV) cboMaGV.setSelectedItem(tenGV);
+
+            // Chọn đúng item trong cboMaPhong
+            boolean matchedPhong = false;
+            if (danhSachPhong != null) {
+                for (Map<String, String> m : danhSachPhong) {
+                    if (phongVal.equalsIgnoreCase(m.getOrDefault("ten", "").trim())
+                            || phongVal.equalsIgnoreCase(m.getOrDefault("ma", "").trim())) {
+                        cboMaPhong.setSelectedItem(m.get("ten"));
+                        matchedPhong = true;
+                        break;
+                    }
+                }
+            }
+            if (!matchedPhong) cboMaPhong.setSelectedItem(phongVal);
             cboThuThem.setSelectedItem(Integer.parseInt(model.getValueAt(row, 6).toString()));
             cboTietBD.setSelectedItem(Integer.parseInt(model.getValueAt(row, 7).toString()));
             cboTietKT.setSelectedItem(Integer.parseInt(model.getValueAt(row, 8).toString()));
@@ -378,6 +470,15 @@ public class FrmTKB extends JPanel {
     }
 
     public JTable getTable() { return table; }
+    public DefaultTableModel getModel() { return model; }
+
+    public String getSelectedMaTKB() {
+        int viewRow = table.getSelectedRow();
+        if (viewRow == -1) return null;
+        int modelRow = table.convertRowIndexToModel(viewRow);
+        Object val = model.getValueAt(modelRow, 0);
+        return val != null ? val.toString() : null;
+    }
     public String getLocMaLop() { return cboLocMaLop.getSelectedItem().toString(); }
     public String getLocMon() { return txtLocMon.getText().trim(); }
     public int getLocThu() {
@@ -432,6 +533,16 @@ public class FrmTKB extends JPanel {
         btnThem.setEnabled(them); btnSua.setEnabled(sua); btnXoa.setEnabled(xoa);
         btnLuu.setEnabled(luu); btnHuy.setEnabled(huy);
     }
+
+    public void resetBoLoc() {
+        if (cboLocMaLop != null && cboLocMaLop.getItemCount() > 0) cboLocMaLop.setSelectedIndex(0);
+        if (txtLocMon != null) txtLocMon.setText("");
+        if (cboLocThu != null && cboLocThu.getItemCount() > 0) cboLocThu.setSelectedIndex(0);
+        if (cboLocNamHoc != null && cboLocNamHoc.getItemCount() > 0) cboLocNamHoc.setSelectedIndex(0);
+        if (cboLocHocKy != null && cboLocHocKy.getItemCount() > 0) cboLocHocKy.setSelectedIndex(0);
+    }
+
+    public JPanel getPnlInput() { return pnlInput; }
 
     public void addBtnXemDanhSachListener(ActionListener l) { btnXemDanhSach.addActionListener(l); }
     public void addBtnLocTimKiemListener(ActionListener l) { btnLocTimKiem.addActionListener(l); }

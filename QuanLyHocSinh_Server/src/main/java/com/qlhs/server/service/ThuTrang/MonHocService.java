@@ -13,7 +13,7 @@ public class MonHocService {
     @Autowired
     private MonHocRepository monHocRepository;
 
-    public List<MonHoc> getAllMH() { return monHocRepository.findAll(); }
+    public List<MonHoc> getAllMH() { return monHocRepository.findAllByOrderByMaMHAsc(); }
 
     public Optional<MonHoc> getByIdMH(String maMH) { return monHocRepository.findById(maMH); }
 
