@@ -11,6 +11,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 public class QuanLyHocSinhPanel extends JPanel {
@@ -20,9 +21,9 @@ public class QuanLyHocSinhPanel extends JPanel {
     private JTable tableHS;
     private DefaultTableModel tableModel;
 
-    private JTextField txtMaHS, txtHoTen, txtDiaChi, txtNienKhoa;
+    private JTextField txtMaHS, txtHoTen, txtDiaChi;
  
-    private JSpinner spNgaySinh; 
+    private JSpinner spNgaySinh, spNamBatDau, spNamKetThuc;
     
     private JComboBox<String> cboGioiTinh,cboMaLop, cboMaDT;
 
@@ -177,11 +178,39 @@ public class QuanLyHocSinhPanel extends JPanel {
         pnlRight.add(cboMaDT, gbc);
 
         y++;
-        gbc.gridx = 0; gbc.gridy = y;
+        gbc.gridx = 0;
+        gbc.gridy = y;
         pnlRight.add(new JLabel("Niên khóa:"), gbc);
+
         gbc.gridx = 1;
-        txtNienKhoa = new JTextField(20);
-        pnlRight.add(txtNienKhoa, gbc);
+
+        JPanel pnlNienKhoa = new JPanel(
+                new FlowLayout(FlowLayout.LEFT, 5, 0)
+        );
+
+        int namHienTai = Calendar.getInstance().get(Calendar.YEAR);
+
+        spNamBatDau = new JSpinner(
+                new SpinnerNumberModel(namHienTai, 2000, 2100, 1)
+        );
+
+        spNamKetThuc = new JSpinner(
+                new SpinnerNumberModel(namHienTai + 3, 2000, 2100, 1)
+        );
+
+        spNamBatDau.setEditor(
+                new JSpinner.NumberEditor(spNamBatDau, "####")
+        );
+
+        spNamKetThuc.setEditor(
+                new JSpinner.NumberEditor(spNamKetThuc, "####")
+        );
+
+        pnlNienKhoa.add(spNamBatDau);
+        pnlNienKhoa.add(new JLabel("-"));
+        pnlNienKhoa.add(spNamKetThuc);
+
+        pnlRight.add(pnlNienKhoa, gbc);
 
         pnlSouth.add(pnlInput, BorderLayout.CENTER);
 
@@ -229,8 +258,16 @@ public class QuanLyHocSinhPanel extends JPanel {
 
     private void them() {
         clearForm();
+
         isThem = true;
+
         setFormEnabled(true);
+
+        int namHienTai = Calendar.getInstance().get(Calendar.YEAR);
+
+        spNamBatDau.setValue(namHienTai);
+        spNamKetThuc.setValue(namHienTai + 3);
+
         txtMaHS.requestFocus();
     }
 
@@ -248,25 +285,37 @@ public class QuanLyHocSinhPanel extends JPanel {
             cboMaDT.setEnabled(false);
         }
     }
-    
+
     private void luu() {
-  
-        if(txtMaHS.getText().isEmpty() || txtHoTen.getText().isEmpty()){
-            JOptionPane.showMessageDialog(this, "Vui lòng nhập Mã HS và Họ Tên!");
+
+        if (!validateThongTinHocSinh()) {
+            return;
+        }
+
+        if (!validateNienKhoa()) {
             return;
         }
 
         HocSinh hs = getHocSinhFromForm();
-        if(hs == null) return; 
 
-        boolean ok = isThem ? controller.them(hs) : controller.sua(hs);
+        if (hs == null) {
+            return;
+        }
+
+        boolean ok = isThem
+                ? controller.them(hs)
+                : controller.sua(hs);
 
         if (ok) {
             JOptionPane.showMessageDialog(this, "Lưu thành công");
+
             controller.loadTable(tableModel);
+
             setFormEnabled(false);
             clearForm();
-            isThem = false; 
+
+            isThem = false;
+
         } else {
             JOptionPane.showMessageDialog(
                     this,
@@ -283,10 +332,26 @@ public class QuanLyHocSinhPanel extends JPanel {
              return;
         }
         if (JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn xóa?", "Xác nhận", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-             if (controller.xoa(txtMaHS.getText())) {
-                JOptionPane.showMessageDialog(this, "Xóa thành công");
+            if (controller.xoa(txtMaHS.getText())) {
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Xóa thành công",
+                        "Thông báo",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+
                 controller.loadTable(tableModel);
                 clearForm();
+
+            } else {
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Xóa thất bại! Không thể xóa học sinh.",
+                        "Lỗi",
+                        JOptionPane.ERROR_MESSAGE
+                );
             }
         }
     }
@@ -304,7 +369,8 @@ public class QuanLyHocSinhPanel extends JPanel {
         txtDiaChi.setEnabled(enabled);
         cboMaLop.setEnabled(enabled);
         cboMaDT.setEnabled(enabled);
-        txtNienKhoa.setEnabled(enabled);
+        spNamBatDau.setEnabled(enabled);
+        spNamKetThuc.setEnabled(enabled);
 
         btnLuu.setEnabled(enabled);
         btnHuy.setEnabled(enabled);
@@ -318,17 +384,17 @@ public class QuanLyHocSinhPanel extends JPanel {
 
         String keyword = txtTimKiem.getText().trim();
 
-        if (keyword.isEmpty()) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Vui lòng nhập mã hoặc tên học sinh cần tìm!",
-                    "Thông báo",
-                    JOptionPane.WARNING_MESSAGE
-            );
-
-            txtTimKiem.requestFocus();
-            return;
-        }
+//        if (keyword.isEmpty()) {
+//            JOptionPane.showMessageDialog(
+//                    this,
+//                    "Vui lòng nhập mã hoặc tên học sinh cần tìm!",
+//                    "Thông báo",
+//                    JOptionPane.WARNING_MESSAGE
+//            );
+//
+//            txtTimKiem.requestFocus();
+//            return;
+//        }
 
         String nienKhoa = cboLocNienKhoa.getSelectedItem() != null ? cboLocNienKhoa.getSelectedItem().toString() : "";
 
@@ -352,6 +418,220 @@ public class QuanLyHocSinhPanel extends JPanel {
                     JOptionPane.ERROR_MESSAGE
             );
         }
+    }
+
+    private boolean validateThongTinHocSinh() {
+
+        // Validate Mã HS
+        String maHS = txtMaHS.getText().trim();
+
+        if (maHS.isEmpty()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Vui lòng nhập Mã HS!",
+                    "Lỗi dữ liệu",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+            txtMaHS.requestFocus();
+            return false;
+        }
+
+        if (maHS.contains(" ")) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Mã HS không được chứa khoảng trắng!",
+                    "Lỗi dữ liệu",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+            txtMaHS.requestFocus();
+            return false;
+        }
+
+        if (maHS.length() > 10) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Mã HS không được vượt quá 10 ký tự!",
+                    "Lỗi dữ liệu",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+            txtMaHS.requestFocus();
+            return false;
+        }
+
+        // Validate Họ tên
+        String hoTen = txtHoTen.getText().trim();
+
+        if (hoTen.isEmpty()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Vui lòng nhập Họ tên!",
+                    "Lỗi dữ liệu",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+            txtHoTen.requestFocus();
+            return false;
+        }
+
+        if (hoTen.length() > 50) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Họ tên không được vượt quá 50 ký tự!",
+                    "Lỗi dữ liệu",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+            txtHoTen.requestFocus();
+            return false;
+        }
+
+        // Validate ngày sinh
+        if (!validateNgaySinh()) {
+            return false;
+        }
+
+        // Validate giới tính
+        Object gioiTinh = cboGioiTinh.getSelectedItem();
+
+        if (gioiTinh == null
+                || gioiTinh.toString().trim().isEmpty()
+                || (!gioiTinh.toString().equals("Nam")
+                && !gioiTinh.toString().equals("Nữ"))) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Vui lòng chọn Giới tính hợp lệ!\n"
+                            + "Chỉ được chọn Nam hoặc Nữ.",
+                    "Lỗi dữ liệu",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+            cboGioiTinh.requestFocus();
+            return false;
+        }
+
+        // Validate địa chỉ
+        String diaChi = txtDiaChi.getText().trim();
+
+        if (diaChi.length() > 200) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Địa chỉ không được vượt quá 200 ký tự!",
+                    "Lỗi dữ liệu",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+            txtDiaChi.requestFocus();
+            return false;
+        }
+
+        // Validate mã lớp
+        if (!isValidComboValue(cboMaLop)) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Vui lòng chọn Mã lớp hợp lệ!\n"
+                            + "Mã lớp phải được chọn từ danh sách.",
+                    "Lỗi dữ liệu",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+            cboMaLop.requestFocus();
+            return false;
+        }
+
+        // Validate mã đối tượng
+        if (!isValidComboValue(cboMaDT)) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Vui lòng chọn Mã đối tượng hợp lệ!\n"
+                            + "Mã đối tượng phải được chọn từ danh sách.",
+                    "Lỗi dữ liệu",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+            cboMaDT.requestFocus();
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean isValidComboValue(JComboBox<String> comboBox) {
+
+        Object selected = comboBox.getSelectedItem();
+
+        if (selected == null || selected.toString().trim().isEmpty()) {
+            return false;
+        }
+
+        String value = selected.toString().trim();
+
+        for (int i = 0; i < comboBox.getItemCount(); i++) {
+
+            String item = comboBox.getItemAt(i);
+
+            if (item != null && item.trim().equalsIgnoreCase(value)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean validateNgaySinh() {
+
+        Date ngaySinh = (Date) spNgaySinh.getValue();
+        Date homNay = new Date();
+
+        if (ngaySinh.after(homNay)) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Ngày sinh không được lớn hơn ngày hiện tại!",
+                    "Lỗi dữ liệu",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+            spNgaySinh.requestFocus();
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean validateNienKhoa() {
+
+        int namBatDau = (Integer) spNamBatDau.getValue();
+        int namKetThuc = (Integer) spNamKetThuc.getValue();
+
+        if (namKetThuc != namBatDau + 3) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Niên khóa không hợp lệ!\n"
+                            + "Niên khóa THPT phải kéo dài 3 năm.\n\n"
+                            + "Ví dụ: 2025 - 2028",
+                    "Lỗi dữ liệu",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+            spNamKetThuc.requestFocus();
+
+            return false;
+        }
+
+        return true;
     }
 
     private void hienThiTatCa() {
@@ -390,8 +670,32 @@ public class QuanLyHocSinhPanel extends JPanel {
             txtDiaChi.setText(tableModel.getValueAt(r, 4).toString());
             cboMaLop.setSelectedItem(tableModel.getValueAt(r, 5).toString());
             cboMaDT.setSelectedItem(tableModel.getValueAt(r, 6).toString());
-            txtNienKhoa.setText(tableModel.getValueAt(r, 7) != null ? tableModel.getValueAt(r, 7).toString() : "");
+            Object value = tableModel.getValueAt(r, 7);
 
+            if (value != null) {
+
+                String nienKhoa = value.toString().trim();
+
+                try {
+                    String[] parts = nienKhoa.split("-");
+
+                    if (parts.length == 2) {
+
+                        int namBatDau = Integer.parseInt(parts[0]);
+                        int namKetThuc = Integer.parseInt(parts[1]);
+
+                        spNamBatDau.setValue(namBatDau);
+                        spNamKetThuc.setValue(namKetThuc);
+                    }
+
+                } catch (NumberFormatException e) {
+
+                    int namHienTai = Calendar.getInstance().get(Calendar.YEAR);
+
+                    spNamBatDau.setValue(namHienTai);
+                    spNamKetThuc.setValue(namHienTai + 3);
+                }
+            }
         }
     }
 
@@ -403,15 +707,20 @@ public class QuanLyHocSinhPanel extends JPanel {
             String strNgaySinh = sdf.format(d);
 
             HocSinh hs = new HocSinh(
-                txtMaHS.getText(),
-                txtHoTen.getText(),
-                strNgaySinh,
-                cboGioiTinh.getSelectedItem().toString(),
-                txtDiaChi.getText(),
-                cboMaLop.getSelectedItem().toString(),
-                cboMaDT.getSelectedItem().toString()
+                    txtMaHS.getText().trim(),
+                    txtHoTen.getText().trim(),
+                    strNgaySinh,
+                    cboGioiTinh.getSelectedItem().toString().trim(),
+                    txtDiaChi.getText().trim(),
+                    cboMaLop.getSelectedItem().toString().trim(),
+                    cboMaDT.getSelectedItem().toString().trim()
             );
-            hs.setNienKhoa(txtNienKhoa.getText());
+            int namBatDau = (Integer) spNamBatDau.getValue();
+            int namKetThuc = (Integer) spNamKetThuc.getValue();
+
+            String nienKhoa = namBatDau + "-" + namKetThuc;
+
+            hs.setNienKhoa(nienKhoa);
             return hs;
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Lỗi định dạng ngày tháng!");
@@ -427,7 +736,10 @@ public class QuanLyHocSinhPanel extends JPanel {
         txtDiaChi.setText("");
         cboMaLop.setSelectedIndex(-1);
         cboMaDT.setSelectedIndex(-1);
-        txtNienKhoa.setText("");
+        int namHienTai = Calendar.getInstance().get(Calendar.YEAR);
+
+        spNamBatDau.setValue(namHienTai);
+        spNamKetThuc.setValue(namHienTai + 3);
 
     }
     
@@ -454,7 +766,30 @@ public class QuanLyHocSinhPanel extends JPanel {
             txtDiaChi.setText(hs.getDiaChi());
             cboMaLop.setSelectedItem(hs.getMaLop());
             cboMaDT.setSelectedItem(hs.getMaDT());
-            txtNienKhoa.setText(hs.getNienKhoa());
+            String nienKhoa = hs.getNienKhoa();
+
+            if (nienKhoa != null && !nienKhoa.trim().isEmpty()) {
+
+                try {
+                    String[] parts = nienKhoa.trim().split("-");
+
+                    if (parts.length == 2) {
+
+                        int namBatDau = Integer.parseInt(parts[0]);
+                        int namKetThuc = Integer.parseInt(parts[1]);
+
+                        spNamBatDau.setValue(namBatDau);
+                        spNamKetThuc.setValue(namKetThuc);
+                    }
+
+                } catch (NumberFormatException e) {
+
+                    int namHienTai = Calendar.getInstance().get(Calendar.YEAR);
+
+                    spNamBatDau.setValue(namHienTai);
+                    spNamKetThuc.setValue(namHienTai + 3);
+                }
+            }
         }
     }
 }

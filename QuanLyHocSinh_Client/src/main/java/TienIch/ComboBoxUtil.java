@@ -64,6 +64,43 @@ public class ComboBoxUtil {
                     });
                 }
             });
+
+            /*
+             * Khi mất focus:
+             * Nếu nội dung đang nhập không tồn tại trong danh sách
+             * thì xóa nội dung đó và đưa ComboBox về trạng thái chưa chọn.
+             */
+            textField.addFocusListener(new java.awt.event.FocusAdapter() {
+                @Override
+                public void focusLost(java.awt.event.FocusEvent e) {
+
+                    String text = textField.getText().trim();
+
+                    if (text.isEmpty()) {
+                        return;
+                    }
+
+                    boolean exists = false;
+
+                    for (int i = 0; i < comboBox.getItemCount(); i++) {
+
+                        Object item = comboBox.getItemAt(i);
+
+                        if (item != null
+                                && item.toString().equalsIgnoreCase(text)) {
+
+                            exists = true;
+                            comboBox.setSelectedItem(item);
+                            break;
+                        }
+                    }
+
+                    if (!exists) {
+                        comboBox.setSelectedItem(null);
+                        textField.setText("");
+                    }
+                }
+            });
         }
     }
 }
