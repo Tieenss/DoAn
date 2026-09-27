@@ -3,6 +3,7 @@ package com.qlhs.server.restControl.ThuTrang;
 import com.qlhs.server.entity.MonHoc;
 import com.qlhs.server.service.ThuTrang.MonHocService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -82,11 +83,27 @@ public class MonHocRestController {
         return ResponseEntity.ok(monHocService.saveMH(monHoc));
     }
     @DeleteMapping("/{maMH}")
-    public ResponseEntity<Void> deleteMH(@PathVariable String maMH) {
+    public ResponseEntity<?> deleteMH(@PathVariable String maMH) {
         if (!monHocService.existsMH(maMH)) {
             return ResponseEntity.notFound().build();
         }
-        monHocService.deleteMH(maMH);
-        return ResponseEntity.ok().build();
+        if (monHocService.hasTKB(maMH)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Không thể xóa môn học này vì đang có dữ liệu trong Thời khóa biểu!");
+        }
+        if (monHocService.hasDiem(maMH)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Không thể xóa môn học này vì đã có dữ liệu Điểm số liên quan!");
+        }
+        try {
+            monHocService.deleteMH(maMH);
+            return ResponseEntity.ok().build();
+        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Không thể xóa môn học này vì đã có dữ liệu liên quan (Điểm số hoặc Thời khóa biểu)!");
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Lỗi khi xóa môn học: " + ex.getMessage());
+        }
     }
 }

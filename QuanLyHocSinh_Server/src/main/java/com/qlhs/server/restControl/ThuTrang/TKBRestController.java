@@ -178,11 +178,19 @@ public class TKBRestController {
     }
 
     @DeleteMapping("/{maTKB}")
-    public ResponseEntity<TKB> delete(@PathVariable Integer maTKB) {
+    public ResponseEntity<?> delete(@PathVariable Integer maTKB) {
         if (!tkbService.existsByIdTKB(maTKB)) {
             return ResponseEntity.notFound().build();
         }
-        tkbService.delete(maTKB);
-        return ResponseEntity.ok().build();
+        try {
+            tkbService.delete(maTKB);
+            return ResponseEntity.ok().build();
+        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Không thể xóa lịch thời khóa biểu này vì có dữ liệu ràng buộc!");
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Lỗi khi xóa thời khóa biểu: " + ex.getMessage());
+        }
     }
 }

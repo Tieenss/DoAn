@@ -13,6 +13,30 @@ public class MonHocService {
     @Autowired
     private MonHocRepository monHocRepository;
 
+    @Autowired
+    private com.qlhs.server.repository.ThuTrang.TKBRepository tkbRepository;
+
+    @Autowired
+    private com.qlhs.server.repository.Tien.DiemRepository diemRepository;
+
+    public boolean hasTKB(String maMH) {
+        if (maMH == null || maMH.trim().isEmpty()) return false;
+        try {
+            return !tkbRepository.findByMaMH(maMH.trim()).isEmpty();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean hasDiem(String maMH) {
+        if (maMH == null || maMH.trim().isEmpty()) return false;
+        try {
+            return !diemRepository.findDiemByFilter("", maMH.trim(), 0, "").isEmpty();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public List<MonHoc> getAllMH() { return monHocRepository.findAllByOrderByMaMHAsc(); }
 
     public Optional<MonHoc> getByIdMH(String maMH) { return monHocRepository.findById(maMH); }

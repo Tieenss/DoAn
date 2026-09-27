@@ -14,11 +14,13 @@ public interface PhongHocRepository extends JpaRepository<PhongHoc, String> {
     List<PhongHoc> findAllByOrderByMaPhongAsc();
 
     @Query("SELECT p FROM PhongHoc p WHERE " +
-            "(:ma IS NULL OR :ma = '' OR LOWER(p.maPhong) LIKE LOWER(CONCAT('%', :ma, '%'))) AND " +
+            "(:keyword IS NULL OR :keyword = '' " +
+            " OR LOWER(p.maPhong) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            " OR LOWER(p.tenPhong) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
             "(:loai IS NULL OR :loai = '' OR p.loaiPhong = :loai) AND " +
             "(:tinhTrang IS NULL OR :tinhTrang = '' OR p.tinhTrang = :tinhTrang) " +
             "ORDER BY p.maPhong ASC")
-    List<PhongHoc> searchPhongHoc(@Param("ma") String ma,
+    List<PhongHoc> searchPhongHoc(@Param("keyword") String keyword,
                                   @Param("loai") String loai,
                                   @Param("tinhTrang") String tinhTrang);
 }

@@ -88,8 +88,15 @@ public class MonHocApiClient {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/" + maMH))
                 .DELETE().build();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         if (response.statusCode() == 404) throw new Exception("Không tìm thấy môn học");
+        if (response.statusCode() != 200) {
+            String msg = response.body();
+            if (msg == null || msg.trim().isEmpty()) {
+                msg = "Không thể xóa môn học (Mã lỗi: " + response.statusCode() + ")!";
+            }
+            throw new Exception(msg);
+        }
     }
 
     public List<MonHoc> search(String keyword) throws Exception {

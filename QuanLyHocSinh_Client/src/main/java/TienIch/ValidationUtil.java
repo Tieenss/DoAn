@@ -4,8 +4,8 @@ import java.util.regex.Pattern;
 
 public class ValidationUtil {
 
-    // Chỉ cho phép chữ cái (không dấu) và số: ví dụ MH01, LAB1, P101
-    private static final Pattern MA_PATTERN = Pattern.compile("^[a-zA-Z0-9]+$");
+    // Cho phép chữ cái (không dấu), số và dấu gạch: ví dụ MH01, LAB1, P101, TN-HS
+    private static final Pattern MA_PATTERN = Pattern.compile("^[a-zA-Z0-9_-]+$");
 
     // Cho phép chữ cái tiếng Việt (có dấu \p{L}), chữ số và khoảng trắng: ví dụ Toán học, Phòng Lab 1
     private static final Pattern TEN_PATTERN = Pattern.compile("^[a-zA-Z0-9\\p{L} ]+$");

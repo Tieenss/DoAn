@@ -63,6 +63,27 @@ public class PhongHocController {
         view.addCboLoaiPhongTimListener(e -> doSearch.run());
         view.addCboTinhTrangTimListener(e -> doSearch.run());
 
+        Runnable updateAutoMaPhong = () -> {
+            if (!editMode[0]) {
+                String ten = view.getTxtTenPhong().getText();
+                String loai = view.getLoaiPhongSelected();
+                List<String> existing = view.getAllMaPhongFromTable();
+                String autoMa = TienIch.AutoCodeGenerator.generateMaPhong(ten, loai, existing);
+                view.setMaPhong(autoMa);
+            }
+        };
+
+        view.addTenPhongLiveListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { updateAutoMaPhong.run(); }
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { updateAutoMaPhong.run(); }
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { updateAutoMaPhong.run(); }
+        });
+
+        view.addCboLoaiPhongInputListener(e -> updateAutoMaPhong.run());
+
         Runnable restoreOrderIfNeeded = () -> {
             if (isCustomOrder) {
                 loadData();
@@ -103,7 +124,8 @@ public class PhongHocController {
                     editMode[0] = false;
                     setIdleState.run();
                 } catch (Exception ex) {
-                    view.showMessage("Lỗi xóa: " + ex.getMessage());
+                    String msg = ex.getMessage();
+                    view.showMessage((msg != null && (msg.startsWith("Không") || msg.startsWith("Lỗi"))) ? msg : "Lỗi xóa: " + msg);
                 }
             }
         });
@@ -112,6 +134,12 @@ public class PhongHocController {
             try {
                 PhongHoc p = view.getPhongHocInput();
                 if (!editMode[0]) {
+                    if (p.getMaPhong() == null || p.getMaPhong().trim().isEmpty()) {
+                        String autoMa = TienIch.AutoCodeGenerator.generateMaPhong(
+                                p.getTenPhong(), p.getLoaiPhong(), view.getAllMaPhongFromTable());
+                        p.setMaPhong(autoMa);
+                        view.setMaPhong(autoMa);
+                    }
                     String errMa = ValidationUtil.validateMa(p.getMaPhong(), "Mã phòng học");
                     if (errMa != null) {
                         view.showMessage(errMa);
