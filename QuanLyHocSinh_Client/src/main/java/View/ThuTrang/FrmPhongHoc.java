@@ -44,8 +44,8 @@ public class FrmPhongHoc extends JPanel {
         JPanel pnlSearch = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 5));
         pnlSearch.setBorder(new TitledBorder("Tìm kiếm"));
 
-        pnlSearch.add(new JLabel("Mã phòng:"));
-        txtMaPhongTim = new JTextField(10);
+        pnlSearch.add(new JLabel("Từ khóa (Mã/Tên):"));
+        txtMaPhongTim = new JTextField(12);
         pnlSearch.add(txtMaPhongTim);
 
         pnlSearch.add(new JLabel("Loại phòng:"));
@@ -81,6 +81,9 @@ public class FrmPhongHoc extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         txtMaPhong  = new JTextField(15);
+        txtMaPhong.setEditable(false);
+        txtMaPhong.setFocusable(false);
+        txtMaPhong.setBackground(new Color(245, 245, 245));
         txtTenPhong = new JTextField(35);
         txtSucChua  = new JTextField(15);
         cboLoaiPhong = new JComboBox<>(new String[]{"Lý thuyết", "Thực hành"});
@@ -170,7 +173,24 @@ public class FrmPhongHoc extends JPanel {
         txtMaPhong.setText(""); txtTenPhong.setText(""); txtSucChua.setText("");
         cboLoaiPhong.setSelectedIndex(0);
         cboTinhTrang.setSelectedItem("Hoạt động");
-        txtMaPhong.setEditable(true);
+        txtMaPhong.setEditable(false);
+    }
+
+    public void setMaPhong(String ma) {
+        txtMaPhong.setText(ma == null ? "" : ma);
+    }
+
+    public String getLoaiPhongSelected() {
+        return cboLoaiPhong.getSelectedItem() != null ? cboLoaiPhong.getSelectedItem().toString() : "";
+    }
+
+    public List<String> getAllMaPhongFromTable() {
+        List<String> list = new java.util.ArrayList<>();
+        for (int i = 0; i < model.getRowCount(); i++) {
+            Object val = model.getValueAt(i, 0);
+            if (val != null) list.add(val.toString());
+        }
+        return list;
     }
 
     public void showMessage(String msg) { JOptionPane.showMessageDialog(this, msg); }
@@ -201,6 +221,12 @@ public class FrmPhongHoc extends JPanel {
     public void addBtnTimListener(ActionListener l)     { btnTim.addActionListener(l); }
     public void addMaPhongTimLiveListener(javax.swing.event.DocumentListener l) {
         txtMaPhongTim.getDocument().addDocumentListener(l);
+    }
+    public void addTenPhongLiveListener(javax.swing.event.DocumentListener l) {
+        txtTenPhong.getDocument().addDocumentListener(l);
+    }
+    public void addCboLoaiPhongInputListener(ActionListener l) {
+        cboLoaiPhong.addActionListener(l);
     }
     public void addBtnThemListener(ActionListener l)    { btnThem.addActionListener(l); }
     public void addBtnSuaListener(ActionListener l)     { btnSua.addActionListener(l); }

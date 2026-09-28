@@ -29,10 +29,12 @@ public class PhongHocRestController {
 
     @GetMapping("/search")
     public List<PhongHoc> search(
+            @RequestParam(defaultValue = "") String keyword,
             @RequestParam(defaultValue = "") String ma,
             @RequestParam(defaultValue = "") String loai,
             @RequestParam(defaultValue = "") String tinhTrang) {
-        if (ma.isEmpty() &&
+        String key = !keyword.trim().isEmpty() ? keyword.trim() : ma.trim();
+        if (key.isEmpty() &&
                 (loai.isEmpty() || loai.equals("Tất cả")) &&
                 (tinhTrang.isEmpty() || tinhTrang.equals("Tất cả"))) {
             return phongHocService.getAllPH();
@@ -41,7 +43,7 @@ public class PhongHocRestController {
         String queryLoai = "Tất cả".equals(loai) ? "" : loai;
         String queryTinhTrang = "Tất cả".equals(tinhTrang) ? "" : tinhTrang;
 
-        return phongHocService.search(ma, queryLoai, queryTinhTrang);
+        return phongHocService.search(key, queryLoai, queryTinhTrang);
     }
 
     @PostMapping
@@ -100,11 +102,23 @@ public class PhongHocRestController {
     }
 
     @DeleteMapping("/{maPhong}")
-    public ResponseEntity<PhongHoc> delete(@PathVariable String maPhong){
+    public ResponseEntity<?> delete(@PathVariable String maPhong){
         if (!phongHocService.existsPH(maPhong)){
             return ResponseEntity.notFound().build();
         }
-        phongHocService.delete(maPhong);
-        return ResponseEntity.ok().build();
+        if (phongHocService.hasTKB(maPhong)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Không thể xóa phòng học này vì đang có Thời khóa biểu sử dụng phòng này!");
+        }
+        try {
+            phongHocService.delete(maPhong);
+            return ResponseEntity.ok().build();
+        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Không thể xóa phòng học này vì đang có Thời khóa biểu sử dụng phòng này!");
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Lỗi khi xóa phòng học: " + ex.getMessage());
+        }
     }
 }

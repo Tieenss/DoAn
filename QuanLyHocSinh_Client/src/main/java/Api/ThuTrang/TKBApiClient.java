@@ -154,7 +154,14 @@ public class TKBApiClient {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/" + maTKB))
                 .DELETE().build();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         if (response.statusCode() == 404) throw new Exception("Không tìm thấy TKB");
+        if (response.statusCode() != 200) {
+            String msg = response.body();
+            if (msg == null || msg.trim().isEmpty()) {
+                msg = "Không thể xóa thời khóa biểu (Mã lỗi: " + response.statusCode() + ")!";
+            }
+            throw new Exception(msg);
+        }
     }
 }

@@ -88,12 +88,19 @@ public class PhongHocApiClient {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/" + maPH))
                 .DELETE().build();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         if (response.statusCode() == 404) throw new Exception("Không tìm thấy phòng học");
+        if (response.statusCode() != 200) {
+            String msg = response.body();
+            if (msg == null || msg.trim().isEmpty()) {
+                msg = "Không thể xóa phòng học (Mã lỗi: " + response.statusCode() + ")!";
+            }
+            throw new Exception(msg);
+        }
     }
 
-    public List<PhongHoc> search(String ma, String loai, String tinhTrang) throws Exception {
-        String url = BASE_URL + "/search?ma=" + URLEncoder.encode(ma, StandardCharsets.UTF_8)
+    public List<PhongHoc> search(String keyword, String loai, String tinhTrang) throws Exception {
+        String url = BASE_URL + "/search?keyword=" + URLEncoder.encode(keyword, StandardCharsets.UTF_8)
                 + "&loai=" + URLEncoder.encode(loai, StandardCharsets.UTF_8)
                 + "&tinhTrang=" + URLEncoder.encode(tinhTrang, StandardCharsets.UTF_8);
         HttpRequest request = HttpRequest.newBuilder()

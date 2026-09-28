@@ -60,6 +60,9 @@ public class FrmMonHoc extends JPanel {
         pnlInput = new JPanel(new GridLayout(2, 2, 10, 5));
         pnlInput.add(new JLabel("Mã môn:"));
         txtMaMH = new JTextField();
+        txtMaMH.setEditable(false);
+        txtMaMH.setFocusable(false);
+        txtMaMH.setBackground(new Color(245, 245, 245));
         pnlInput.add(txtMaMH);
         pnlInput.add(new JLabel("Tên môn:"));
         txtTenMH = new JTextField();
@@ -108,7 +111,11 @@ public class FrmMonHoc extends JPanel {
 
     public void clearForm() {
         txtMaMH.setText(""); txtTenMH.setText("");
-        txtMaMH.setEditable(true);
+        txtMaMH.setEditable(false);
+    }
+
+    public void setMaMH(String ma) {
+        txtMaMH.setText(ma == null ? "" : ma);
     }
 
     public JTable getTable() { return table; }
@@ -134,6 +141,9 @@ public class FrmMonHoc extends JPanel {
     public void addBtnTimKiemListener(ActionListener l) { btnTimKiem.addActionListener(l); }
     public void addTimKiemLiveListener(javax.swing.event.DocumentListener l) {
         txtTimKiem.getDocument().addDocumentListener(l);
+    }
+    public void addTenMHLiveListener(javax.swing.event.DocumentListener l) {
+        txtTenMH.getDocument().addDocumentListener(l);
     }
     public void addBtnThemListener(ActionListener l)    { btnThem.addActionListener(l); }
     public void addBtnSuaListener(ActionListener l)     { btnSua.addActionListener(l); }

@@ -13,12 +13,24 @@ public class PhongHocService {
     @Autowired
     private PhongHocRepository phongHocRepository;
 
+    @Autowired
+    private com.qlhs.server.repository.ThuTrang.TKBRepository tkbRepository;
+
+    public boolean hasTKB(String maPhong) {
+        if (maPhong == null || maPhong.trim().isEmpty()) return false;
+        try {
+            return !tkbRepository.findByMaPhong(maPhong.trim()).isEmpty();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public List<PhongHoc> getAllPH() { return phongHocRepository.findAllByOrderByMaPhongAsc(); }
 
     public Optional<PhongHoc> getByIdPH(String maPhong) { return phongHocRepository.findById(maPhong); }
 
-    public List<PhongHoc> search(String ma, String loai, String tinhTrang) {
-        return phongHocRepository.searchPhongHoc(ma, loai, tinhTrang);
+    public List<PhongHoc> search(String keyword, String loai, String tinhTrang) {
+        return phongHocRepository.searchPhongHoc(keyword, loai, tinhTrang);
     }
 
     public PhongHoc save(PhongHoc phongHoc) { return phongHocRepository.save(phongHoc); }

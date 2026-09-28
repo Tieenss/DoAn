@@ -58,6 +58,22 @@ public class MonHocController {
             }
         });
 
+        view.addTenMHLiveListener(new javax.swing.event.DocumentListener() {
+            private void updateAutoCode() {
+                if (!editMode[0]) {
+                    String ten = view.getTxtTenMH().getText();
+                    String autoMa = TienIch.AutoCodeGenerator.generateMaMH(ten);
+                    view.setMaMH(autoMa);
+                }
+            }
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { updateAutoCode(); }
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { updateAutoCode(); }
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { updateAutoCode(); }
+        });
+
         Runnable restoreOrderIfNeeded = () -> {
             if (isCustomOrder) {
                 loadData();
@@ -99,7 +115,8 @@ public class MonHocController {
                     editMode[0] = false;
                     setIdleState.run();
                 } catch (Exception ex) {
-                    view.showMessage("Lỗi xóa: " + ex.getMessage());
+                    String msg = ex.getMessage();
+                    view.showMessage((msg != null && (msg.startsWith("Không") || msg.startsWith("Lỗi"))) ? msg : "Lỗi xóa: " + msg);
                 }
             }
         });
@@ -107,6 +124,11 @@ public class MonHocController {
         view.addBtnLuuListener(e -> {
             MonHoc m = view.getMonHocInput();
             if (!editMode[0]) {
+                if (m.getMaMH() == null || m.getMaMH().trim().isEmpty()) {
+                    String autoMa = TienIch.AutoCodeGenerator.generateMaMH(m.getTenMH());
+                    m.setMaMH(autoMa);
+                    view.setMaMH(autoMa);
+                }
                 String errMa = ValidationUtil.validateMa(m.getMaMH(), "Mã môn học");
                 if (errMa != null) {
                     view.showMessage(errMa);
