@@ -11,6 +11,9 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -607,6 +610,29 @@ public class QuanLyHocSinhPanel extends JPanel {
             spNgaySinh.requestFocus();
             return false;
         }
+
+//        LocalDate ngaySinhLocal = ngaySinh.toInstant()
+//                .atZone(ZoneId.systemDefault())
+//                .toLocalDate();
+//
+//        LocalDate homNayLocal = LocalDate.now();
+//
+//        int tuoi = Period.between(ngaySinhLocal, homNayLocal).getYears();
+//
+//        // Kiểm tra độ tuổi học sinh THPT
+//        if (tuoi < 15 || tuoi > 20) {
+//            JOptionPane.showMessageDialog(
+//                    this,
+//                    "Tuổi học sinh không hợp lệ!\n"
+//                            + "Học sinh THPT phải từ 15 đến 20 tuổi.\n"
+//                            + "Tuổi hiện tại: " + tuoi,
+//                    "Lỗi dữ liệu",
+//                    JOptionPane.ERROR_MESSAGE
+//            );
+//
+//            spNgaySinh.requestFocus();
+//            return false;
+//        }
 
         return true;
     }

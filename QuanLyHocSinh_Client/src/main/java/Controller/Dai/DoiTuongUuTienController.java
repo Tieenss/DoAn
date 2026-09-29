@@ -32,6 +32,13 @@ public class DoiTuongUuTienController {
     }
 
     public boolean them(DoiTuongUuTien dt) {
+        // Kiểm tra mã đối tượng đã tồn tại chưa
+        DoiTuongUuTien existing = api.getById(dt.getMaDT());
+        if (existing != null) {
+            throw new RuntimeException(
+                    "Mã đối tượng '" + dt.getMaDT() + "' đã tồn tại!"
+            );
+        }   
         return api.insert(dt);
     }
 
