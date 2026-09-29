@@ -19,9 +19,9 @@ public class QuanLyTaiKhoanPanel extends JPanel {
     private JTable tableTK;
     private DefaultTableModel tableModel;
 
-    private JTextField txtTenDangNhap, txtMaNguoiDung;
+    private JTextField txtTenDangNhap;
     private JPasswordField txtMatKhau;
-    private JComboBox<String> cboQuyen;
+    private JComboBox<String> cboQuyen, cboMaNguoiDung;
 
     private JTextField txtTimKiem;
     private JButton btnTim, btnHienThiTatCa;
@@ -109,12 +109,20 @@ public class QuanLyTaiKhoanPanel extends JPanel {
         cboQuyen = new JComboBox<>(new String[]{"", "Admin", "GiaoVien", "HocSinh"});
         cboQuyen.setSelectedIndex(0);
         pnlInput.add(cboQuyen, gbc);
+        cboQuyen.addItemListener(e -> {
+            if (e.getStateChange() == java.awt.event.ItemEvent.SELECTED) {
+                capNhatMaNguoiDung();
+            }
+        });
 
         gbc.gridx = 0; gbc.gridy = 3;
         pnlInput.add(new JLabel("Mã người dùng:"), gbc);
         gbc.gridx = 1;
-        txtMaNguoiDung = new JTextField(15);
-        pnlInput.add(txtMaNguoiDung, gbc);
+        cboMaNguoiDung = new JComboBox<>();
+//        cboMaNguoiDung.setPreferredSize(new Dimension(180, 15));
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboMaNguoiDung);
+        cboMaNguoiDung.setEnabled(false);
+        pnlInput.add(cboMaNguoiDung, gbc);
 
         pnlSouth.add(pnlInput, BorderLayout.CENTER);
 
@@ -168,47 +176,82 @@ public class QuanLyTaiKhoanPanel extends JPanel {
     }
 
     private void luu() {
-        if (txtTenDangNhap.getText().trim().isEmpty()
-                || txtMaNguoiDung.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin");
-            return;
-        }
 
-        if (isThem && txtMatKhau.getPassword().length == 0) {
-            JOptionPane.showMessageDialog(this, "Mật khẩu không được để trống");
+        if (!validateTaiKhoan()) {
             return;
         }
 
         TaiKhoan tk = getTaiKhoanFromForm();
-        boolean ok = isThem ? controller.them(tk) : controller.sua(tk);
+
+        boolean ok;
+
+        if (isThem) {
+            ok = controller.them(tk);
+        } else {
+            ok = controller.sua(tk);
+        }
 
         if (ok) {
-            JOptionPane.showMessageDialog(this, "Lưu thành công");
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Lưu thành công"
+            );
             controller.loadTable(tableModel);
             clearForm();
             setFormEnabled(false);
+
+        } else {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Lưu thất bại! Vui lòng kiểm tra lại thông tin.",
+                    "Lỗi",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 
     private void xoa() {
-        if (txtTenDangNhap.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Chọn tài khoản cần xóa");
+        String tenDangNhap = txtTenDangNhap.getText().trim();
+
+        if (tenDangNhap.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Vui lòng chọn tài khoản để xóa!"
+            );
             return;
         }
 
         int confirm = JOptionPane.showConfirmDialog(
                 this,
-                "Bạn có chắc muốn xóa tài khoản này?",
-                "Xác nhận",
-                JOptionPane.YES_NO_OPTION
+                "Bạn có chắc chắn muốn xóa tài khoản \""
+                        + tenDangNhap + "\"?",
+                "Xác nhận xóa",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE
         );
 
-        if (confirm == JOptionPane.YES_OPTION) {
-            if (controller.xoa(txtTenDangNhap.getText())) {
-                JOptionPane.showMessageDialog(this, "Xóa thành công");
-                controller.loadTable(tableModel);
-                clearForm();
-            }
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        boolean ok = controller.xoa(tenDangNhap);
+
+        if (ok) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Xóa thành công"
+            );
+
+            controller.loadTable(tableModel);
+            clearForm();
+
+        } else {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Xóa thất bại!",
+                    "Lỗi",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 
@@ -217,11 +260,96 @@ public class QuanLyTaiKhoanPanel extends JPanel {
         setFormEnabled(false);
     }
 
+    private boolean validateTaiKhoan() {
+
+        String tenDangNhap = txtTenDangNhap.getText().trim();
+        String quyen = (String) cboQuyen.getSelectedItem();
+
+        // 1. Kiểm tra tên đăng nhập
+        if (tenDangNhap.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Tên đăng nhập không được để trống"
+            );
+            txtTenDangNhap.requestFocus();
+            return false;
+        }
+
+//        if (tenDangNhap.length() < 3 || tenDangNhap.length() > 20) {
+//            JOptionPane.showMessageDialog(
+//                    this,
+//                    "Tên đăng nhập phải từ 3 đến 20 ký tự"
+//            );
+//            txtTenDangNhap.requestFocus();
+//            return false;
+//        }
+
+        if (tenDangNhap.contains(" ")) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Tên đăng nhập không được chứa khoảng trắng"
+            );
+            txtTenDangNhap.requestFocus();
+            return false;
+        }
+
+        // 2. Kiểm tra mật khẩu khi thêm
+        String matKhau = new String(txtMatKhau.getPassword());
+
+        if (isThem) {
+
+            if (matKhau.isEmpty()) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Mật khẩu không được để trống"
+                );
+                txtMatKhau.requestFocus();
+                return false;
+            }
+
+//            if (matKhau.length() < 6) {
+//                JOptionPane.showMessageDialog(
+//                        this,
+//                        "Mật khẩu phải có ít nhất 6 ký tự"
+//                );
+//                txtMatKhau.requestFocus();
+//                return false;
+//            }
+        }
+
+        // 3. Kiểm tra quyền
+        if (quyen == null || quyen.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Vui lòng chọn quyền"
+            );
+            cboQuyen.requestFocus();
+            return false;
+        }
+
+        // 4. Kiểm tra mã người dùng
+        Object selected = cboMaNguoiDung.getSelectedItem();
+
+        if (!"Admin".equals(quyen)
+                && (selected == null
+                || selected.toString().trim().isEmpty()
+                || !isValidComboValue(cboMaNguoiDung))) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Vui lòng chọn mã người dùng hợp lệ"
+            );
+            cboMaNguoiDung.requestFocus();
+            return false;
+        }
+
+        return true;
+    }
+
     private void setFormEnabled(boolean enabled) {
         txtTenDangNhap.setEnabled(enabled);
         txtMatKhau.setEnabled(enabled);
         cboQuyen.setEnabled(enabled);
-        txtMaNguoiDung.setEnabled(enabled);
 
         btnLuu.setEnabled(enabled);
         btnHuy.setEnabled(enabled);
@@ -229,34 +357,132 @@ public class QuanLyTaiKhoanPanel extends JPanel {
         btnThem.setEnabled(!enabled);
         btnSua.setEnabled(!enabled);
         btnXoa.setEnabled(!enabled);
+
+        if (enabled) {
+            capNhatMaNguoiDung();
+        } else {
+            cboMaNguoiDung.setEnabled(false);
+        }
     }
 
     private void doDuLieuVaoForm() {
-        int r = tableTK.getSelectedRow();
-        if (r >= 0) {
+        int viewRow = tableTK.getSelectedRow();
+
+        if (viewRow >= 0) {
+            int r = tableTK.convertRowIndexToModel(viewRow);
             txtTenDangNhap.setText(tableModel.getValueAt(r, 0).toString());
-     
-            txtMatKhau.setText(tableModel.getValueAt(r, 1).toString()); 
-            cboQuyen.setSelectedItem(tableModel.getValueAt(r, 2));
-            txtMaNguoiDung.setText(tableModel.getValueAt(r, 3).toString());
+
+            txtMatKhau.setText(tableModel.getValueAt(r, 1).toString());
+            String quyen = tableModel.getValueAt(r, 2).toString();
+            Object value = tableModel.getValueAt(r, 3);
+            String maNguoiDung = value == null ? "" : value.toString();
+            cboQuyen.setSelectedItem(quyen);
+            if (!"Admin".equals(quyen) && !maNguoiDung.isEmpty()) {
+                cboMaNguoiDung.setSelectedItem(maNguoiDung);
+            }
         }
     }
 
     private TaiKhoan getTaiKhoanFromForm() {
+        String quyen = cboQuyen.getSelectedItem().toString();
+
+        String maNguoiDung = "";
+
+        if (!"Admin".equals(quyen) && cboMaNguoiDung.getSelectedItem() != null) {
+            maNguoiDung = cboMaNguoiDung.getSelectedItem().toString();
+        }
+
         return new TaiKhoan(
-                txtTenDangNhap.getText(),
+                txtTenDangNhap.getText().trim(),
                 new String(txtMatKhau.getPassword()),
-                cboQuyen.getSelectedItem().toString(),
-                txtMaNguoiDung.getText()
+                quyen,
+                maNguoiDung
         );
     }
 
     private void clearForm() {
         txtTenDangNhap.setText("");
         txtMatKhau.setText("");
-        txtMaNguoiDung.setText("");
+
         cboQuyen.setSelectedIndex(0);
+
+        cboMaNguoiDung.removeAllItems();
+        cboMaNguoiDung.setEnabled(false);
+
         txtTenDangNhap.setEnabled(true);
+    }
+
+    private void loadMaGiaoVien() {
+
+        java.util.List<String> maGV =
+                controller.getMaGiaoVien();
+
+        for (String ma : maGV) {
+            cboMaNguoiDung.addItem(ma);
+        }
+
+        TienIch.ComboBoxUtil.refreshOriginalItems(cboMaNguoiDung);
+    }
+
+    private void loadMaHocSinh() {
+
+        java.util.List<String> maHS =
+                controller.getMaHocSinh();
+
+        for (String ma : maHS) {
+            cboMaNguoiDung.addItem(ma);
+        }
+
+        TienIch.ComboBoxUtil.refreshOriginalItems(cboMaNguoiDung);
+    }
+
+    private void capNhatMaNguoiDung() {
+        String quyen = (String) cboQuyen.getSelectedItem();
+
+        cboMaNguoiDung.removeAllItems();
+
+        if (quyen == null || quyen.isEmpty()) {
+            cboMaNguoiDung.setEnabled(false);
+            return;
+        }
+
+        if ("Admin".equals(quyen)) {
+            cboMaNguoiDung.setEnabled(false);
+            return;
+        }
+
+        cboMaNguoiDung.setEnabled(true);
+
+        if ("GiaoVien".equals(quyen)) {
+            loadMaGiaoVien();
+        } else if ("HocSinh".equals(quyen)) {
+            loadMaHocSinh();
+        }
+    }
+
+    private boolean isValidComboValue(JComboBox<String> comboBox) {
+        Object selected = comboBox.getSelectedItem();
+
+        if (selected == null) {
+            return false;
+        }
+
+        String value = selected.toString().trim();
+
+        if (value.isEmpty()) {
+            return false;
+        }
+
+        for (int i = 0; i < comboBox.getItemCount(); i++) {
+            String item = comboBox.getItemAt(i);
+
+            if (item != null
+                    && item.trim().equalsIgnoreCase(value)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void timKiem() {
