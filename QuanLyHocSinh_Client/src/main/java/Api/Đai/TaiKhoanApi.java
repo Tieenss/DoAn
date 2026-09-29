@@ -3,6 +3,9 @@ package Api.Đai;
 import Api.ApiConfig;
 import Model.TaiKhoan;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
@@ -191,6 +194,80 @@ public class TaiKhoanApi {
 
                 return gson.fromJson(response.body(), listType);
 
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new ArrayList<>();
+    }
+
+    public List<String> getMaGiaoVien() {
+
+        try {
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(ApiConfig.BASE_URL + "/api/giaovien"))
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response =
+                    client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+
+                JsonArray array = gson.fromJson(response.body(), JsonArray.class);
+
+                List<String> danhSach = new ArrayList<>();
+
+                for (JsonElement element : array) {
+
+                    JsonObject obj = element.getAsJsonObject();
+
+                    if (obj.has("maGV") && !obj.get("maGV").isJsonNull()) {
+                        danhSach.add(obj.get("maGV").getAsString());
+                    }
+                }
+
+                return danhSach;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new ArrayList<>();
+    }
+
+    public List<String> getMaHocSinh() {
+
+        try {
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(ApiConfig.BASE_URL + "/api/hocsinh"))
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response =
+                    client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+
+                JsonArray array = gson.fromJson(response.body(), JsonArray.class);
+
+                List<String> danhSach = new ArrayList<>();
+
+                for (JsonElement element : array) {
+
+                    JsonObject obj = element.getAsJsonObject();
+
+                    if (obj.has("maHS") && !obj.get("maHS").isJsonNull()) {
+                        danhSach.add(obj.get("maHS").getAsString());
+                    }
+                }
+
+                return danhSach;
             }
 
         } catch (Exception e) {

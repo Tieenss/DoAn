@@ -106,6 +106,7 @@ public class QuanLyHocSinhPanel extends JPanel {
         });
 
         controller.loadComboLocNienKhoa(cboLocNienKhoa);
+        TienIch.ComboBoxUtil.refreshOriginalItems(cboLocNienKhoa);
 
         add(new JScrollPane(tableHS), BorderLayout.CENTER);
 
@@ -742,10 +743,13 @@ public class QuanLyHocSinhPanel extends JPanel {
         spNamKetThuc.setValue(namHienTai + 3);
 
     }
-    
+
     private void loadComboBox() {
         controller.loadComboMaLop(cboMaLop);
+        TienIch.ComboBoxUtil.refreshOriginalItems(cboMaLop);
+
         controller.loadComboMaDT(cboMaDT);
+        TienIch.ComboBoxUtil.refreshOriginalItems(cboMaDT);
     }
 
     private void loadThongTinCaNhan() {

@@ -59,4 +59,12 @@ public class TaiKhoanController {
         return !list.isEmpty();
     }
 
+    public List<String> getMaGiaoVien() {
+        return api.getMaGiaoVien();
+    }
+
+    public List<String> getMaHocSinh() {
+        return api.getMaHocSinh();
+    }
+
 }
