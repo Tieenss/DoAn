@@ -149,7 +149,7 @@ public class QuanLyDoiTuongUuTienPanel extends JPanel {
     }
 
     private void sua() {
-        if (txtMaDT.getText().isEmpty()) {
+        if (txtMaDT.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Chọn đối tượng cần sửa");
             return;
         }
@@ -157,47 +157,52 @@ public class QuanLyDoiTuongUuTienPanel extends JPanel {
         setFormEnabled(true);
         txtMaDT.setEnabled(false);
     }
-    
+
     private void luu() {
-        if (txtMaDT.getText().trim().isEmpty()
-                || txtTenDT.getText().trim().isEmpty()
-                || txtTiLeGiam.getText().trim().isEmpty()) {
 
-            JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin");
+        if (!validateForm()) {
             return;
         }
 
-        double tiLe;
+        String maDT = txtMaDT.getText().trim();
+        String tenDT = txtTenDT.getText().trim();
+        double tiLe = Double.parseDouble(txtTiLeGiam.getText().trim());
+
+        // Giao diện nhập 0 - 100%, Model lưu 0 - 1
+        tiLe = tiLe / 100.0;
+
+        DoiTuongUuTien dt = new DoiTuongUuTien(maDT, tenDT, tiLe);
+
         try {
+            boolean ok = isThem
+                    ? controller.them(dt)
+                    : controller.sua(dt);
 
-            tiLe = Double.parseDouble(txtTiLeGiam.getText());
+            if (ok) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Lưu thành công",
+                        "Thông báo",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
 
-            if (tiLe < 0 || tiLe > 100) {
-                JOptionPane.showMessageDialog(this, "Tỉ lệ giảm phải từ 0 đến 100");
-                return;
+                hienThiTatCa();
+                setFormEnabled(false);
+            } else {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Lưu thất bại!",
+                        "Lỗi",
+                        JOptionPane.ERROR_MESSAGE
+                );
             }
-
-            tiLe = tiLe / 100.0;
-
-        } catch (NumberFormatException e) {
-
-            JOptionPane.showMessageDialog(this, "Tỉ lệ giảm phải là số");
-            return;
-
-        }
-
-        DoiTuongUuTien dt = new DoiTuongUuTien(
-                txtMaDT.getText(),
-                txtTenDT.getText(),
-                tiLe
-        );
-
-        boolean ok = isThem ? controller.them(dt) : controller.sua(dt);
-
-        if (ok) {
-            JOptionPane.showMessageDialog(this, "Lưu thành công");
-            hienThiTatCa();
-            setFormEnabled(false);
+        } catch (RuntimeException ex) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    ex.getMessage(),
+                    "Lỗi",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 
@@ -220,7 +225,7 @@ public class QuanLyDoiTuongUuTienPanel extends JPanel {
     }
 
     private void xoa() {
-    if (txtMaDT.getText().isEmpty()) {
+        if (txtMaDT.getText().trim().isEmpty()) {
         JOptionPane.showMessageDialog(this, "Chọn đối tượng cần xóa");
         return;
     }
@@ -233,7 +238,7 @@ public class QuanLyDoiTuongUuTienPanel extends JPanel {
     );
 
     if (confirm == JOptionPane.YES_OPTION) {
-        if (controller.xoa(txtMaDT.getText())) {
+        if (controller.xoa(txtMaDT.getText().trim())) {
             JOptionPane.showMessageDialog(this, "Xóa thành công");
             hienThiTatCa();
         }
@@ -279,6 +284,100 @@ public class QuanLyDoiTuongUuTienPanel extends JPanel {
             );
 
         }
+    }
+
+    private boolean validateForm() {
+
+        String maDT = txtMaDT.getText().trim();
+        String tenDT = txtTenDT.getText().trim();
+        String tiLeText = txtTiLeGiam.getText().trim();
+
+        // Kiểm tra mã đối tượng
+        if (maDT.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Mã đối tượng không được để trống!",
+                    "Thông báo",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            txtMaDT.requestFocus();
+            return false;
+        }
+
+        // Kiểm tra mã đối tượng không quá 10 ký tự
+        if (maDT.length() > 10) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Mã đối tượng không được vượt quá 10 ký tự!",
+                    "Thông báo",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            txtMaDT.requestFocus();
+            return false;
+        }
+
+        // Kiểm tra tên đối tượng
+        if (tenDT.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Tên đối tượng không được để trống!",
+                    "Thông báo",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            txtTenDT.requestFocus();
+            return false;
+        }
+
+        // Kiểm tra tỉ lệ giảm
+        if (tiLeText.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Tỉ lệ giảm không được để trống!",
+                    "Thông báo",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            txtTiLeGiam.requestFocus();
+            return false;
+        }
+
+        double tiLe;
+
+        try {
+            tiLe = Double.parseDouble(tiLeText);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Tỉ lệ giảm phải là số!",
+                    "Thông báo",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            txtTiLeGiam.requestFocus();
+            return false;
+        }
+
+        if (!Double.isFinite(tiLe)) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Tỉ lệ giảm phải là một số hợp lệ!",
+                    "Thông báo",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            txtTiLeGiam.requestFocus();
+            return false;
+        }
+
+        if (tiLe < 0 || tiLe > 100) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Tỉ lệ giảm phải từ 0 đến 100!",
+                    "Thông báo",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            txtTiLeGiam.requestFocus();
+            return false;
+        }
+
+        return true;
     }
 
     private void hienThiTatCa() {
