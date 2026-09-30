@@ -15,6 +15,7 @@ public class HoSoHocSinhPanel extends JPanel {
     private final HocSinhController controller = new HocSinhController();
 
     private JLabel lblTenHocSinh;
+    private JLabel lblTieuDe;   // thêm cùng chỗ khai báo field
 
     // =========================
     // THÔNG TIN CÁ NHÂN
@@ -37,9 +38,15 @@ public class HoSoHocSinhPanel extends JPanel {
     private String maHSCurrent;
     private boolean boDangTaiDuLieu = false;
 
+    // Học sinh tự xem hồ sơ của mình
     public HoSoHocSinhPanel() {
+        this(Auth.maNguoiDung);
+    }
+
+    // Giáo viên/Admin xem hồ sơ của học sinh được chọn
+    public HoSoHocSinhPanel(String maHS) {
         initComponents();
-        loadThongTinCaNhan();
+        loadThongTinHocSinh(maHS);
     }
 
     // =========================================================
@@ -638,8 +645,8 @@ public class HoSoHocSinhPanel extends JPanel {
     // =========================================================
     // LOAD DỮ LIỆU
     // =========================================================
-    private void loadThongTinCaNhan() {
-        HocSinh hs = controller.getThongTinCaNhan();
+    private void loadThongTinHocSinh(String maHS) {
+        HocSinh hs = controller.getThongTinHocSinhByMa(maHS);
         if (hs == null) {
             JOptionPane.showMessageDialog(
                     this,

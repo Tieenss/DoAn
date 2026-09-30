@@ -470,6 +470,13 @@ public class HocSinhController {
         return ten + " (" + maDT.trim() + ")";
     }
 
+    public HocSinh getThongTinHocSinhByMa(String maHS) {
+        if (maHS == null || maHS.trim().isEmpty()) {
+            return null;
+        }
+        return api.getHocSinh(maHS.trim());
+    }
+
     public List<LichThi> getLichThiCuaLop(String maLop) {
         if (maLop == null || maLop.trim().isEmpty()) {
             return new ArrayList<>();
