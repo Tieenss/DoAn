@@ -50,7 +50,10 @@ public class QuanLyHocSinhPanel extends JPanel {
             setFormEnabled(false);
 
             btnThem.setVisible(false);
+            btnSua.setVisible(false);
             btnXoa.setVisible(false);
+            btnLuu.setVisible(false);
+            btnHuy.setVisible(false);
         }
     }
 
@@ -280,14 +283,22 @@ public class QuanLyHocSinhPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Chọn học sinh cần sửa");
             return;
         }
+        // Học sinh không được phép sửa thông tin
+        if (Model.Auth.isHocSinh()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Học sinh không có quyền sửa thông tin học sinh."
+            );
+            return;
+        }
         isThem = false;
         setFormEnabled(true);
         txtMaHS.setEnabled(false);
         
-        if (Model.Auth.isHocSinh()) {
-            cboMaLop.setEnabled(false);
-            cboMaDT.setEnabled(false);
-        }
+//        if (Model.Auth.isHocSinh()) {
+//            cboMaLop.setEnabled(false);
+//            cboMaDT.setEnabled(false);
+//        }
     }
 
     private void luu() {

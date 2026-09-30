@@ -4,6 +4,7 @@ import Model.TaiKhoan;
 import Controller.Dai.TaiKhoanController;
 import TienIch.ButtonStyleHelper;
 
+import java.util.List;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
@@ -77,7 +78,7 @@ public class QuanLyTaiKhoanPanel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 doDuLieuVaoForm();
-                setFormEnabled(false); 
+                setFormEnabled(false);
             }
         });
 
@@ -161,6 +162,7 @@ public class QuanLyTaiKhoanPanel extends JPanel {
     private void them() {
         clearForm();
         isThem = true;
+        txtMaNguoiDungHienTai = "";
         setFormEnabled(true);
         txtTenDangNhap.requestFocus();
     }
@@ -172,7 +174,17 @@ public class QuanLyTaiKhoanPanel extends JPanel {
         }
         isThem = false;
         setFormEnabled(true);
-        txtTenDangNhap.setEnabled(false);
+//        txtTenDangNhap.setEnabled(false);
+//
+//        // Không cho thay đổi quyền
+//        cboQuyen.setEnabled(false);
+//
+//        // Chọn lại mã người dùng hiện tại
+//        if (!txtMaNguoiDungHienTai.isEmpty()) {
+//            cboMaNguoiDung.setSelectedItem(
+//                    txtMaNguoiDungHienTai
+//            );
+//        }
     }
 
     private void luu() {
@@ -337,9 +349,15 @@ public class QuanLyTaiKhoanPanel extends JPanel {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Vui lòng chọn mã người dùng hợp lệ"
+                    "Mã người dùng đã có tài khoản hoặc không hợp lệ.\n"
+                            + "Vui lòng chọn mã người dùng khác."
             );
+
+            // Khôi phục lại danh sách mã người dùng
+            capNhatMaNguoiDung();
+
             cboMaNguoiDung.requestFocus();
+
             return false;
         }
 
@@ -349,7 +367,9 @@ public class QuanLyTaiKhoanPanel extends JPanel {
     private void setFormEnabled(boolean enabled) {
         txtTenDangNhap.setEnabled(enabled);
         txtMatKhau.setEnabled(enabled);
-        cboQuyen.setEnabled(enabled);
+
+        // Khi thêm mới mới được chọn quyền
+        cboQuyen.setEnabled(enabled && isThem);
 
         btnLuu.setEnabled(enabled);
         btnHuy.setEnabled(enabled);
@@ -360,6 +380,10 @@ public class QuanLyTaiKhoanPanel extends JPanel {
 
         if (enabled) {
             capNhatMaNguoiDung();
+            // Khi sửa: không cho thay đổi mã người dùng
+            if (!isThem) {
+                cboMaNguoiDung.setEnabled(false);
+            }
         } else {
             cboMaNguoiDung.setEnabled(false);
         }
@@ -371,12 +395,24 @@ public class QuanLyTaiKhoanPanel extends JPanel {
         if (viewRow >= 0) {
             int r = tableTK.convertRowIndexToModel(viewRow);
             txtTenDangNhap.setText(tableModel.getValueAt(r, 0).toString());
-
             txtMatKhau.setText(tableModel.getValueAt(r, 1).toString());
+
             String quyen = tableModel.getValueAt(r, 2).toString();
             Object value = tableModel.getValueAt(r, 3);
-            String maNguoiDung = value == null ? "" : value.toString();
+
+            String maNguoiDung = value == null ? "" : value.toString().trim();
+
+            // Lưu mã người dùng hiện tại trước
+            // khi load lại ComboBox
+            txtMaNguoiDungHienTai = maNguoiDung;
+
+            // Chọn quyền
             cboQuyen.setSelectedItem(quyen);
+
+            // Load lại danh sách theo quyền
+            capNhatMaNguoiDung();
+
+            // Chọn lại mã người dùng của tài khoản
             if (!"Admin".equals(quyen) && !maNguoiDung.isEmpty()) {
                 cboMaNguoiDung.setSelectedItem(maNguoiDung);
             }
@@ -410,27 +446,61 @@ public class QuanLyTaiKhoanPanel extends JPanel {
         cboMaNguoiDung.setEnabled(false);
 
         txtTenDangNhap.setEnabled(true);
+        txtMaNguoiDungHienTai = "";
+    }
+
+    private String txtMaNguoiDungHienTai = "";
+
+    private List<String> getMaNguoiDungDaCoTaiKhoan() {
+        List<String> danhSachDaCoTaiKhoan = new java.util.ArrayList<>();
+        List<TaiKhoan> danhSachTaiKhoan = controller.getAll();
+
+        for (TaiKhoan tk : danhSachTaiKhoan) {
+            String maNguoiDung = tk.getMaNguoiDung();
+
+            if (maNguoiDung != null && !maNguoiDung.trim().isEmpty()) {
+                danhSachDaCoTaiKhoan.add(
+                        maNguoiDung.trim()
+                );
+            }
+        }
+        return danhSachDaCoTaiKhoan;
+    }
+
+    private boolean daCoTaiKhoan(List<String> danhSachDaCoTaiKhoan, String maNguoiDung) {
+        for (String ma : danhSachDaCoTaiKhoan) {
+            if (ma != null && maNguoiDung != null && ma.trim().equalsIgnoreCase(maNguoiDung.trim())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void loadMaGiaoVien() {
 
-        java.util.List<String> maGV =
-                controller.getMaGiaoVien();
+        List<String> maGV = controller.getMaGiaoVien();
+        List<String> daCoTaiKhoan = getMaNguoiDungDaCoTaiKhoan();
 
         for (String ma : maGV) {
-            cboMaNguoiDung.addItem(ma);
+            boolean laMaHienTai = !isThem && ma.equalsIgnoreCase(txtMaNguoiDungHienTai);
+            if (!daCoTaiKhoan(daCoTaiKhoan, ma) || laMaHienTai) {
+                cboMaNguoiDung.addItem(ma);
+            }
         }
 
         TienIch.ComboBoxUtil.refreshOriginalItems(cboMaNguoiDung);
     }
 
     private void loadMaHocSinh() {
+        List<String> maHS = controller.getMaHocSinh();
 
-        java.util.List<String> maHS =
-                controller.getMaHocSinh();
+        List<String> daCoTaiKhoan = getMaNguoiDungDaCoTaiKhoan();
 
         for (String ma : maHS) {
-            cboMaNguoiDung.addItem(ma);
+            boolean laMaHienTai = !isThem && ma.equalsIgnoreCase(txtMaNguoiDungHienTai);
+            if (!daCoTaiKhoan(daCoTaiKhoan, ma) || laMaHienTai) {
+                cboMaNguoiDung.addItem(ma);
+            }
         }
 
         TienIch.ComboBoxUtil.refreshOriginalItems(cboMaNguoiDung);
