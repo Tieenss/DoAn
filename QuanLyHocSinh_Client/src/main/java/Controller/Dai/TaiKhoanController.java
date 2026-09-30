@@ -67,4 +67,6 @@ public class TaiKhoanController {
         return api.getMaHocSinh();
     }
 
+    public List<TaiKhoan> getAll() {return api.getAll();}
+
 }

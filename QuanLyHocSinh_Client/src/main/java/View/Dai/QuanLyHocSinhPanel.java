@@ -44,14 +44,17 @@ public class QuanLyHocSinhPanel extends JPanel {
         controller.loadTable(tableModel);
         setFormEnabled(false);
 
-        if (Model.Auth.isHocSinh()) {
-            loadThongTinCaNhan();
-            
-            setFormEnabled(false);
-
-            btnThem.setVisible(false);
-            btnXoa.setVisible(false);
-        }
+//        if (Model.Auth.isHocSinh()) {
+//            loadThongTinCaNhan();
+//
+//            setFormEnabled(false);
+//
+//            btnThem.setVisible(false);
+//            btnSua.setVisible(false);
+//            btnXoa.setVisible(false);
+//            btnLuu.setVisible(false);
+//            btnHuy.setVisible(false);
+//        }
     }
 
     private void initComponents() {
@@ -60,7 +63,7 @@ public class QuanLyHocSinhPanel extends JPanel {
 
         JPanel pnlNorth = new JPanel(new GridLayout(2, 1, 5, 5));
 
-        String titleText = Model.Auth.isHocSinh() ? "HỒ SƠ HỌC SINH" : "QUẢN LÝ HỌC SINH";
+        String titleText = "QUẢN LÝ HỌC SINH";
         JLabel lblTitle = new JLabel(titleText, JLabel.CENTER);
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 26));
         lblTitle.setForeground(new Color(0, 102, 204));
@@ -249,11 +252,15 @@ public class QuanLyHocSinhPanel extends JPanel {
         btnTimKiem.addActionListener(e -> timKiem());
         btnHienThiTatCa.addActionListener(e -> hienThiTatCa());
         
-        if (Model.Auth.isHocSinh()) {
-            pnlSearch.setVisible(false);
-            btnThem.setVisible(false);
-            btnXoa.setVisible(false);
-        } else if (Model.Auth.isGiaoVien()) {
+//        if (Model.Auth.isHocSinh()) {
+//            pnlSearch.setVisible(false);
+//            btnThem.setVisible(false);
+//            btnXoa.setVisible(false);
+//        } else if (Model.Auth.isGiaoVien()) {
+//            btnThem.setVisible(false);
+//            btnXoa.setVisible(false);
+//        }
+        if (Model.Auth.isGiaoVien()) {
             btnThem.setVisible(false);
             btnXoa.setVisible(false);
         }
@@ -280,14 +287,22 @@ public class QuanLyHocSinhPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Chọn học sinh cần sửa");
             return;
         }
+//        // Học sinh không được phép sửa thông tin
+//        if (Model.Auth.isHocSinh()) {
+//            JOptionPane.showMessageDialog(
+//                    this,
+//                    "Học sinh không có quyền sửa thông tin học sinh."
+//            );
+//            return;
+//        }
         isThem = false;
         setFormEnabled(true);
         txtMaHS.setEnabled(false);
         
-        if (Model.Auth.isHocSinh()) {
-            cboMaLop.setEnabled(false);
-            cboMaDT.setEnabled(false);
-        }
+//        if (Model.Auth.isHocSinh()) {
+//            cboMaLop.setEnabled(false);
+//            cboMaDT.setEnabled(false);
+//        }
     }
 
     private void luu() {
@@ -778,48 +793,48 @@ public class QuanLyHocSinhPanel extends JPanel {
         TienIch.ComboBoxUtil.refreshOriginalItems(cboMaDT);
     }
 
-    private void loadThongTinCaNhan() {
-        HocSinh hs = controller.getThongTinCaNhan();
-
-        if (hs != null) {
-            txtMaHS.setText(hs.getMaHS());
-            txtHoTen.setText(hs.getHoTen());
-
-            try {
-                Date d = new SimpleDateFormat("yyyy-MM-dd").parse(hs.getNgaySinh());
-                spNgaySinh.setValue(d);
-            } catch (Exception e) {
-                spNgaySinh.setValue(new Date());
-            }
-
-            cboGioiTinh.setSelectedItem(hs.getGioiTinh());
-            txtDiaChi.setText(hs.getDiaChi());
-            cboMaLop.setSelectedItem(hs.getMaLop());
-            cboMaDT.setSelectedItem(hs.getMaDT());
-            String nienKhoa = hs.getNienKhoa();
-
-            if (nienKhoa != null && !nienKhoa.trim().isEmpty()) {
-
-                try {
-                    String[] parts = nienKhoa.trim().split("-");
-
-                    if (parts.length == 2) {
-
-                        int namBatDau = Integer.parseInt(parts[0]);
-                        int namKetThuc = Integer.parseInt(parts[1]);
-
-                        spNamBatDau.setValue(namBatDau);
-                        spNamKetThuc.setValue(namKetThuc);
-                    }
-
-                } catch (NumberFormatException e) {
-
-                    int namHienTai = Calendar.getInstance().get(Calendar.YEAR);
-
-                    spNamBatDau.setValue(namHienTai);
-                    spNamKetThuc.setValue(namHienTai + 3);
-                }
-            }
-        }
-    }
+//    private void loadThongTinCaNhan() {
+//        HocSinh hs = controller.getThongTinCaNhan();
+//
+//        if (hs != null) {
+//            txtMaHS.setText(hs.getMaHS());
+//            txtHoTen.setText(hs.getHoTen());
+//
+//            try {
+//                Date d = new SimpleDateFormat("yyyy-MM-dd").parse(hs.getNgaySinh());
+//                spNgaySinh.setValue(d);
+//            } catch (Exception e) {
+//                spNgaySinh.setValue(new Date());
+//            }
+//
+//            cboGioiTinh.setSelectedItem(hs.getGioiTinh());
+//            txtDiaChi.setText(hs.getDiaChi());
+//            cboMaLop.setSelectedItem(hs.getMaLop());
+//            cboMaDT.setSelectedItem(hs.getMaDT());
+//            String nienKhoa = hs.getNienKhoa();
+//
+//            if (nienKhoa != null && !nienKhoa.trim().isEmpty()) {
+//
+//                try {
+//                    String[] parts = nienKhoa.trim().split("-");
+//
+//                    if (parts.length == 2) {
+//
+//                        int namBatDau = Integer.parseInt(parts[0]);
+//                        int namKetThuc = Integer.parseInt(parts[1]);
+//
+//                        spNamBatDau.setValue(namBatDau);
+//                        spNamKetThuc.setValue(namKetThuc);
+//                    }
+//
+//                } catch (NumberFormatException e) {
+//
+//                    int namHienTai = Calendar.getInstance().get(Calendar.YEAR);
+//
+//                    spNamBatDau.setValue(namHienTai);
+//                    spNamKetThuc.setValue(namHienTai + 3);
+//                }
+//            }
+//        }
+//    }
 }
