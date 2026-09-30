@@ -219,6 +219,7 @@ public class FrmPhongHoc extends JPanel {
     }
 
     public void addBtnTimListener(ActionListener l)     { btnTim.addActionListener(l); }
+    public void addTxtTimKiemActionListener(ActionListener l) { txtMaPhongTim.addActionListener(l); }
     public void addMaPhongTimLiveListener(javax.swing.event.DocumentListener l) {
         txtMaPhongTim.getDocument().addDocumentListener(l);
     }

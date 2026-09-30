@@ -87,13 +87,14 @@ public class TKBController {
         view.addCboLocMaLopListener(e -> doFilter.run());
         view.addCboLocThuListener(e -> doFilter.run());
         view.addCboLocNamHocListener(e -> doFilter.run());
-        view.addCboLocHocKyListener(e -> doFilter.run());
-        view.addBtnLocTimKiemListener(e -> {
+        java.awt.event.ActionListener filterAction = e -> {
             doFilter.run();
             if (view.getTable().getRowCount() == 0) {
-                view.showMessage("Không tìm thấy thời khóa biểu nào phù hợp!");
+                view.showMessage("Không tìm thấy thời khóa biểu phù hợp với điều kiện tìm kiếm");
             }
-        });
+        };
+        view.addBtnLocTimKiemListener(filterAction);
+        view.addTxtLocMonActionListener(filterAction);
 
         Runnable restoreOrderIfNeeded = () -> {
             if (isCustomOrder) {

@@ -54,12 +54,14 @@ public class PhongHocController {
             public void changedUpdate(javax.swing.event.DocumentEvent e) { doSearch.run(); }
         });
 
-        view.addBtnTimListener(e -> {
+        java.awt.event.ActionListener searchAction = e -> {
             doSearch.run();
             if (view.getTable().getRowCount() == 0) {
-                view.showMessage("Không tìm thấy phòng học nào phù hợp!");
+                view.showMessage("Không tìm thấy phòng học phù hợp với điều kiện tìm kiếm");
             }
-        });
+        };
+        view.addBtnTimListener(searchAction);
+        view.addTxtTimKiemActionListener(searchAction);
         view.addCboLoaiPhongTimListener(e -> doSearch.run());
         view.addCboTinhTrangTimListener(e -> doSearch.run());
 
