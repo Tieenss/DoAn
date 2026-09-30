@@ -29,6 +29,7 @@ import View.ThuTrang.FrmPhongHoc;
 import View.ThuTrang.FrmTKB;
 import View.Dai.QuanLyDoiTuongUuTienPanel;
 import View.Dai.QuanLyHocSinhPanel;
+import View.Dai.HoSoHocSinhPanel;
 import View.Dai.QuanLyTaiKhoanPanel;
 import View.Dat.QuanLyGiaoVienPanel;
 import View.Dat.QuanLyLopPanel;
@@ -328,7 +329,11 @@ public class MainFormNew extends JFrame {
         sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
 
         addSideHeader(sidebar, "Hệ thống & chính sách");
-        addSideButton(sidebar, "Hồ sơ học sinh (Chi tiết)", "FormHocSinh", "student.png");
+        if (Auth.isHocSinh()) {
+            addSideButton(sidebar, "Hồ sơ của tôi", "FormHocSinh", "student.png");
+        } else {
+            addSideButton(sidebar, "Quản lý học sinh", "FormHocSinh", "student.png");
+        }
         if (Auth.isAdmin()) {
             addSideButton(sidebar, "Quản lý tài khoản user", "FormTaiKhoan", "user.png");
             addSideButton(sidebar, "Đối tượng chính sách", "FormChinhSach", "policy.png");
@@ -444,7 +449,11 @@ public class MainFormNew extends JFrame {
         } else if (formCode.equals("FormToBoMon")) {
             viewToShow = new QuanLyToBoMonPanel();
         } else if (formCode.equals("FormHocSinh")) {
-            viewToShow = new QuanLyHocSinhPanel();
+            if (Auth.isHocSinh()) {
+                viewToShow = new HoSoHocSinhPanel();
+            } else {
+                viewToShow = new QuanLyHocSinhPanel();
+            }
         } else if (formCode.equals("FormTaiKhoan")) {
             viewToShow = new QuanLyTaiKhoanPanel();
         } else if (formCode.equals("FormChinhSach")) {
