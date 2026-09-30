@@ -32,7 +32,7 @@ public class QuanLyHocSinhPanel extends JPanel {
 
     private JTextField txtTimKiem;
     private JComboBox<String> cboLocNienKhoa;
-    private JButton btnTimKiem, btnHienThiTatCa;
+    private JButton btnTimKiem, btnHienThiTatCa, btnXemChiTiet;
 
     private JButton btnThem, btnSua, btnXoa, btnLuu, btnHuy;
     
@@ -197,21 +197,10 @@ public class QuanLyHocSinhPanel extends JPanel {
 
         int namHienTai = Calendar.getInstance().get(Calendar.YEAR);
 
-        spNamBatDau = new JSpinner(
-                new SpinnerNumberModel(namHienTai, 2000, 2100, 1)
-        );
-
-        spNamKetThuc = new JSpinner(
-                new SpinnerNumberModel(namHienTai + 3, 2000, 2100, 1)
-        );
-
-        spNamBatDau.setEditor(
-                new JSpinner.NumberEditor(spNamBatDau, "####")
-        );
-
-        spNamKetThuc.setEditor(
-                new JSpinner.NumberEditor(spNamKetThuc, "####")
-        );
+        spNamBatDau = new JSpinner(new SpinnerNumberModel(namHienTai, 2000, 2100, 1));
+        spNamKetThuc = new JSpinner(new SpinnerNumberModel(namHienTai + 3, 2000, 2100, 1));
+        spNamBatDau.setEditor(new JSpinner.NumberEditor(spNamBatDau, "####"));
+        spNamKetThuc.setEditor(new JSpinner.NumberEditor(spNamKetThuc, "####"));
 
         pnlNienKhoa.add(spNamBatDau);
         pnlNienKhoa.add(new JLabel("-"));
@@ -227,18 +216,21 @@ public class QuanLyHocSinhPanel extends JPanel {
         btnXoa = new JButton("Xóa");
         btnLuu = new JButton("Lưu");
         btnHuy = new JButton("Hủy");
+        btnXemChiTiet = new JButton("Xem hồ sơ");
 
         ButtonStyleHelper.styleButtonAdd(btnThem);
         ButtonStyleHelper.styleButtonEdit(btnSua);
         ButtonStyleHelper.styleButtonDelete(btnXoa);
         ButtonStyleHelper.styleButtonSave(btnLuu);
         ButtonStyleHelper.styleButtonCancel(btnHuy);
+        ButtonStyleHelper.styleButtonView(btnXemChiTiet);
 
         pnlButton.add(btnThem);
         pnlButton.add(btnSua);
         pnlButton.add(btnXoa);
         pnlButton.add(btnLuu);
         pnlButton.add(btnHuy);
+        pnlButton.add(btnXemChiTiet);
 
         pnlSouth.add(pnlButton, BorderLayout.SOUTH);
         add(pnlSouth, BorderLayout.SOUTH);
@@ -248,6 +240,8 @@ public class QuanLyHocSinhPanel extends JPanel {
         btnXoa.addActionListener(e -> xoa());
         btnLuu.addActionListener(e -> luu());
         btnHuy.addActionListener(e -> huy());
+        btnXemChiTiet.addActionListener(e -> xemChiTietHoSo());
+
 
         btnTimKiem.addActionListener(e -> timKiem());
         btnHienThiTatCa.addActionListener(e -> hienThiTatCa());
@@ -306,7 +300,6 @@ public class QuanLyHocSinhPanel extends JPanel {
     }
 
     private void luu() {
-
         if (!validateThongTinHocSinh()) {
             return;
         }
@@ -327,14 +320,12 @@ public class QuanLyHocSinhPanel extends JPanel {
 
         if (ok) {
             JOptionPane.showMessageDialog(this, "Lưu thành công");
-
             controller.loadTable(tableModel);
 
             setFormEnabled(false);
             clearForm();
 
             isThem = false;
-
         } else {
             JOptionPane.showMessageDialog(
                     this,
@@ -352,19 +343,15 @@ public class QuanLyHocSinhPanel extends JPanel {
         }
         if (JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn xóa?", "Xác nhận", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
             if (controller.xoa(txtMaHS.getText())) {
-
                 JOptionPane.showMessageDialog(
                         this,
                         "Xóa thành công",
                         "Thông báo",
                         JOptionPane.INFORMATION_MESSAGE
                 );
-
                 controller.loadTable(tableModel);
                 clearForm();
-
             } else {
-
                 JOptionPane.showMessageDialog(
                         this,
                         "Xóa thất bại! Không thể xóa học sinh.",
@@ -378,6 +365,36 @@ public class QuanLyHocSinhPanel extends JPanel {
     private void huy() {
         clearForm();
         setFormEnabled(false);
+    }
+
+    private void xemChiTietHoSo() {
+        int r = tableHS.getSelectedRow();
+        if (r < 0) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Vui lòng chọn học sinh từ danh sách để xem hồ sơ chi tiết!",
+                    "Thông báo",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
+        String maHS = tableModel.getValueAt(tableHS.convertRowIndexToModel(r), 0).toString().trim();
+
+        Window ancestor = SwingUtilities.getWindowAncestor(this);
+        JDialog dialog = new JDialog(ancestor,
+                "Hồ sơ chi tiết học sinh - " + maHS,
+                Dialog.ModalityType.APPLICATION_MODAL);
+
+        HoSoHocSinhPanel pnlHoSo = new HoSoHocSinhPanel(maHS);
+        JScrollPane scrollPane = new JScrollPane(pnlHoSo);
+        scrollPane.setBorder(null);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
+        dialog.setContentPane(scrollPane);
+        dialog.setSize(1100, 750);
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
     }
 
     private void setFormEnabled(boolean enabled) {

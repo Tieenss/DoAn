@@ -88,6 +88,8 @@ public class HocSinhController {
             if (hs != null) {
                 list.add(hs);
             }
+        } else if (Auth.isGiaoVien()) {
+            list = locTheoLopChuNhiem(api.getAllHocSinh());
         } else {
             list = api.getAllHocSinh();
         }
@@ -135,6 +137,14 @@ public class HocSinhController {
 
     public void loadComboMaLop(JComboBox<String> cbo) {
         cbo.removeAllItems();
+
+        if (Auth.isGiaoVien()) {
+            for (String ma : getDanhSachMaLopChuNhiem()) {
+                cbo.addItem(ma);
+            }
+            return;
+        }
+
         List<String> list = api.getAllMaLop();
         if (list == null) return;
 
@@ -162,6 +172,10 @@ public class HocSinhController {
 
         if (list == null) {
             throw new RuntimeException("Không thể kết nối tới Server.");
+        }
+
+        if (Auth.isGiaoVien()) {
+            list = locTheoLopChuNhiem(list);
         }
 
         if (list.isEmpty()) {
@@ -198,6 +212,42 @@ public class HocSinhController {
 
     public HocSinh getThongTinCaNhan() {
         return api.getHocSinh(Auth.maNguoiDung);
+    }
+
+    public Set<String> getDanhSachMaLopChuNhiem() {
+        Set<String> dsMaLop = new LinkedHashSet<>();
+        if (Auth.maNguoiDung == null) {
+            return dsMaLop;
+        }
+        try {
+            List<LopGVCN> listLop = lopApi.getAllLop();
+            if (listLop != null) {
+                for (LopGVCN lop : listLop) {
+                    if (lop != null && lop.getMaLop() != null
+                            && Auth.maNguoiDung.equalsIgnoreCase(lop.getMaGVCN())) {
+                        dsMaLop.add(lop.getMaLop().trim());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dsMaLop;
+    }
+
+    private List<HocSinh> locTheoLopChuNhiem(List<HocSinh> all) {
+        List<HocSinh> kq = new ArrayList<>();
+        if (all == null) {
+            return kq;
+        }
+        Set<String> maLopChuNhiem = getDanhSachMaLopChuNhiem();
+        for (HocSinh hs : all) {
+            if (hs != null && hs.getMaLop() != null
+                    && maLopChuNhiem.contains(hs.getMaLop().trim())) {
+                kq.add(hs);
+            }
+        }
+        return kq;
     }
 
     public Lop getLopCuaHocSinh(String maLop) {
@@ -468,6 +518,13 @@ public class HocSinhController {
             return maDT.trim();   // không tra được thì hiện lại mã, không để ô trống
         }
         return ten + " (" + maDT.trim() + ")";
+    }
+
+    public HocSinh getThongTinHocSinhByMa(String maHS) {
+        if (maHS == null || maHS.trim().isEmpty()) {
+            return null;
+        }
+        return api.getHocSinh(maHS.trim());
     }
 
     public List<LichThi> getLichThiCuaLop(String maLop) {
