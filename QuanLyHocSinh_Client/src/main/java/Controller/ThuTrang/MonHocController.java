@@ -50,13 +50,14 @@ public class MonHocController {
             public void changedUpdate(javax.swing.event.DocumentEvent e) { doSearch.run(); }
         });
 
-        view.addBtnTimKiemListener(e -> {
+        java.awt.event.ActionListener searchAction = e -> {
             doSearch.run();
-            String key = view.getTuKhoa();
-            if (!key.isEmpty() && view.getTable().getRowCount() == 0) {
-                view.showMessage("Không tìm thấy môn học");
+            if (view.getTable().getRowCount() == 0) {
+                view.showMessage("Không tìm thấy môn học phù hợp với điều kiện tìm kiếm");
             }
-        });
+        };
+        view.addBtnTimKiemListener(searchAction);
+        view.addTxtTimKiemActionListener(searchAction);
 
         view.addTenMHLiveListener(new javax.swing.event.DocumentListener() {
             private void updateAutoCode() {

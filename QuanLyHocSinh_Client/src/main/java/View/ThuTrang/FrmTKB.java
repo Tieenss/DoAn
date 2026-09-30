@@ -546,6 +546,7 @@ public class FrmTKB extends JPanel {
 
     public void addBtnXemDanhSachListener(ActionListener l) { btnXemDanhSach.addActionListener(l); }
     public void addBtnLocTimKiemListener(ActionListener l) { btnLocTimKiem.addActionListener(l); }
+    public void addTxtLocMonActionListener(ActionListener l) { txtLocMon.addActionListener(l); }
     public void addLocMonLiveListener(javax.swing.event.DocumentListener l) {
         txtLocMon.getDocument().addDocumentListener(l);
     }
