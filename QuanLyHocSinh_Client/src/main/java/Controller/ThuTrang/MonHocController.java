@@ -124,6 +124,11 @@ public class MonHocController {
 
         view.addBtnLuuListener(e -> {
             MonHoc m = view.getMonHocInput();
+            String errTen = ValidationUtil.validateTen(m.getTenMH(), "Tên môn học");
+            if (errTen != null) {
+                view.showMessage(errTen);
+                return;
+            }
             if (!editMode[0]) {
                 if (m.getMaMH() == null || m.getMaMH().trim().isEmpty()) {
                     String autoMa = TienIch.AutoCodeGenerator.generateMaMH(m.getTenMH());
@@ -135,11 +140,6 @@ public class MonHocController {
                     view.showMessage(errMa);
                     return;
                 }
-            }
-            String errTen = ValidationUtil.validateTen(m.getTenMH(), "Tên môn học");
-            if (errTen != null) {
-                view.showMessage(errTen);
-                return;
             }
             try {
                 if (editMode[0]) {

@@ -135,6 +135,16 @@ public class PhongHocController {
         view.addBtnLuuListener(e -> {
             try {
                 PhongHoc p = view.getPhongHocInput();
+                String errTen = ValidationUtil.validateTen(p.getTenPhong(), "Tên phòng học");
+                if (errTen != null) {
+                    view.showMessage(errTen);
+                    return;
+                }
+                String errSucChua = ValidationUtil.validateSucChua(view.getSucChuaText());
+                if (errSucChua != null) {
+                    view.showMessage(errSucChua);
+                    return;
+                }
                 if (!editMode[0]) {
                     if (p.getMaPhong() == null || p.getMaPhong().trim().isEmpty()) {
                         String autoMa = TienIch.AutoCodeGenerator.generateMaPhong(
@@ -147,16 +157,6 @@ public class PhongHocController {
                         view.showMessage(errMa);
                         return;
                     }
-                }
-                String errTen = ValidationUtil.validateTen(p.getTenPhong(), "Tên phòng học");
-                if (errTen != null) {
-                    view.showMessage(errTen);
-                    return;
-                }
-                String errSucChua = ValidationUtil.validateSucChua(view.getSucChuaText());
-                if (errSucChua != null) {
-                    view.showMessage(errSucChua);
-                    return;
                 }
                 if (editMode[0]) {
                     apiClient.update(p.getMaPhong(), p);
