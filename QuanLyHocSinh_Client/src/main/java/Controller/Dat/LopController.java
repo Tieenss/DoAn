@@ -12,6 +12,7 @@ import Model.Giaovien;
 import Model.Lop;
 import Model.LopGVCN;
 import View.Dat.QuanLyLopPanel;
+import TienIch.XuatExcel;
 
 public class LopController {
 
@@ -51,10 +52,40 @@ public class LopController {
             loadTable();
         });
         view.getBtnTimKiem().addActionListener(e -> searchData());
+        view.addBtnXuatExcelListener(e -> XuatExcel.xuatFileExcel(view.getTableLop(), view));
+    }
+
+    private void loadGVCNComboBox(String currentMaLop) {
+        view.getCboGVCN().removeAllItems();
+        try {
+            List<Giaovien> list = gvDao.getAll();
+            List<LopGVCN> listLop = dao.getAllLop();
+            
+            java.util.Set<String> assignedGV = new java.util.HashSet<>();
+            for (LopGVCN l : listLop) {
+                if (l.getMaGVCN() != null && !l.getMaGVCN().isEmpty()) {
+                    if (currentMaLop == null || !l.getMaLop().equals(currentMaLop)) {
+                        assignedGV.add(l.getMaGVCN());
+                    }
+                }
+            }
+
+            for (Giaovien gv : list) {
+                if (!assignedGV.contains(gv.getMaGV())) {
+                    view.getCboGVCN().addItem(gv);
+                }
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(
+                    view,
+                    "Không thể tải danh sách giáo viên!\n" + ex.getMessage(),
+                    "Lỗi",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
     }
 
     private void loadComboBox() {
-        view.getCboGVCN().removeAllItems();
         view.getCboNienKhoa().removeAllItems();
         view.getCboLocNienKhoa().removeAllItems();
         view.getCboLocNienKhoa().addItem("Tất cả");
@@ -68,19 +99,7 @@ public class LopController {
                 view.getCboLocNienKhoa().addItem(nienKhoa);
             }
         }
-        try {
-            List<Giaovien> list = gvDao.getAll();
-            for (Giaovien gv : list) {
-                view.getCboGVCN().addItem(gv);
-            }
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(
-                    view,
-                    "Không thể tải danh sách giáo viên!\n" + ex.getMessage(),
-                    "Lỗi",
-                    JOptionPane.ERROR_MESSAGE
-            );
-        }
+        loadGVCNComboBox(null);
     }
 
     private void loadTable() {
@@ -101,7 +120,9 @@ public class LopController {
         if (r < 0) {
             return;
         }
-        view.getTxtMaLop().setText(view.getTableLop().getValueAt(r, 0).toString());
+        
+        String currentMaLop = view.getTableLop().getValueAt(r, 0).toString();
+        view.getTxtMaLop().setText(currentMaLop);
         view.getTxtTenLop().setText(view.getTableLop().getValueAt(r, 1).toString());
         String nienKhoa = view.getTableLop().getValueAt(r, 2).toString();
         boolean foundNienKhoa = false;
@@ -117,6 +138,8 @@ public class LopController {
         }
         view.getCboNienKhoa().setSelectedItem(nienKhoa);
 
+        loadGVCNComboBox(currentMaLop);
+
         String tenGV = view.getTableLop().getValueAt(r, 3).toString();
 
         for (int i = 0; i < view.getCboGVCN().getItemCount(); i++) {
@@ -131,6 +154,7 @@ public class LopController {
     private void them() {
         clearForm();
         currentMode = "ADD";
+        loadGVCNComboBox(null);
         setButtonState(false);
         view.getTxtMaLop().setEnabled(true);
         view.getTxtMaLop().requestFocus();

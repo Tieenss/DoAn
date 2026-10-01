@@ -57,11 +57,18 @@ public class GiaoVienRestController {
     }
 
     @DeleteMapping("/{maGV}")
-    public ResponseEntity<Void> delete(
+    public ResponseEntity<?> delete(
             @PathVariable String maGV) {
 
-        giaoVienService.deleteGiaoVien(maGV);
-
-        return ResponseEntity.noContent().build();
+        try {
+            giaoVienService.deleteGiaoVien(maGV);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(409).body(e.getMessage());
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            return ResponseEntity.status(409).body("Không thể xóa giáo viên vì đang có dữ liệu ràng buộc.");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Không thể xóa giáo viên: " + e.getMessage());
+        }
     }
 }

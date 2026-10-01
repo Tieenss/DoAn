@@ -42,4 +42,8 @@ public interface LopRepository extends JpaRepository<Lop, String> {
     @Query("SELECT DISTINCT l.nienKhoa FROM Lop l ORDER BY l.nienKhoa")
     List<String> findDistinctNienKhoa();
 
+    boolean existsByGiaoVienChuNhiem_MaGV(String maGV);
+
+    List<Lop> findByGiaoVienChuNhiem_MaGV(String maGV);
+
 }

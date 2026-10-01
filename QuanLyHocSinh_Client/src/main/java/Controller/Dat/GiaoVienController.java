@@ -13,6 +13,7 @@ import Api.Đat.ToHopMonApi;
 import Model.Giaovien;
 import Model.ToBoMon;
 import View.Dat.QuanLyGiaoVienPanel;
+import TienIch.XuatExcel;
 
 public class GiaoVienController {
 
@@ -55,9 +56,14 @@ public class GiaoVienController {
 
         view.getBtnHuy().addActionListener(e -> huy());
 
-        view.getBtnXem().addActionListener(e -> loadTable());
+        view.getBtnXem().addActionListener(e -> {
+            loadTable();
+            huy();
+        });
 
         view.getBtnTimKiem().addActionListener(e -> search());
+        
+        view.addBtnXuatExcelListener(e -> XuatExcel.xuatFileExcel(view.getTableGV(), view));
     }
 
     private void loadComboBox() {
@@ -218,7 +224,7 @@ public class GiaoVienController {
         } catch (Exception e) {
 
             JOptionPane.showMessageDialog(view,
-                    "Xóa thất bại");
+                    e.getMessage());
 
         }
 
@@ -295,9 +301,7 @@ public class GiaoVienController {
 
             loadTable();
 
-            clearForm();
-
-            setButtonState(true);
+            huy();
 
         } catch (Exception e) {
 

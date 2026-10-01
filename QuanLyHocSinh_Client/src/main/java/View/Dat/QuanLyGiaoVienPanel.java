@@ -21,7 +21,7 @@ public class QuanLyGiaoVienPanel extends JPanel {
     private JSpinner spNgaySinh;
     private JComboBox<ToBoMon> cboMaToHop;
 
-    private JButton btnThem, btnSua, btnXoa, btnLuu, btnHuy, btnXem, btnTimKiem;
+    private JButton btnThem, btnSua, btnXoa, btnLuu, btnHuy, btnXem, btnTimKiem, btnXuatExcel;
 
     public QuanLyGiaoVienPanel() {
         initComponents();
@@ -157,6 +157,10 @@ public class QuanLyGiaoVienPanel extends JPanel {
         pnlBtn.add(btnXoa);
         pnlBtn.add(btnLuu);
         pnlBtn.add(btnHuy);
+        
+        btnXuatExcel = new JButton("Xuất Excel");
+        ButtonStyleHelper.styleButtonExport(btnXuatExcel);
+        pnlBtn.add(btnXuatExcel);
 
         pnlSouth.add(pnlBtn, BorderLayout.SOUTH);
         add(pnlSouth, BorderLayout.SOUTH);
@@ -271,4 +275,7 @@ public class QuanLyGiaoVienPanel extends JPanel {
         return btnXem;
     }
 
+    public void addBtnXuatExcelListener(ActionListener ac) { 
+        btnXuatExcel.addActionListener(ac); 
+    }
 }

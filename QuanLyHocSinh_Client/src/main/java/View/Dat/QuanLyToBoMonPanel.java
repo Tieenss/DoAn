@@ -23,7 +23,7 @@ public class QuanLyToBoMonPanel extends JPanel {
 
     private JTextField txtMaToHop, txtTenToHop;
     private JTextField txtTimKiem;
-    private JButton btnThem, btnSua, btnXoa, btnLuu, btnHuy, btnTim;
+    private JButton btnThem, btnSua, btnXoa, btnLuu, btnHuy, btnTim, btnXuatExcel;
 
     public QuanLyToBoMonPanel() {
         initComponents();
@@ -109,12 +109,17 @@ public class QuanLyToBoMonPanel extends JPanel {
         btnXoa.setPreferredSize(btnSize);
         btnLuu.setPreferredSize(btnSize);
         btnHuy.setPreferredSize(btnSize);
+        
+        btnXuatExcel = new JButton("Xuất Excel");
+        ButtonStyleHelper.styleButtonExport(btnXuatExcel);
+        btnXuatExcel.setPreferredSize(new Dimension(110, 40));
 
         pnlBtn.add(btnThem);
         pnlBtn.add(btnSua);
         pnlBtn.add(btnXoa);
         pnlBtn.add(btnLuu);
         pnlBtn.add(btnHuy);
+        pnlBtn.add(btnXuatExcel);
 
         pnlSouth.add(pnlBtn, BorderLayout.SOUTH);
         add(pnlSouth, BorderLayout.SOUTH);
@@ -164,4 +169,5 @@ public class QuanLyToBoMonPanel extends JPanel {
     public JButton getBtnLuu() { return btnLuu; }
     public JButton getBtnHuy() { return btnHuy; }
     public JButton getBtnTim() { return btnTim; }
+    public void addBtnXuatExcelListener(java.awt.event.ActionListener l) { btnXuatExcel.addActionListener(l); }
 }

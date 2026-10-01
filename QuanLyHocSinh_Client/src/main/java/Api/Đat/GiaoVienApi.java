@@ -1,10 +1,5 @@
 package Api.Đat;
 
-import Api.ApiConfig;
-import Model.Giaovien;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -13,6 +8,12 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import Api.ApiConfig;
+import Model.Giaovien;
 
 public class GiaoVienApi {
 
@@ -28,14 +29,15 @@ public class GiaoVienApi {
                 .GET()
                 .build();
 
-        HttpResponse<String> response =
-                client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response
+                = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != 200) {
             throw new Exception("Không lấy được danh sách giáo viên.");
         }
 
-        Type type = new TypeToken<List<Giaovien>>() {}.getType();
+        Type type = new TypeToken<List<Giaovien>>() {
+        }.getType();
 
         return gson.fromJson(response.body(), type);
 
@@ -48,8 +50,8 @@ public class GiaoVienApi {
                 .GET()
                 .build();
 
-        HttpResponse<String> response =
-                client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response
+                = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() == 404) {
             return null;
@@ -76,8 +78,8 @@ public class GiaoVienApi {
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
 
-        HttpResponse<String> response =
-                client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response
+                = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != 200 && response.statusCode() != 201) {
             throw new Exception("Không thể thêm giáo viên.");
@@ -96,8 +98,8 @@ public class GiaoVienApi {
                 .PUT(HttpRequest.BodyPublishers.ofString(json))
                 .build();
 
-        HttpResponse<String> response =
-                client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response
+                = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() == 404) {
             throw new Exception("Không tìm thấy giáo viên.");
@@ -117,15 +119,19 @@ public class GiaoVienApi {
                 .DELETE()
                 .build();
 
-        HttpResponse<String> response =
-                client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response
+                = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() == 404) {
             throw new Exception("Không tìm thấy giáo viên.");
         }
 
         if (response.statusCode() != 204 && response.statusCode() != 200) {
-            throw new Exception("Không thể xóa giáo viên.");
+            String msg = response.body();
+            if (msg == null || msg.trim().isEmpty() || msg.startsWith("{")) {
+                msg = "Không thể xóa giáo viên.";
+            }
+            throw new Exception(msg);
         }
 
         return true;
@@ -141,14 +147,15 @@ public class GiaoVienApi {
                 .GET()
                 .build();
 
-        HttpResponse<String> response =
-                client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response
+                = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != 200) {
             throw new Exception("Không tìm kiếm được giáo viên.");
         }
 
-        Type type = new TypeToken<List<Giaovien>>() {}.getType();
+        Type type = new TypeToken<List<Giaovien>>() {
+        }.getType();
 
         return gson.fromJson(response.body(), type);
     }

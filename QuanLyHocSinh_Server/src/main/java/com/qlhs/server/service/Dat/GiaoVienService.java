@@ -14,6 +14,9 @@ public class GiaoVienService {
     @Autowired
     private GiaoVienRepository giaoVienRepository;
 
+    @Autowired
+    private com.qlhs.server.repository.Dat.LopRepository lopRepository;
+
     public List<Map<String, Object>> getAllGiaoVien() {
         return giaoVienRepository.findAllGiaoVienWithToHop();
     }
@@ -31,6 +34,13 @@ public class GiaoVienService {
     }
 
     public void deleteGiaoVien(String maGV) {
+        List<com.qlhs.server.entity.Lop> lops = lopRepository.findByGiaoVienChuNhiem_MaGV(maGV);
+        if (!lops.isEmpty()) {
+            String tenLops = lops.stream()
+                    .map(com.qlhs.server.entity.Lop::getTenLop)
+                    .collect(java.util.stream.Collectors.joining(", "));
+            throw new IllegalStateException("Giáo viên này đang làm chủ nhiệm lớp: " + tenLops);
+        }
         giaoVienRepository.deleteById(maGV);
     }
 

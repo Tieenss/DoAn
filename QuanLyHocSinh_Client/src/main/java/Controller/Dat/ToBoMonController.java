@@ -7,6 +7,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 import javax.swing.JOptionPane;
+import TienIch.XuatExcel;
 
 public class ToBoMonController {
 
@@ -153,5 +154,7 @@ public class ToBoMonController {
             view.getTableTBM().clearSelection();
             loadData(); 
         });
+
+        view.addBtnXuatExcelListener(e -> XuatExcel.xuatFileExcel(view.getTableTBM(), view));
     }
 }
