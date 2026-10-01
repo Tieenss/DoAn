@@ -134,6 +134,7 @@ public class DiemController {
                 String err = dao.addDiem(d);
                 if (err == null) {
                     view.showMessage("Thêm mới điểm học sinh thành công!");
+                    loadComboBoxData(); // Tải lại danh sách ComboBox để cập nhật Năm học mới lên bộ lọc
                     loadData();
                     view.clearForm();
                     editMode[0] = false;
@@ -177,6 +178,7 @@ public class DiemController {
                 String updateErr = dao.updateDiemResult(d);
                 if (updateErr == null) {
                     view.showMessage("Đã cập nhật điểm thành công!");
+                    loadComboBoxData(); // Tải lại danh sách ComboBox
                     loadData();
                     view.clearForm();
                     editMode[0] = false;

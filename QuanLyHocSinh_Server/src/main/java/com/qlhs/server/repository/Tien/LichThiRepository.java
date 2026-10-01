@@ -31,8 +31,9 @@ public interface LichThiRepository extends JpaRepository<LichThi, Integer> {
     List<LichThi> searchLichThiNative(@Param("keyword") String keyword, @Param("namHoc") String namHoc);
 
     @Query("SELECT l FROM LichThi l JOIN FETCH l.monHoc LEFT JOIN FETCH l.lop " +
-           "WHERE l.ngayThi = :ngayThi AND l.maPhong = :maPhong AND l.maLT != :excludeId " +
-           "AND l.gioBatDau < :gioKetThuc AND l.gioKetThuc > :gioBatDau")
+            "WHERE l.ngayThi = :ngayThi AND l.maPhong = :maPhong AND l.maLT != :excludeId " +
+            "AND l.gioBatDau < CAST(:gioKetThuc AS time) AND l.gioKetThuc > CAST(:gioBatDau AS time)")
+
     List<LichThi> findRoomConflicts(
             @Param("ngayThi") java.time.LocalDate ngayThi,
             @Param("maPhong") String maPhong,
@@ -41,8 +42,9 @@ public interface LichThiRepository extends JpaRepository<LichThi, Integer> {
             @Param("excludeId") int excludeId);
 
     @Query("SELECT l FROM LichThi l JOIN FETCH l.monHoc LEFT JOIN FETCH l.lop " +
-           "WHERE l.ngayThi = :ngayThi AND l.maLop = :maLop AND l.maLT != :excludeId " +
-           "AND l.gioBatDau < :gioKetThuc AND l.gioKetThuc > :gioBatDau")
+            "WHERE l.ngayThi = :ngayThi AND l.maLop = :maLop AND l.maLT != :excludeId " +
+            "AND l.gioBatDau < CAST(:gioKetThuc AS time) AND l.gioKetThuc > CAST(:gioBatDau AS time)")
+
     List<LichThi> findClassConflicts(
             @Param("ngayThi") java.time.LocalDate ngayThi,
             @Param("maLop") String maLop,
