@@ -40,12 +40,17 @@ public class Hocphicontroller {
                 view.setCrudButtonState(!hasSelected && !updateMode[0], hasSelected && !updateMode[0], hasSelected && !updateMode[0], updateMode[0], updateMode[0]);
                 view.setInputEditable(updateMode[0]);
                 if (updateMode[0] && view.getTableHocPhi().getSelectedRow() != -1) {
-                    view.getTxtMaHS().setEditable(false); 
+                    view.getTxtMaHS().setEditable(false);
                 }
             }
         };
 
         setFormState.run();
+
+        if (Auth.isHocSinh() && view.getTxtMaLop() != null) {
+            view.getTxtMaLop().setEnabled(false);
+            view.getTxtMaLop().setText("");
+        }
 
         if (view.getBtnLoc() != null) view.getBtnLoc().addActionListener(e -> locDuLieu());
 
@@ -54,9 +59,9 @@ public class Hocphicontroller {
                 updateMode[0] = false;
                 selectedMaHP = 0;
                 view.refreshForm();
-                updateMode[0] = true; 
+                updateMode[0] = true;
                 setFormState.run();
-                updateMode[0] = false; 
+                updateMode[0] = false;
             });
         }
 
@@ -150,7 +155,7 @@ public class Hocphicontroller {
     private void locDuLieu() {
         try {
             Object cboHocKySelected = view.getCboHocKy().getSelectedItem();
-            String maLop = view.getTxtMaLop().getText().trim().toUpperCase();
+            String maLop = Auth.isHocSinh() ? "" : view.getTxtMaLop().getText().trim().toUpperCase();
             String hocKyStr = (cboHocKySelected != null) ? cboHocKySelected.toString().trim() : "";
             Object cboNamHocObj = view.getCboLocNamHoc().getSelectedItem();
             String namHoc = (cboNamHocObj != null) ? cboNamHocObj.toString().trim() : "";
@@ -197,16 +202,46 @@ public class Hocphicontroller {
             long tongTien = Long.parseLong(tongTienStr);
             long mienGiam = mienGiamStr.isEmpty() ? 0 : Long.parseLong(mienGiamStr);
 
+            // FIX 2: Bắt lỗi số âm
+            if (tongTien < 0) {
+                JOptionPane.showMessageDialog(view, "Tổng tiền học phí không được là số âm!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+
+            if (mienGiam < 0) {
+                JOptionPane.showMessageDialog(view, "Số tiền miễn giảm không được là số âm!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+
             if (mienGiam > tongTien) {
                 JOptionPane.showMessageDialog(view, "Số tiền miễn giảm không được lớn hơn tổng tiền học phí!", "Lỗi", JOptionPane.ERROR_MESSAGE);
                 return false;
+            }
+
+            int hocKy = Integer.parseInt(hocKyStr);
+
+            // FIX 1: Check trùng học phí (Chỉ kiểm tra khi THÊM MỚI)
+            if (!isUpdate) {
+                List<Hocphi> allHocPhi = dao.getAllHocPhi();
+                boolean isDuplicate = allHocPhi.stream().anyMatch(hp ->
+                        hp.getMaHS() != null && hp.getMaHS().equalsIgnoreCase(maHS) &&
+                                hp.getHocKy() == hocKy &&
+                                hp.getNamHoc() != null && hp.getNamHoc().equalsIgnoreCase(namHoc)
+                );
+
+                if (isDuplicate) {
+                    JOptionPane.showMessageDialog(view,
+                            "Học sinh " + maHS + " đã có bản ghi học phí Kỳ " + hocKy + " - Năm học " + namHoc + "!",
+                            "Trùng dữ liệu", JOptionPane.WARNING_MESSAGE);
+                    return false;
+                }
             }
 
             Hocphi hp = new Hocphi();
             if (isUpdate) hp.setMaHP(selectedMaHP);
             hp.setMaHS(maHS);
             hp.setMaLop(maLop);
-            hp.setHocKy(Integer.parseInt(hocKyStr));
+            hp.setHocKy(hocKy);
             hp.setNamHoc(namHoc);
             hp.setTongTien(tongTien);
             hp.setMienGiam(mienGiam);
@@ -222,7 +257,7 @@ public class Hocphicontroller {
             JOptionPane.showMessageDialog(view, "Lưu thất bại! Kiểm tra kết nối API/DB.");
             return false;
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(view, "Số tiền học phí hoặc miễn giảm phải nhập định dạng số!");
+            JOptionPane.showMessageDialog(view, "Số tiền học phí hoặc miễn giảm phải nhập định dạng số nguyên hợp lệ!");
             return false;
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(view, "Lỗi hệ thống: " + ex.getMessage());

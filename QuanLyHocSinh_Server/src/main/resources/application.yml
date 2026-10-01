@@ -3,7 +3,8 @@ server:
 
 spring:
   datasource:
-    url: jdbc:sqlserver://localhost:1433;databaseName=QuanLyHocSinh;encrypt=true;trustServerCertificate=true
+    url: jdbc:sqlserver://localhost;instanceName=SQLEXPRESS2025;databaseName=QuanLyHocSinh;encrypt=true;trustServerCertificate=true
+    #url: jdbc:sqlserver://localhost:1433;databaseName=QuanLyHocSinh;encrypt=true;trustServerCertificate=true
     #url: jdbc:sqlserver://localhost:61091;databaseName=QuanLyHocSinh;encrypt=true;trustServerCertificate=true
     username: sa
     password: 123456

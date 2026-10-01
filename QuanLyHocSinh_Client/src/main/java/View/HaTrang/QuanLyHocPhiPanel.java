@@ -32,7 +32,6 @@ public class QuanLyHocPhiPanel extends JPanel {
 
     public QuanLyHocPhiPanel() {
         initComponents();
-        Hocphicontroller controller = new Hocphicontroller(this);
     }
 
     private void initComponents() {

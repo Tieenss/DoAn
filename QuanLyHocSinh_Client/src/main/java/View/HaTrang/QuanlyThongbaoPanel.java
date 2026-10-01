@@ -21,7 +21,6 @@ public class QuanlyThongbaoPanel extends JPanel {
 
     public QuanlyThongbaoPanel() {
         initComponents();
-        Thongbaocontroller controller = new Thongbaocontroller(this);
     }
 
     private void initComponents() {
