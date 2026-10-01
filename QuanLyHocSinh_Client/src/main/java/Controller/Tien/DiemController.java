@@ -82,6 +82,15 @@ public class DiemController {
             setAddState.run();
         });
 
+        view.addBtnTaoNhanhListener(e -> {
+            View.Tien.TaoDiemNhanhDialog dialog = new View.Tien.TaoDiemNhanhDialog(javax.swing.SwingUtilities.getWindowAncestor(view));
+            dialog.setVisible(true);
+            if (dialog.isSuccess()) {
+                loadComboBoxData();
+                loadData();
+            }
+        });
+
         view.addBtnSuaListener(e -> {
             int row = view.getTable().getSelectedRow();
             if (row == -1) {
@@ -190,55 +199,102 @@ public class DiemController {
         });
 
         view.addBtnXoaListener(e -> {
-            int row = view.getTable().getSelectedRow();
-            if (row == -1) {
-                view.showMessage("Vui lòng chọn dòng điểm cần xóa trên bảng!");
+            int[] rows = view.getTable().getSelectedRows();
+            if (rows.length == 0) {
+                view.showMessage("Vui lòng chọn ít nhất một dòng điểm cần xóa trên bảng!");
                 return;
             }
 
-            String maHS = String.valueOf(view.getTable().getValueAt(row, 0));
-            String tenHS = String.valueOf(view.getTable().getValueAt(row, 1));
-            String tenMon = String.valueOf(view.getTable().getValueAt(row, 3));
-            String namHoc = String.valueOf(view.getTable().getValueAt(row, 4));
-            int hocKy = Integer.parseInt(view.getTable().getValueAt(row, 5).toString());
+            if (rows.length == 1) {
+                int row = rows[0];
+                String maHS = String.valueOf(view.getTable().getValueAt(row, 0));
+                String tenHS = String.valueOf(view.getTable().getValueAt(row, 1));
+                String tenMon = String.valueOf(view.getTable().getValueAt(row, 3));
+                String namHoc = String.valueOf(view.getTable().getValueAt(row, 4));
+                int hocKy = Integer.parseInt(view.getTable().getValueAt(row, 5).toString());
 
-            String maMH = "";
-            if (monHocList != null) {
-                for (MonHoc m : monHocList) {
-                    if (m.getTenMH().equals(tenMon) || m.getMaMH().equals(tenMon)) {
-                        maMH = m.getMaMH();
-                        break;
+                String maMH = "";
+                if (monHocList != null) {
+                    for (MonHoc m : monHocList) {
+                        if (m.getTenMH().equals(tenMon) || m.getMaMH().equals(tenMon)) {
+                            maMH = m.getMaMH();
+                            break;
+                        }
                     }
                 }
-            }
-            if (maMH.isEmpty()) maMH = tenMon;
+                if (maMH.isEmpty()) maMH = tenMon;
 
-            String entityInfo = String.format("Học sinh: %s (%s) - Môn: %s - HK: %d - Năm: %s",
-                    tenHS, maHS, tenMon, hocKy, namHoc);
+                String entityInfo = String.format("Học sinh: %s (%s) - Môn: %s - HK: %d - Năm: %s",
+                        tenHS, maHS, tenMon, hocKy, namHoc);
 
-            List<String> impacts = java.util.Arrays.asList(
-                "Bản ghi điểm môn học này của học sinh sẽ bị XÓA VĨNH VIỄN khỏi hệ thống.",
-                "Học sinh sẽ bị thiếu điểm môn này -> Không thể tính Điểm tổng kết học kỳ.",
-                "Không đủ điều kiện xét danh hiệu thi đua và xếp loại học lực cho học kỳ.",
-                "Thao tác này KHÔNG THỂ KHÔI PHỤC tự động!"
-            );
+                List<String> impacts = java.util.Arrays.asList(
+                    "Bản ghi điểm môn học này của học sinh sẽ bị XÓA VĨNH VIỄN khỏi hệ thống.",
+                    "Học sinh sẽ bị thiếu điểm môn này -> Không thể tính Điểm tổng kết học kỳ.",
+                    "Không đủ điều kiện xét danh hiệu thi đua và xếp loại học lực cho học kỳ.",
+                    "Thao tác này KHÔNG THỂ KHÔI PHỤC tự động!"
+                );
 
-            boolean pass = TienIch.DangerConfirmDialog.showDeleteConfirmation(
-                    view, "CẢNH BÁO NGUY HIỂM: XÓA BẢNG ĐIỂM", entityInfo, impacts);
+                boolean pass = TienIch.DangerConfirmDialog.showDeleteConfirmation(
+                        view, "CẢNH BÁO NGUY HIỂM: XÓA BẢNG ĐIỂM", entityInfo, impacts);
 
-            if (!pass) {
-                return;
-            }
+                if (!pass) return;
 
-            String delErr = dao.deleteDiem(maHS, maMH, hocKy, namHoc);
-            if (delErr == null) {
-                view.showMessage("Xóa bảng điểm thành công!");
+                String delErr = dao.deleteDiem(maHS, maMH, hocKy, namHoc);
+                if (delErr == null) {
+                    view.showMessage("Xóa bảng điểm thành công!");
+                    loadData();
+                    view.clearForm();
+                    editMode[0] = false;
+                    setIdleState.run();
+                } else {
+                    view.showMessage("Xóa thất bại: " + delErr);
+                }
+            } else {
+                String entityInfo = String.format("Bạn đang yêu cầu xóa %d bản ghi điểm cùng lúc.", rows.length);
+                List<String> impacts = java.util.Arrays.asList(
+                    "Toàn bộ các bản ghi điểm đã chọn sẽ bị XÓA VĨNH VIỄN khỏi hệ thống.",
+                    "Các học sinh bị xóa điểm sẽ không thể tính tổng kết học kỳ.",
+                    "Thao tác xóa hàng loạt này KHÔNG THỂ KHÔI PHỤC!"
+                );
+
+                boolean pass = TienIch.DangerConfirmDialog.showDeleteConfirmation(
+                        view, "CẢNH BÁO NGUY HIỂM: XÓA NHIỀU BẢNG ĐIỂM", entityInfo, impacts);
+
+                if (!pass) return;
+
+                int successCount = 0;
+                int failCount = 0;
+                for (int row : rows) {
+                    String maHS = String.valueOf(view.getTable().getValueAt(row, 0));
+                    String tenMon = String.valueOf(view.getTable().getValueAt(row, 3));
+                    String namHoc = String.valueOf(view.getTable().getValueAt(row, 4));
+                    int hocKy = Integer.parseInt(view.getTable().getValueAt(row, 5).toString());
+
+                    String maMH = "";
+                    if (monHocList != null) {
+                        for (MonHoc m : monHocList) {
+                            if (m.getTenMH().equals(tenMon) || m.getMaMH().equals(tenMon)) {
+                                maMH = m.getMaMH();
+                                break;
+                            }
+                        }
+                    }
+                    if (maMH.isEmpty()) maMH = tenMon;
+
+                    String delErr = dao.deleteDiem(maHS, maMH, hocKy, namHoc);
+                    if (delErr == null) successCount++;
+                    else failCount++;
+                }
+
+                if (failCount == 0) {
+                    view.showMessage(String.format("Xóa thành công toàn bộ %d bảng điểm!", successCount));
+                } else {
+                    view.showMessage(String.format("Đã xóa xong. Thành công: %d, Thất bại: %d", successCount, failCount));
+                }
                 loadData();
                 view.clearForm();
                 editMode[0] = false;
                 setIdleState.run();
-            } else {
-                view.showMessage("Xóa thất bại: " + delErr);
             }
         });
 

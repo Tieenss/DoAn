@@ -158,35 +158,21 @@ public class LichThiController {
             editMode[0] = false;
             view.clearForm();
             view.getTable().clearSelection();
-
             int maxId = 0;
-            for(int i=0; i<view.getTable().getRowCount(); i++) {
-                try {
-                    int id = Integer.parseInt(view.getTable().getValueAt(i, 0).toString());
-                    if (id > maxId) maxId = id;
-                } catch(Exception ex) {}
+            List<Model.LichThi> all = dao.getAllLichThi();
+            if (all != null) {
+                for (Model.LichThi l : all) {
+                    if (l.getMaLT() > maxId) {
+                        maxId = l.getMaLT();
+                    }
+                }
             }
             view.getCboMaLT().getEditor().setItem(String.valueOf(maxId + 1));
             
             setAddState.run();
         });
         
-        view.getCboMaLT().addActionListener(e -> {
-            String selected = "";
-            if (view.getCboMaLT().getSelectedItem() != null) {
-                selected = view.getCboMaLT().getSelectedItem().toString();
-            }
-            if(!selected.isEmpty()) {
-                
-                for(int i=0; i<view.getTable().getRowCount(); i++) {
-                    if(view.getTable().getValueAt(i, 0).toString().equals(selected)) {
-                        view.getTable().setRowSelectionInterval(i, i);
 
-                        break;
-                    }
-                }
-            }
-        });
         view.addBtnSuaListener(e -> {
             int row = view.getTable().getSelectedRow();
             if (row == -1) {
@@ -268,11 +254,12 @@ public class LichThiController {
             if (editMode[0]) {
                 // SỬA LỊCH THI -> CẢNH BÁO NGUY HIỂM 2 BƯỚC
                 int row = view.getTable().getSelectedRow();
-                String oldNgay = row >= 0 && view.getTable().getValueAt(row, 3) != null ? view.getTable().getValueAt(row, 3).toString() : "";
-                String oldGioBD = row >= 0 && view.getTable().getValueAt(row, 4) != null ? view.getTable().getValueAt(row, 4).toString() : "";
-                String oldGioKT = row >= 0 && view.getTable().getValueAt(row, 5) != null ? view.getTable().getValueAt(row, 5).toString() : "";
-                String oldPhong = row >= 0 && view.getTable().getValueAt(row, 6) != null ? view.getTable().getValueAt(row, 6).toString() : "";
-                String oldLop = row >= 0 && view.getTable().getValueAt(row, 7) != null ? view.getTable().getValueAt(row, 7).toString() : "";
+                LichThi oldLt = view.getLichThiAt(row);
+                String oldNgay = oldLt != null && oldLt.getNgayThi() != null ? oldLt.getNgayThi() : "";
+                String oldGioBD = oldLt != null && oldLt.getGioBatDau() != null ? oldLt.getGioBatDau() : "";
+                String oldGioKT = oldLt != null && oldLt.getGioKetThuc() != null ? oldLt.getGioKetThuc() : "";
+                String oldPhong = oldLt != null && oldLt.getMaPhong() != null ? oldLt.getMaPhong() : "";
+                String oldLop = oldLt != null && oldLt.getMaLop() != null ? oldLt.getMaLop() : "";
 
                 List<String[]> changes = new ArrayList<>();
                 changes.add(new String[]{"Ngày thi", oldNgay, lt.getNgayThi()});
@@ -310,10 +297,20 @@ public class LichThiController {
                     view.showMessage("Cập nhật thất bại:\n" + err);
                 }
             } else {
+                int maxId = 0;
+                if (allExams != null) {
+                    for (Model.LichThi l : allExams) {
+                        if (l.getMaLT() > maxId) {
+                            maxId = l.getMaLT();
+                        }
+                    }
+                }
+                lt.setMaLT(maxId + 1);
+
                 String err = dao.addLichThiResult(lt);
                 if (err == null) {
                     view.showMessage("Thêm lịch thi thành công!");
-                    loadComboBoxData(); // <--- Nạp lại danh sách năm học & kỳ thi mới
+                    loadComboBoxData(); 
                     loadAll();
                     view.clearForm();
                     editMode[0] = false;
@@ -331,10 +328,11 @@ public class LichThiController {
             }
 
             int row = view.getTable().getSelectedRow();
-            String kyThi = row >= 0 && view.getTable().getValueAt(row, 1) != null ? view.getTable().getValueAt(row, 1).toString() : "";
-            String mon = row >= 0 && view.getTable().getValueAt(row, 2) != null ? view.getTable().getValueAt(row, 2).toString() : "";
-            String ngay = row >= 0 && view.getTable().getValueAt(row, 3) != null ? view.getTable().getValueAt(row, 3).toString() : "";
-            String lop = row >= 0 && view.getTable().getValueAt(row, 7) != null ? view.getTable().getValueAt(row, 7).toString() : "";
+            LichThi oldLt = view.getLichThiAt(row);
+            String kyThi = oldLt != null && oldLt.getTenKyThi() != null ? oldLt.getTenKyThi() : "";
+            String mon = oldLt != null && oldLt.getTenMH() != null ? oldLt.getTenMH() : (oldLt != null && oldLt.getMaMH() != null ? oldLt.getMaMH() : "");
+            String ngay = oldLt != null && oldLt.getNgayThi() != null ? oldLt.getNgayThi() : "";
+            String lop = oldLt != null && oldLt.getMaLop() != null ? oldLt.getMaLop() : "";
 
             String entityInfo = String.format("Mã LT: %d | Kỳ thi: %s | Môn: %s | Lớp: %s | Ngày: %s",
                     lt.getMaLT(), kyThi, mon, lop, ngay);

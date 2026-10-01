@@ -21,7 +21,7 @@ public class QuanLyDiemPanel extends JPanel {
     private JTextField txtMaHS, txtTenHS, txtDiem15p, txtDiem1Tiet, txtDiemGiuaKy, txtDiemCuoiKy;
     private JComboBox<String> cboHocKyInput, cboNamHocInput;
     private JComboBox<String> cboMonHocInput;
-    private JButton btnCapNhat, btnThem, btnSua, btnXoa, btnLuu, btnHuy;
+    private JButton btnCapNhat, btnThem, btnSua, btnXoa, btnLuu, btnHuy, btnTaoNhanh;
 
     private JTextField txtTimKiem;
     private JButton btnTimKiem;
@@ -185,6 +185,11 @@ public class QuanLyDiemPanel extends JPanel {
         ButtonStyleHelper.styleButtonAdd(btnThem);
         btnThem.setPreferredSize(sz);
         pnlButton.add(btnThem);
+
+        btnTaoNhanh = new JButton("Tạo Điểm Nhanh");
+        ButtonStyleHelper.styleButtonAdd(btnTaoNhanh);
+        btnTaoNhanh.setPreferredSize(new Dimension(135, 36));
+        pnlButton.add(btnTaoNhanh);
 
         btnSua = new JButton("Sửa");
         ButtonStyleHelper.styleButtonEdit(btnSua);
@@ -452,6 +457,7 @@ public class QuanLyDiemPanel extends JPanel {
     public void addBtnTimKiemListener(ActionListener action) { btnTimKiem.addActionListener(action); } 
     public void addBtnCapNhatListener(ActionListener action) { btnLuu.addActionListener(action); }
     public void addBtnThemListener(ActionListener action) { btnThem.addActionListener(action); }
+    public void addBtnTaoNhanhListener(ActionListener action) { btnTaoNhanh.addActionListener(action); }
     public void addBtnSuaListener(ActionListener action) { btnSua.addActionListener(action); }
     public void addBtnXoaListener(ActionListener action) { btnXoa.addActionListener(action); }
     public void addBtnLuuListener(ActionListener action) { btnLuu.addActionListener(action); }
