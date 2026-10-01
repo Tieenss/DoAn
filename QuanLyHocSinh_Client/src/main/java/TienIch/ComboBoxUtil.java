@@ -17,7 +17,7 @@ public class ComboBoxUtil {
     private static final String IS_FILTERING_KEY = "ComboBoxUtil.isFiltering";
 
     public static void makeSearchableAndEditable(JComboBox comboBox) {
-        makeSearchableAndEditable(comboBox, false);
+        makeSearchableAndEditable(comboBox, true);
     }
 
     public static void makeSearchableAndEditable(JComboBox comboBox, boolean allowCustomInput) {
