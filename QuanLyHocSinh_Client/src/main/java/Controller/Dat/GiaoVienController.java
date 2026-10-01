@@ -267,8 +267,8 @@ public class GiaoVienController {
             String ma = gv.getMaGV();
             String sdt = gv.getSdt();
 
-            if (!sdt.startsWith("0") || sdt.length() != 10) {
-                JOptionPane.showMessageDialog(view, "Số điện thoại không tồn tại");
+            if (!sdt.matches("0\\d{9}")) {
+                JOptionPane.showMessageDialog(view, "Số điện thoại không hợp lệ");
                 return;
             }
 

@@ -195,8 +195,13 @@ public class LopController {
 
     private void luu() {
 
-        if (view.getTxtMaLop().getText().isEmpty()) {
+        if (view.getTxtMaLop().getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(view, "Vui lòng nhập Mã lớp!");
+            return;
+        }
+
+        if (view.getTxtTenLop().getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(view, "Vui lòng nhập Tên lớp!");
             return;
         }
 
