@@ -145,29 +145,25 @@ public class HocSinhApi {
     }
 
     public boolean deleteHocSinh(String maHS) {
-
         try {
-
             URL url = new URL(API_URL + "/" + maHS);
-
-            HttpURLConnection conn =
-                    (HttpURLConnection) url.openConnection();
-
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("DELETE");
 
             int responseCode = conn.getResponseCode();
-
             conn.disconnect();
 
+            // Chỉ coi là xóa thành công khi HTTP 200 hoặc 204
+            // HTTP 409 Conflict = vi phạm khóa ngoại → trả về false
             return responseCode == HttpURLConnection.HTTP_OK
                     || responseCode == HttpURLConnection.HTTP_NO_CONTENT;
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return false;
     }
+
 
     public List<HocSinh> search(String keyword, String nienKhoa) {
 

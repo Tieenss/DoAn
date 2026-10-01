@@ -107,7 +107,9 @@ public class QuanLyHocSinhPanel extends JPanel {
         tableHS.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                doDuLieuVaoForm();
+                isThem = false;          // Hủy trạng thái Thêm mới
+                doDuLieuVaoForm();       // Đổ dữ liệu học sinh được chọn lên form
+                setFormEnabled(false);   // Khóa form và đưa nút Thêm/Sửa/Xóa về trạng thái ban đầu
             }
         });
 
@@ -263,17 +265,19 @@ public class QuanLyHocSinhPanel extends JPanel {
 
     private void them() {
         clearForm();
-
         isThem = true;
-
         setFormEnabled(true);
+
+        // Tự động sinh mã HS mới và điền vào form, khóa không cho sửa mã
+        txtMaHS.setText(taoMaHocSinhTuDong());
+        txtMaHS.setEnabled(false);
 
         int namHienTai = Calendar.getInstance().get(Calendar.YEAR);
 
         spNamBatDau.setValue(namHienTai);
         spNamKetThuc.setValue(namHienTai + 3);
 
-        txtMaHS.requestFocus();
+        txtHoTen.requestFocus();
     }
 
     private void sua() {
@@ -281,22 +285,10 @@ public class QuanLyHocSinhPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Chọn học sinh cần sửa");
             return;
         }
-//        // Học sinh không được phép sửa thông tin
-//        if (Model.Auth.isHocSinh()) {
-//            JOptionPane.showMessageDialog(
-//                    this,
-//                    "Học sinh không có quyền sửa thông tin học sinh."
-//            );
-//            return;
-//        }
         isThem = false;
         setFormEnabled(true);
         txtMaHS.setEnabled(false);
-        
-//        if (Model.Auth.isHocSinh()) {
-//            cboMaLop.setEnabled(false);
-//            cboMaDT.setEnabled(false);
-//        }
+
     }
 
     private void luu() {
@@ -337,34 +329,50 @@ public class QuanLyHocSinhPanel extends JPanel {
     }
 
     private void xoa() {
-        if (txtMaHS.getText().isEmpty()) {
-             JOptionPane.showMessageDialog(this, "Vui lòng chọn học sinh để xóa!");
-             return;
+        String maHS = txtMaHS.getText().trim();
+        if (maHS.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn học sinh để xóa!");
+            return;
         }
-        if (JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn xóa?", "Xác nhận", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-            if (controller.xoa(txtMaHS.getText())) {
+
+        if (JOptionPane.showConfirmDialog(
+                this,
+                "Bạn có chắc chắn muốn xóa học sinh " + maHS + "?",
+                "Xác nhận xóa",
+                JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+
+            if (controller.xoa(maHS)) {
                 JOptionPane.showMessageDialog(
                         this,
-                        "Xóa thành công",
+                        "Xóa học sinh thành công!",
                         "Thông báo",
                         JOptionPane.INFORMATION_MESSAGE
                 );
                 controller.loadTable(tableModel);
                 clearForm();
             } else {
+                // Thông báo rõ nguyên nhân do vướng khóa ngoại
                 JOptionPane.showMessageDialog(
                         this,
-                        "Xóa thất bại! Không thể xóa học sinh.",
-                        "Lỗi",
+                        " Không thể xóa học sinh " + maHS + "!\n\n"
+                                + "Lý do: Học sinh này đang có các dữ liệu liên quan trong hệ thống:\n"
+                                + "- Bảng điểm các môn\n"
+                                + "- Đánh giá hạnh kiểm\n"
+                                + "- Thông tin học phí\n"
+                                + "- Tài khoản đăng nhập\n\n"
+                                + "Vui lòng xóa các dữ liệu liên quan trên trước khi xóa học sinh!",
+                        "Lỗi ràng buộc dữ liệu",
                         JOptionPane.ERROR_MESSAGE
                 );
             }
         }
     }
-    
+
+
     private void huy() {
         clearForm();
         setFormEnabled(false);
+        isThem = false; // Đảm bảo trả lại trạng thái không thêm mới
     }
 
     private void xemChiTietHoSo() {
@@ -457,74 +465,83 @@ public class QuanLyHocSinhPanel extends JPanel {
     }
 
     private boolean validateThongTinHocSinh() {
-
         // Validate Mã HS
         String maHS = txtMaHS.getText().trim();
-
         if (maHS.isEmpty()) {
-
             JOptionPane.showMessageDialog(
                     this,
                     "Vui lòng nhập Mã HS!",
                     "Lỗi dữ liệu",
                     JOptionPane.ERROR_MESSAGE
             );
-
             txtMaHS.requestFocus();
             return false;
         }
 
-        if (maHS.contains(" ")) {
+        // Kiểm tra trùng Mã HS khi thêm mới
+        if (isThem) {
+            for (int i = 0; i < tableModel.getRowCount(); i++) {
+                Object value = tableModel.getValueAt(i, 0);
+                if (value == null) {
+                    continue;
+                }
 
+                String existingMaHS = value.toString().trim();
+                if (existingMaHS.equalsIgnoreCase(maHS)) {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Mã HS '" + maHS + "' đã tồn tại trong hệ thống!\n",
+                            "Lỗi trùng lặp",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                    txtMaHS.requestFocus();
+                    return false;
+                }
+            }
+        }
+
+        if (maHS.contains(" ")) {
             JOptionPane.showMessageDialog(
                     this,
                     "Mã HS không được chứa khoảng trắng!",
                     "Lỗi dữ liệu",
                     JOptionPane.ERROR_MESSAGE
             );
-
             txtMaHS.requestFocus();
             return false;
         }
 
         if (maHS.length() > 10) {
-
             JOptionPane.showMessageDialog(
                     this,
                     "Mã HS không được vượt quá 10 ký tự!",
                     "Lỗi dữ liệu",
                     JOptionPane.ERROR_MESSAGE
             );
-
             txtMaHS.requestFocus();
             return false;
         }
 
         // Validate Họ tên
         String hoTen = txtHoTen.getText().trim();
-
         if (hoTen.isEmpty()) {
-
             JOptionPane.showMessageDialog(
                     this,
                     "Vui lòng nhập Họ tên!",
                     "Lỗi dữ liệu",
                     JOptionPane.ERROR_MESSAGE
             );
-
             txtHoTen.requestFocus();
             return false;
         }
 
         if (hoTen.length() > 50) {
-
             JOptionPane.showMessageDialog(
                     this,
                     "Họ tên không được vượt quá 50 ký tự!",
                     "Lỗi dữ liệu",
                     JOptionPane.ERROR_MESSAGE
             );
-
             txtHoTen.requestFocus();
             return false;
         }
@@ -549,30 +566,25 @@ public class QuanLyHocSinhPanel extends JPanel {
                     "Lỗi dữ liệu",
                     JOptionPane.ERROR_MESSAGE
             );
-
             cboGioiTinh.requestFocus();
             return false;
         }
 
         // Validate địa chỉ
         String diaChi = txtDiaChi.getText().trim();
-
         if (diaChi.length() > 200) {
-
             JOptionPane.showMessageDialog(
                     this,
                     "Địa chỉ không được vượt quá 200 ký tự!",
                     "Lỗi dữ liệu",
                     JOptionPane.ERROR_MESSAGE
             );
-
             txtDiaChi.requestFocus();
             return false;
         }
 
         // Validate mã lớp
         if (!isValidComboValue(cboMaLop)) {
-
             JOptionPane.showMessageDialog(
                     this,
                     "Vui lòng chọn Mã lớp hợp lệ!\n"
@@ -580,14 +592,12 @@ public class QuanLyHocSinhPanel extends JPanel {
                     "Lỗi dữ liệu",
                     JOptionPane.ERROR_MESSAGE
             );
-
             cboMaLop.requestFocus();
             return false;
         }
 
         // Validate mã đối tượng
         if (!isValidComboValue(cboMaDT)) {
-
             JOptionPane.showMessageDialog(
                     this,
                     "Vui lòng chọn Mã đối tượng hợp lệ!\n"
@@ -595,7 +605,6 @@ public class QuanLyHocSinhPanel extends JPanel {
                     "Lỗi dữ liệu",
                     JOptionPane.ERROR_MESSAGE
             );
-
             cboMaDT.requestFocus();
             return false;
         }
@@ -694,22 +703,22 @@ public class QuanLyHocSinhPanel extends JPanel {
     }
 
     private void hienThiTatCa() {
-
         txtTimKiem.setText("");
         if (cboLocNienKhoa.getItemCount() > 0) {
             cboLocNienKhoa.setSelectedIndex(0);
         }
-
         tableHS.clearSelection();
-
         clearForm();
-
         setFormEnabled(false);
-
         controller.loadTable(tableModel);
     }
 
     private void doDuLieuVaoForm() {
+        // 1. Thêm dòng này: Nếu đang ở chế độ Thêm mới thì không đè dữ liệu lên Form
+        if (isThem) {
+            return;
+        }
+
         int r = tableHS.getSelectedRow();
         if (r >= 0) {
             txtMaHS.setText(tableModel.getValueAt(r, 0).toString());
@@ -808,6 +817,31 @@ public class QuanLyHocSinhPanel extends JPanel {
 
         controller.loadComboMaDT(cboMaDT);
         TienIch.ComboBoxUtil.refreshOriginalItems(cboMaDT);
+    }
+
+    private String taoMaHocSinhTuDong() {
+        int maxId = 0;
+
+        for (int i = 0; i < tableModel.getRowCount(); i++) {
+            Object val = tableModel.getValueAt(i, 0);
+
+            if (val != null) {
+                String ma = val.toString().trim();
+
+                if (ma.toUpperCase().startsWith("HS")) {
+                    try {
+                        int num = Integer.parseInt(ma.substring(2));
+
+                        if (num > maxId) {
+                            maxId = num;
+                        }
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+            }
+        }
+
+        return String.format("HS%03d", maxId + 1);
     }
 
 //    private void loadThongTinCaNhan() {

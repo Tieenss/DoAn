@@ -11,6 +11,8 @@ import java.util.List;
 @Repository
 public interface DiemRepository extends JpaRepository<Diem, Diem.DiemId> {
 
+    boolean existsByMaHS(String maHS);
+
     @Query("SELECT d FROM Diem d JOIN FETCH d.hocSinh JOIN FETCH d.monHoc")
     List<Diem> findAllDiemWithDetails();
 

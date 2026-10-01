@@ -3,6 +3,8 @@ package com.qlhs.server.restControl.Dai;
 import com.qlhs.server.entity.HocSinh;
 import com.qlhs.server.service.Dai.HocSinhService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,11 +44,17 @@ public class HocSinhController {
     }
 
     @DeleteMapping("/{maHS}")
-    public void delete(@PathVariable String maHS) {
-
-        service.deleteHocSinh(maHS);
-
+    public ResponseEntity<?> delete(@PathVariable String maHS) {
+        try {
+            service.deleteHocSinh(maHS);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            // Trả về HTTP 409 Conflict khi vi phạm khóa ngoại
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Không thể xóa: Học sinh đang có dữ liệu liên quan!");
+        }
     }
+
 
     @GetMapping("/search")
     public List<HocSinh> search(

@@ -10,6 +10,9 @@ import java.util.List;
 
 @Repository
 public interface HocPhiRepository extends JpaRepository<HocPhi, Integer> {
+
+    boolean existsByMaHS(String maHS);
+    
     @Query("SELECT t FROM HocPhi t JOIN FETCH t.hocSinh")
     List<HocPhi> findAllWithDetails();
 

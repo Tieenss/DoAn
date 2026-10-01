@@ -11,6 +11,8 @@ import org.springframework.data.repository.query.Param;
 @Repository
 public interface HanhKiemRepository extends JpaRepository<HanhKiem, HanhKiem.HanhKiemId> {
 
+       boolean existsByMaHS(String maHS);
+
        @Query("SELECT hk FROM HanhKiem hk JOIN FETCH hk.hocSinh hs " +
                      "WHERE hs.maLop LIKE %:maLop% AND hk.namHoc LIKE %:namHoc% AND (:hocKy = 0 OR hk.hocKy = :hocKy)")
        List<HanhKiem> getHanhKiemByFilter(@Param("maLop") String maLop, @Param("namHoc") String namHoc,

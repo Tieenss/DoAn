@@ -2,8 +2,12 @@ package com.qlhs.server.service.Dai;
 
 import com.qlhs.server.entity.HocSinh;
 import com.qlhs.server.repository.Dai.HocSinhRepository;
+import com.qlhs.server.repository.HaTrang.HocPhiRepository;
+import com.qlhs.server.repository.Tien.DiemRepository;
+import com.qlhs.server.repository.Tien.HanhKiemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -15,6 +19,15 @@ public class HocSinhService {
 
     @Autowired
     private HocSinhRepository repository;
+
+    @Autowired
+    private DiemRepository diemRepository;
+
+    @Autowired
+    private HanhKiemRepository hanhKiemRepository;
+
+    @Autowired
+    private HocPhiRepository hocPhiRepository;
 
     public List<HocSinh> getAllHocSinh() {
         return repository.findAll();
@@ -28,7 +41,19 @@ public class HocSinhService {
         return repository.save(hs);
     }
 
+    @Transactional
     public void deleteHocSinh(String maHS) {
+        if (diemRepository.existsByMaHS(maHS)) {
+            throw new IllegalStateException("Học sinh đang có dữ liệu điểm, không thể xóa!");
+        }
+
+        if (hanhKiemRepository.existsByMaHS(maHS)) {
+            throw new IllegalStateException("Học sinh đang có dữ liệu hạnh kiểm, không thể xóa!");
+        }
+
+        if (hocPhiRepository.existsByMaHS(maHS)) {
+            throw new IllegalStateException("Học sinh đang có dữ liệu học phí, không thể xóa!");
+        }
         repository.deleteById(maHS);
     }
 

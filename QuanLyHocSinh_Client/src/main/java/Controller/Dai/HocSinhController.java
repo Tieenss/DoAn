@@ -374,7 +374,7 @@ public class HocSinhController {
             return result;
         }
         try {
-            taiDuLieu(maHS, false);
+            taiDuLieu(maHS, true);
             // 1) Năm học cần xem: theo lựa chọn, không có thì lấy mới nhất
             String namHocXem = chuanHoaNamHoc(namHocChon);
             if (!laNamHocHopLe(namHocXem)) {
@@ -385,72 +385,108 @@ public class HocSinhController {
                 return result;
             }
 
-            // 2) Điểm TB + số môn: học kỳ lớn nhất trong Diem
-            int hkDiem = 0;
-            for (Diem d : cacheDiem) {
-                if (d != null && d.getDiemTongKet() != null
-                        && namHocXem.equals(chuanHoaNamHoc(d.getNamHoc()))) {
-                    hkDiem = Math.max(hkDiem, d.getHocKy());
-                }
-            }
-            if (hkDiem == 0) {   // năm này chưa có điểm nào: vẫn đếm số môn theo HK lớn nhất
-                for (Diem d : cacheDiem) {
-                    if (d != null && namHocXem.equals(chuanHoaNamHoc(d.getNamHoc()))) {
-                        hkDiem = Math.max(hkDiem, d.getHocKy());
-                    }
-                }
-            }
-            double tongDiem = 0;
-            int soMonTong = 0;
-            int soMonCoDiem = 0;
+            // 2) Điểm TB cả năm + Số môn học trong năm học được chọn
+            // Công thức: TB cả năm = (HK1 + 2 * HK2) / 3
+            Map<String, Map<Integer, Double>> diemTheoMon = new HashMap<>();
             for (Diem diem : cacheDiem) {
-                if (diem == null || !namHocXem.equals(chuanHoaNamHoc(diem.getNamHoc()))) continue;
-                if (diem.getHocKy() != hkDiem) continue;
-                soMonTong++;
-                if (diem.getDiemTongKet() != null) {
-                    tongDiem += diem.getDiemTongKet();
-                    soMonCoDiem++;
+                if (diem == null
+                        || !namHocXem.equals(chuanHoaNamHoc(diem.getNamHoc()))
+                        || diem.getDiemTongKet() == null) {
+                    continue;
                 }
-            }
-            if (soMonCoDiem > 0) {
-                result.setGpa(String.format("%.1f", tongDiem / soMonCoDiem));
-                result.setGpaMoTa("HK" + hkDiem + " – " + namHocXem);
-            }
-            if (soMonTong > 0) {
-                result.setSoMon(String.valueOf(soMonTong));
-                result.setSoMonMoTa("HK" + hkDiem + " – " + namHocXem);
+                String maMH = diem.getMaMH() != null && !diem.getMaMH().trim().isEmpty()
+                        ? diem.getMaMH().trim()
+                        : (diem.getTenMH() != null ? diem.getTenMH().trim() : "");
+
+                if (maMH.isEmpty()) {
+                    continue;
+                }
+
+                int hocKy = diem.getHocKy();
+                if (hocKy == 1 || hocKy == 2) {
+                    diemTheoMon
+                            .computeIfAbsent(maMH, k -> new HashMap<>())
+                            .put(hocKy, diem.getDiemTongKet());
+                }
             }
 
-            // 3) Hạnh kiểm: học kỳ lớn nhất trong HanhKiem
-            int hkHanhKiem = 0;
-            for (HanhKiem h : cacheHanhKiem) {
-                if (h != null && namHocXem.equals(chuanHoaNamHoc(h.getNamHoc()))) {
-                    hkHanhKiem = Math.max(hkHanhKiem, h.getHocKy());
+            if (!diemTheoMon.isEmpty()) {
+                double tongTBM = 0;
+                int soMon = 0;
+
+                for (Map<Integer, Double> diemHocKy : diemTheoMon.values()) {
+                    Double hk1 = diemHocKy.get(1);
+                    Double hk2 = diemHocKy.get(2);
+                    double tbMon;
+                    if (hk1 != null && hk2 != null) {
+                        // Có đủ HK1 + HK2
+                        tbMon = (hk1 + 2 * hk2) / 3.0;
+                    } else if (hk2 != null) {
+                        // Chỉ có HK2
+                        tbMon = hk2;
+                    } else if (hk1 != null) {
+                        // Chỉ có HK1
+                        tbMon = hk1;
+                    } else {
+                        continue;
+                    }
+                    tongTBM += tbMon;
+                    soMon++;
+                }
+
+                if (soMon > 0) {
+                    // Điểm TB cả năm = trung bình TB cả năm của các môn
+                    double gpaNam = tongTBM / soMon;
+                    result.setGpa(String.format("%.2f", gpaNam));
+                    result.setGpaMoTa("Năm học " + namHocXem);
+
+                    result.setSoMon(String.valueOf(soMon));
+                    result.setSoMonMoTa("Năm học " + namHocXem);
                 }
             }
+
+            // 3) Hạnh kiểm cả năm
+            HanhKiem hkNam = null;
             for (HanhKiem hk : cacheHanhKiem) {
                 if (hk == null || !namHocXem.equals(chuanHoaNamHoc(hk.getNamHoc()))) continue;
-                if (hk.getHocKy() != hkHanhKiem) continue;
-                result.setXepLoai(giaTriRong(hk.getXepLoai()));
-                result.setXepLoaiMoTa("HK" + hkHanhKiem + " – " + namHocXem);
-                break;
-            }
-
-            // 4) Học phí: học kỳ lớn nhất trong HocPhi
-            int hkHocPhi = 0;
-            for (Hocphi p : cacheHocPhi) {
-                if (p != null && namHocXem.equals(chuanHoaNamHoc(p.getNamHoc()))) {
-                    hkHocPhi = Math.max(hkHocPhi, p.getHocKy());
+                // Ưu tiên lấy xếp loại của kỳ mới nhất (HK2)
+                if (hkNam == null || hk.getHocKy() > hkNam.getHocKy()) {
+                    hkNam = hk;
                 }
             }
-            for (Hocphi hp : cacheHocPhi) {
-                if (hp == null || !namHocXem.equals(chuanHoaNamHoc(hp.getNamHoc()))) continue;
-                if (hp.getHocKy() != hkHocPhi) continue;
-                result.setHocPhi(giaTriRong(hp.getTrangThai()));
-                result.setHocPhiMoTa("HK" + hkHocPhi + " – " + namHocXem);
-                break;
+            if (hkNam != null) {
+                result.setXepLoai(giaTriRong(hkNam.getXepLoai()));
+                result.setXepLoaiMoTa("Năm học " + namHocXem);
             }
-            result.setHocKy(hkDiem > 0 ? hkDiem : hkHanhKiem);
+
+            // 4) Học phí cả năm
+            List<Hocphi> dsHocPhiNam = new ArrayList<>();
+
+            for (Hocphi hp : cacheHocPhi) {
+                if (hp != null
+                        && namHocXem.equals(chuanHoaNamHoc(hp.getNamHoc()))) {
+                    dsHocPhiNam.add(hp);
+                }
+            }
+
+            if (!dsHocPhiNam.isEmpty()) {
+                boolean tatCaDaNop = true;
+
+                for (Hocphi hp : dsHocPhiNam) {
+                    String trangThai = hp.getTrangThai() != null
+                            ? hp.getTrangThai().trim()
+                            : "";
+
+                    if (!trangThai.equalsIgnoreCase("Đã nộp")
+                            && !trangThai.equalsIgnoreCase("Đã hoàn thành")) {
+                        tatCaDaNop = false;
+                        break;
+                    }
+                }
+
+                result.setHocPhi(tatCaDaNop ? "Đã nộp" : "Chưa nộp");
+                result.setHocPhiMoTa("Năm học " + namHocXem);
+            }
 
         } catch (Exception e) {
             e.printStackTrace();

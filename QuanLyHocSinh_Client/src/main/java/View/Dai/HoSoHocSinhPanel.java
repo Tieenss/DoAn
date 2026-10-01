@@ -166,7 +166,7 @@ public class HoSoHocSinhPanel extends JPanel {
         // =========================
         lblGpaValue = new JLabel("-");
         lblGpaMoTa = new JLabel("-");
-        panel.add(createStatCard("Điểm TB học kỳ", lblGpaValue, lblGpaMoTa));
+        panel.add(createStatCard("Điểm TB năm học", lblGpaValue, lblGpaMoTa));
 
         // =========================
         // HẠNH KIỂM
@@ -309,16 +309,6 @@ public class HoSoHocSinhPanel extends JPanel {
         center.add(lblLoai);
         center.add(Box.createVerticalStrut(12));
 
-        // -------------------------
-        // THÔNG TIN NGẮN
-        // -------------------------
-
-//        center.add(createSimpleInfo("Mã HS", lblMaHS = new JLabel("-")));
-//
-//        center.add(createSimpleInfo("Niên khóa", lblNienKhoa = new JLabel("-")));
-//
-//        center.add(createSimpleInfo("Đối tượng", lblMaDT = new JLabel("-")));
-//
         center.add(Box.createVerticalGlue());
 
         // -------------------------
@@ -345,14 +335,6 @@ public class HoSoHocSinhPanel extends JPanel {
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
         top.add(title, BorderLayout.WEST);
-
-//        JButton btnSua = new JButton("Chỉnh sửa");
-//
-//        btnSua.setBorderPainted(false);
-//        btnSua.setContentAreaFilled(false);
-//        btnSua.setFocusPainted(false);
-//
-//        top.add(btnSua, BorderLayout.EAST);
 
         card.add(top, BorderLayout.NORTH);
 
@@ -677,15 +659,6 @@ public class HoSoHocSinhPanel extends JPanel {
         lblMaDT.setText(giaTri(controller.hienThiDoiTuongUuTien(hs.getMaDT())));
 
         lblNienKhoa.setText(giaTri(hs.getNienKhoa()));
-
-        // -------------------------
-        // CẬP NHẬT TÊN HIỂN THỊ
-        // -------------------------
-
-        // Phần card trái hiện đang có
-        // tên mẫu "Trần Thị Lan".
-        // Có thể lấy trực tiếp từ model
-        // nếu muốn.
 
         // -------------------------
         // THÔNG TIN LỚP
