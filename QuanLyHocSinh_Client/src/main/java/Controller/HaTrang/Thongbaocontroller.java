@@ -43,11 +43,11 @@ public class Thongbaocontroller {
         });
 
         view.getBtnThem().addActionListener(e -> {
-            editMode[0] = true; 
+            editMode[0] = true;
             view.refresh();
             view.getTable().clearSelection();
             updateUIState.run();
-            editMode[0] = false; 
+            editMode[0] = false;
         });
 
         view.getTable().addMouseListener(new MouseAdapter() {
@@ -67,7 +67,7 @@ public class Thongbaocontroller {
                 editMode[0] = true;
                 view.fillForm(row);
                 updateUIState.run();
-                
+
                 view.setCrudButtonState(false, true, true, true, true);
             } else {
                 JOptionPane.showMessageDialog(view, "Chọn dòng cần sửa!");
@@ -82,7 +82,9 @@ public class Thongbaocontroller {
 
             tb.setTieuDe(view.getTieuDe().trim());
             tb.setNoiDung(view.getNoiDung().trim());
-            tb.setNguoiGui(view.getNguoiGui().trim());
+
+            String nguoiGui = view.getNguoiGui().trim();
+            tb.setNguoiGui(nguoiGui.isEmpty() ? "AD01" : nguoiGui);
 
             boolean success = editMode[0] ? dao.update(tb) : dao.insert(tb);
             if (success) {
@@ -128,8 +130,8 @@ public class Thongbaocontroller {
     }
 
     private boolean validateForm() {
-        if (view.getTieuDe().trim().isEmpty() || view.getNguoiGui().trim().isEmpty() || view.getNoiDung().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(view, "Vui lòng không để trống thông tin!");
+        if (view.getTieuDe().trim().isEmpty() || view.getNoiDung().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(view, "Vui lòng nhập đầy đủ tiêu đề và nội dung!");
             return false;
         }
         return true;

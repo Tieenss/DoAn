@@ -1,4 +1,3 @@
-
 package View.HaTrang;
 
 import Controller.HaTrang.Thongbaocontroller;
@@ -21,7 +20,6 @@ public class QuanlyThongbaoPanel extends JPanel {
 
     public QuanlyThongbaoPanel() {
         initComponents();
-        Thongbaocontroller controller = new Thongbaocontroller(this);
     }
 
     private void initComponents() {
@@ -72,8 +70,13 @@ public class QuanlyThongbaoPanel extends JPanel {
 
         gbc.gridx = 0; gbc.gridy = 0; pnlInput.add(new JLabel("Tiêu đề:"), gbc);
         gbc.gridx = 1; txtTieuDe = new JTextField(30); pnlInput.add(txtTieuDe, gbc);
+
         gbc.gridx = 0; gbc.gridy = 1; pnlInput.add(new JLabel("Người gửi:"), gbc);
-        gbc.gridx = 1; txtNguoiGui = new JTextField(30); pnlInput.add(txtNguoiGui, gbc);
+        gbc.gridx = 1; txtNguoiGui = new JTextField(30);
+        txtNguoiGui.setEditable(false);
+        txtNguoiGui.setBackground(new Color(240, 240, 240));
+        pnlInput.add(txtNguoiGui, gbc);
+
         gbc.gridx = 0; gbc.gridy = 2; pnlInput.add(new JLabel("Nội dung:"), gbc);
         gbc.gridx = 1; txtNoiDung = new JTextArea(4, 30);
         txtNoiDung.setLineWrap(true);
@@ -113,25 +116,20 @@ public class QuanlyThongbaoPanel extends JPanel {
         }
 
         setCrudButtonState(true, false, false, false, false);
-        setInputEditable(false); 
+        setInputEditable(false);
+        refresh();
     }
 
     public void setInputEditable(boolean editable) {
         txtTieuDe.setEditable(editable);
-        txtNguoiGui.setEditable(editable);
         txtNoiDung.setEditable(editable);
+
+        txtNguoiGui.setEditable(false);
 
         Color bgColor = editable ? Color.WHITE : new Color(240, 240, 240);
         txtTieuDe.setBackground(bgColor);
-        txtNguoiGui.setBackground(bgColor);
         txtNoiDung.setBackground(bgColor);
-    }
-
-    private JButton createBtn(String t, Color c) {
-        JButton b = new JButton(t);
-        b.setBackground(c);
-        b.setPreferredSize(new Dimension(120, 35));
-        return b;
+        txtNguoiGui.setBackground(new Color(240, 240, 240));
     }
 
     public void loadTable(List<Thongbao> list) {
@@ -151,8 +149,12 @@ public class QuanlyThongbaoPanel extends JPanel {
     }
 
     public void refresh() {
-        txtTieuDe.setText(""); txtNguoiGui.setText("");
-        txtNoiDung.setText(""); txtLocKeyword.setText("");
+        txtTieuDe.setText("");
+        txtNoiDung.setText("");
+        txtLocKeyword.setText("");
+
+        txtNguoiGui.setText("AD01");
+
         table.clearSelection();
     }
 
@@ -175,12 +177,4 @@ public class QuanlyThongbaoPanel extends JPanel {
         btnLuu.setEnabled(luu);
         btnHuy.setEnabled(huy);
     }
-
-    public void addBtnThemListener(java.awt.event.ActionListener ac) { btnThem.addActionListener(ac); }
-    public void addBtnSuaListener(java.awt.event.ActionListener ac) { btnSua.addActionListener(ac); }
-    public void addBtnXoaListener(java.awt.event.ActionListener ac) { btnXoa.addActionListener(ac); }
-    public void addBtnLuuListener(java.awt.event.ActionListener ac) { btnLuu.addActionListener(ac); }
-    public void addBtnHuyListener(java.awt.event.ActionListener ac) { btnHuy.addActionListener(ac); }
-    public void addBtnLocListener(java.awt.event.ActionListener ac) { btnLoc.addActionListener(ac); }
-    public void addTableMouseListener(java.awt.event.MouseAdapter ad) { table.addMouseListener(ad); }
 }
