@@ -97,6 +97,7 @@ public class HanhKiemController {
                 String err = dao.addHanhKiemResult(hk);
                 if (err == null) {
                     view.showMessage("Thêm hạnh kiểm học sinh thành công!");
+                    loadComboBoxData(); // <--- Nạp lại năm học mới cho bộ lọc
                     loadData();
                     view.clearForm();
                     editMode[0] = false;
@@ -135,6 +136,7 @@ public class HanhKiemController {
                 String updateErr = dao.updateHanhKiemResult(hk);
                 if (updateErr == null) {
                     view.showMessage("Cập nhật hạnh kiểm thành công!");
+                    loadComboBoxData(); // <--- Nạp lại năm học mới cho bộ lọc
                     loadData();
                     view.clearForm();
                     editMode[0] = false;

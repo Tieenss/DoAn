@@ -162,7 +162,7 @@ public class QuanLyDiemPanel extends JPanel {
 
         gbc.gridx=0; gbc.gridy=3; pnlInput.add(new JLabel("Năm Học:"), gbc);
         cboNamHocInput = new JComboBox<>();
-        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboNamHocInput);
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboNamHocInput, true);
         gbc.gridx=1; gbc.gridy=3; pnlInput.add(cboNamHocInput, gbc);
 
         gbc.gridx=2; gbc.gridy=3; pnlInput.add(new JLabel("Học Kỳ:"), gbc);
@@ -319,8 +319,13 @@ public class QuanLyDiemPanel extends JPanel {
                 hocKy = Integer.parseInt(cboHocKyInput.getSelectedItem().toString());
             }
         } catch (Exception e) {}
-        d.setHocKy(hocKy); 
-        d.setNamHoc(cboNamHocInput.getSelectedItem() != null ? cboNamHocInput.getSelectedItem().toString() : "");
+        d.setHocKy(hocKy);
+        Object selectedNH = cboNamHocInput.getSelectedItem();
+        String namHocVal = selectedNH != null ? selectedNH.toString().trim() : "";
+        if (namHocVal.isEmpty() && cboNamHocInput.getEditor() != null && cboNamHocInput.getEditor().getItem() != null) {
+            namHocVal = cboNamHocInput.getEditor().getItem().toString().trim();
+        }
+        d.setNamHoc(namHocVal);
         try {
             if (!txtDiem15p.getText().trim().isEmpty()) {
                 d.setDiem15p(Double.parseDouble(txtDiem15p.getText().trim()));

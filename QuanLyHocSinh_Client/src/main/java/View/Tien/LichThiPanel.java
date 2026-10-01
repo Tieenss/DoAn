@@ -109,7 +109,7 @@ public class LichThiPanel extends JPanel {
         pnlInput.add(new JLabel("Mã LT:"), gbc);
         
         gbc.gridx=1; gbc.gridy=0; gbc.weightx = 1.0; 
-        cboMaLT=new JComboBox<>(); TienIch.ComboBoxUtil.makeSearchableAndEditable(cboMaLT); pnlInput.add(cboMaLT, gbc);
+        cboMaLT=new JComboBox<>(); TienIch.ComboBoxUtil.makeSearchableAndEditable(cboMaLT, true); pnlInput.add(cboMaLT, gbc);
         
         gbc.gridx=2; gbc.gridy=0; gbc.weightx = 0;
         pnlInput.add(new JLabel("Kỳ Thi:"), gbc);
@@ -172,7 +172,7 @@ public class LichThiPanel extends JPanel {
         pnlInput.add(new JLabel("Năm Học:"), gbc);
         
         gbc.gridx=1; gbc.gridy=4; gbc.weightx = 1.0;
-        cboNamHocInput = new JComboBox<>(); TienIch.ComboBoxUtil.makeSearchableAndEditable(cboNamHocInput); pnlInput.add(cboNamHocInput, gbc);
+        cboNamHocInput = new JComboBox<>(); TienIch.ComboBoxUtil.makeSearchableAndEditable(cboNamHocInput, true); pnlInput.add(cboNamHocInput, gbc);
 
         pnlSouth.add(pnlInput, BorderLayout.CENTER);
 

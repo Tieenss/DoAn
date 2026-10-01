@@ -301,6 +301,7 @@ public class LichThiController {
                 String err = dao.updateLichThiResult(lt);
                 if (err == null) {
                     view.showMessage("Cập nhật lịch thi thành công!");
+                    loadComboBoxData(); // <--- Nạp lại danh sách năm học & kỳ thi mới
                     loadAll();
                     view.clearForm();
                     editMode[0] = false;
@@ -312,6 +313,7 @@ public class LichThiController {
                 String err = dao.addLichThiResult(lt);
                 if (err == null) {
                     view.showMessage("Thêm lịch thi thành công!");
+                    loadComboBoxData(); // <--- Nạp lại danh sách năm học & kỳ thi mới
                     loadAll();
                     view.clearForm();
                     editMode[0] = false;

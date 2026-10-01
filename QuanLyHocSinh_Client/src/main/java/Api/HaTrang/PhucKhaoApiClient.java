@@ -4,6 +4,9 @@ import Api.ApiConfig;
 import Model.Phuckhao;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
@@ -20,8 +23,47 @@ public class PhucKhaoApiClient {
     private static final String BASE_URL = ApiConfig.BASE_URL + "/api/phuckhao";
     private final HttpClient client = HttpClient.newHttpClient();
     private final Gson gson = new GsonBuilder()
-            .setDateFormat("yyyy-MM-dd") 
+            .setDateFormat("yyyy-MM-dd")
             .create();
+
+    // Lấy danh sách môn học và ghép dạng "Mã - Tên môn"
+    public List<String> getAllMaMonHoc() {
+        try {
+            String url = ApiConfig.BASE_URL + "/api/monhoc";
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200 && response.body() != null) {
+                List<String> listMaMH = new ArrayList<>();
+                JsonArray jsonArray = gson.fromJson(response.body(), JsonArray.class);
+
+                if (jsonArray != null) {
+                    for (JsonElement element : jsonArray) {
+                        if (element.isJsonObject()) {
+                            JsonObject obj = element.getAsJsonObject();
+                            String ma = obj.has("maMH") ? obj.get("maMH").getAsString() : "";
+                            String ten = obj.has("tenMH") ? obj.get("tenMH").getAsString() : "";
+
+                            if (!ma.isEmpty()) {
+                                listMaMH.add(ten.isEmpty() ? ma : ma + " - " + ten);
+                            }
+                        } else if (element.isJsonPrimitive()) {
+                            listMaMH.add(element.getAsString());
+                        }
+                    }
+                }
+                return listMaMH;
+            }
+            return new ArrayList<>();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
 
     public List<Phuckhao> getAll() {
         try {
@@ -31,11 +73,15 @@ public class PhucKhaoApiClient {
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            Type type = new TypeToken<List<Phuckhao>>(){}.getType();
-            return gson.fromJson(response.body(), type);
+            if (response.statusCode() == 200 && response.body() != null) {
+                Type type = new TypeToken<List<Phuckhao>>(){}.getType();
+                List<Phuckhao> list = gson.fromJson(response.body(), type);
+                return list != null ? list : new ArrayList<>();
+            }
+            return new ArrayList<>();
         } catch (Exception e) {
             e.printStackTrace();
-            return new ArrayList<>(); 
+            return new ArrayList<>();
         }
     }
 
@@ -50,7 +96,6 @@ public class PhucKhaoApiClient {
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
             return response.statusCode() == 200 || response.statusCode() == 201;
         } catch (Exception e) {
             e.printStackTrace();
@@ -101,8 +146,12 @@ public class PhucKhaoApiClient {
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            Type type = new TypeToken<List<Phuckhao>>(){}.getType();
-            return gson.fromJson(response.body(), type);
+            if (response.statusCode() == 200 && response.body() != null) {
+                Type type = new TypeToken<List<Phuckhao>>(){}.getType();
+                List<Phuckhao> list = gson.fromJson(response.body(), type);
+                return list != null ? list : new ArrayList<>();
+            }
+            return new ArrayList<>();
         } catch (Exception e) {
             e.printStackTrace();
             return new ArrayList<>();
@@ -119,8 +168,11 @@ public class PhucKhaoApiClient {
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            String body = response.body().trim();
+            if (response.statusCode() != 200 || response.body() == null) {
+                return new ArrayList<>();
+            }
 
+            String body = response.body().trim();
             Type listType = new TypeToken<List<Phuckhao>>(){}.getType();
 
             if (body.startsWith("{")) {
@@ -132,7 +184,8 @@ public class PhucKhaoApiClient {
                 return list;
             }
 
-            return gson.fromJson(body, listType);
+            List<Phuckhao> list = gson.fromJson(body, listType);
+            return list != null ? list : new ArrayList<>();
         } catch (Exception e) {
             e.printStackTrace();
             return new ArrayList<>();

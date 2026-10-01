@@ -4,8 +4,10 @@ import Api.HaTrang.PhucKhaoApiClient;
 import Model.Phuckhao;
 import View.HaTrang.QuanLyPhucKhaoPanel;
 import java.awt.event.*;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 
 public class Phuckhaocontroller {
     private QuanLyPhucKhaoPanel view;
@@ -16,7 +18,15 @@ public class Phuckhaocontroller {
         this.view = view;
         this.dao = new PhucKhaoApiClient();
         initEvents();
+        loadMaMonHocCombo();
         loadData();
+    }
+
+    private void loadMaMonHocCombo() {
+        List<String> listMH = dao.getAllMaMonHoc();
+        if (listMH != null) {
+            view.setMaMonHocData(listMH);
+        }
     }
 
     private void initEvents() {
@@ -163,15 +173,17 @@ public class Phuckhaocontroller {
                     loadData();
                     return;
                 }
-                
+
                 List<Phuckhao> searchResult = dao.search(tuKhoa);
-                
+
                 if (Model.Auth.isHocSinh()) {
-                    searchResult = searchResult.stream().filter(pk -> pk.getMaHS().equals(Model.Auth.maNguoiDung)).collect(java.util.stream.Collectors.toList());
+                    searchResult = searchResult.stream()
+                            .filter(pk -> pk.getMaHS().equalsIgnoreCase(Model.Auth.maNguoiDung))
+                            .collect(java.util.stream.Collectors.toList());
                 }
 
                 listCurrent = searchResult;
-                view.loadTable(listCurrent);
+                loadTable(listCurrent);
 
                 if (listCurrent == null || listCurrent.isEmpty()) {
                     JOptionPane.showMessageDialog(view, "Không tìm thấy yêu cầu phúc khảo nào với từ khóa: " + tuKhoa, "Thông báo", JOptionPane.INFORMATION_MESSAGE);
@@ -194,12 +206,35 @@ public class Phuckhaocontroller {
         try {
             List<Phuckhao> list = dao.getAll();
             if (Model.Auth.isHocSinh()) {
-                list = list.stream().filter(pk -> pk.getMaHS().equals(Model.Auth.maNguoiDung)).collect(java.util.stream.Collectors.toList());
+                list = list.stream()
+                        .filter(pk -> pk.getMaHS().equalsIgnoreCase(Model.Auth.maNguoiDung))
+                        .collect(java.util.stream.Collectors.toList());
             }
             listCurrent = list;
-            view.loadTable(list);
+            loadTable(list);
         } catch (Exception ex) {
             ex.printStackTrace();
+        }
+    }
+
+    private void loadTable(List<Phuckhao> list) {
+        DefaultTableModel model = (DefaultTableModel) view.getTable().getModel();
+        model.setRowCount(0);
+        if (list == null) return;
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        int stt = 1;
+
+        for (Phuckhao pk : list) {
+            String ngayGui = pk.getNgayGui() != null ? sdf.format(pk.getNgayGui()) : "";
+            model.addRow(new Object[]{
+                    stt++,
+                    pk.getMaHS(),
+                    pk.getMaMH(),
+                    ngayGui,
+                    pk.getTrangThai(),
+                    pk.getLyDo()
+            });
         }
     }
 

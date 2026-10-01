@@ -14,8 +14,8 @@ import TienIch.TableSortHelper;
 public class QuanLyPhucKhaoPanel extends JPanel {
     private JTable table;
     private DefaultTableModel model;
-    private JTextField txtMaHS, txtMaMH, txtLoc;
-    private JComboBox<String> cboTrangThai;
+    private JTextField txtMaHS, txtLoc;
+    private JComboBox<String> cboTrangThai, cboMaMH;
     private JTextArea txtLyDo;
     private JButton btnLoc, btnThem, btnSua, btnXoa, btnLuu, btnHuy;
     private JLabel lblTrangThai;
@@ -71,8 +71,13 @@ public class QuanLyPhucKhaoPanel extends JPanel {
 
         gbc.gridx = 0; gbc.gridy = 0; pnlInput.add(new JLabel("Mã Học Sinh:"), gbc);
         gbc.gridx = 1; txtMaHS = new JTextField(25); pnlInput.add(txtMaHS, gbc);
+
         gbc.gridx = 0; gbc.gridy = 1; pnlInput.add(new JLabel("Mã Môn Học:"), gbc);
-        gbc.gridx = 1; txtMaMH = new JTextField(25); pnlInput.add(txtMaMH, gbc);
+        gbc.gridx = 1;
+        cboMaMH = new JComboBox<>();
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboMaMH);
+        cboMaMH.setPreferredSize(new Dimension(250, 28));
+        pnlInput.add(cboMaMH, gbc);
 
         lblTrangThai = new JLabel("Trạng Thái:");
         gbc.gridx = 0; gbc.gridy = 2; pnlInput.add(lblTrangThai, gbc);
@@ -115,9 +120,18 @@ public class QuanLyPhucKhaoPanel extends JPanel {
             setCrudButtonState(true, false, false, false, false);
             setInputEditable(false);
         } else {
-            btnThem.setVisible(false); 
+            btnThem.setVisible(false);
             setCrudButtonState(false, false, false, false, false);
             setInputEditable(false);
+        }
+    }
+
+    public void setMaMonHocData(List<String> listMH) {
+        cboMaMH.removeAllItems();
+        if (listMH != null) {
+            for (String mh : listMH) {
+                cboMaMH.addItem(mh);
+            }
         }
     }
 
@@ -125,46 +139,41 @@ public class QuanLyPhucKhaoPanel extends JPanel {
         if (Model.Auth.isHocSinh()) {
             txtMaHS.setEditable(false);
             txtMaHS.setBackground(new Color(245, 245, 245));
-            txtMaMH.setEditable(editable);
+            cboMaMH.setEnabled(editable);
             txtLyDo.setEditable(editable);
 
-            txtMaMH.setBackground(editable ? Color.WHITE : new Color(245, 245, 245));
             txtLyDo.setBackground(editable ? Color.WHITE : new Color(245, 245, 245));
         } else {
             txtMaHS.setEditable(false);
-            txtMaMH.setEditable(false);
+            cboMaMH.setEnabled(false);
             txtLyDo.setEditable(false);
             cboTrangThai.setEnabled(editable);
 
             txtMaHS.setBackground(new Color(245, 245, 245));
-            txtMaMH.setBackground(new Color(245, 245, 245));
             txtLyDo.setBackground(new Color(245, 245, 245));
         }
         txtLoc.setEditable(true);
         txtLoc.setBackground(Color.WHITE);
     }
 
-    public void loadTable(List<Phuckhao> list) {
-        model.setRowCount(0);
-        if (list == null) return;
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        int stt = 1;
-        for (Phuckhao pk : list) {
-            model.addRow(new Object[]{
-                    stt++,
-                    pk.getMaHS(),
-                    pk.getMaMH(),
-                    pk.getNgayGui() != null ? sdf.format(pk.getNgayGui()) : "",
-                    pk.getTrangThai(),
-                    pk.getLyDo()
-            });
-        }
-    }
-
     public void fillForm(int row) {
         int modelRow = table.convertRowIndexToModel(row);
         txtMaHS.setText(model.getValueAt(modelRow, 1).toString());
-        txtMaMH.setText(model.getValueAt(modelRow, 2).toString());
+
+        String maMH = model.getValueAt(modelRow, 2).toString().trim();
+
+        boolean found = false;
+        for (int i = 0; i < cboMaMH.getItemCount(); i++) {
+            String item = cboMaMH.getItemAt(i);
+            if (item.equalsIgnoreCase(maMH) || item.startsWith(maMH + " - ")) {
+                cboMaMH.setSelectedIndex(i);
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            cboMaMH.setSelectedItem(maMH);
+        }
 
         String trangThai = model.getValueAt(modelRow, 4).toString().trim();
 
@@ -187,7 +196,11 @@ public class QuanLyPhucKhaoPanel extends JPanel {
         } else {
             txtMaHS.setText(Model.Auth.maNguoiDung != null ? Model.Auth.maNguoiDung.toUpperCase() : "");
         }
-        txtMaMH.setText("");
+
+        if (cboMaMH.getItemCount() > 0) {
+            cboMaMH.setSelectedIndex(0);
+        }
+
         if (cboTrangThai.getItemCount() > 0) {
             cboTrangThai.setSelectedIndex(0);
         }
@@ -215,7 +228,18 @@ public class QuanLyPhucKhaoPanel extends JPanel {
     public JButton getBtnHuy() { return btnHuy; }
     public JButton getBtnLoc() { return btnLoc; }
     public String getMaHS() { return txtMaHS.getText(); }
-    public String getMaMH() { return txtMaMH.getText(); }
+
+    public String getMaMH() {
+        Object selected = cboMaMH.getSelectedItem();
+        if (selected == null) return "";
+        String str = selected.toString().trim();
+        if (str.contains(" - ")) {
+            return str.split(" - ")[0].trim();
+        }
+        return str;
+    }
+
+    public JComboBox<String> getCboMaMH() { return cboMaMH; }
     public String getTrangThai() {
         Object value = cboTrangThai.getSelectedItem();
         return value == null ? "" : value.toString();

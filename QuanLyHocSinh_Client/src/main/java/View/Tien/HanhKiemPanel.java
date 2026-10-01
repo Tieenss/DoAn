@@ -123,7 +123,7 @@ public class HanhKiemPanel extends JPanel {
         gbc.gridx=2; gbc.gridy=1; pnlInput.add(new JLabel("Năm Học:"), gbc);
         gbc.gridx=3; gbc.gridy=1; 
         cboNamHocInput = new JComboBox<>(); 
-        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboNamHocInput);
+        TienIch.ComboBoxUtil.makeSearchableAndEditable(cboNamHocInput, true);
         pnlInput.add(cboNamHocInput, gbc);
 
         gbc.gridx=0; gbc.gridy=2; pnlInput.add(new JLabel("Học Kỳ:"), gbc);
@@ -231,7 +231,13 @@ public class HanhKiemPanel extends JPanel {
         HanhKiem hk = new HanhKiem();
         hk.setMaHS(txtMaHS.getText());
         hk.setMaLop(cboMaLopInput.getSelectedItem() != null ? cboMaLopInput.getSelectedItem().toString() : "");
-        hk.setNamHoc(cboNamHocInput.getSelectedItem() != null ? cboNamHocInput.getSelectedItem().toString() : "");
+        Object selectedNH = cboNamHocInput.getSelectedItem();
+        String namHocVal = selectedNH != null ? selectedNH.toString().trim() : "";
+        if (namHocVal.isEmpty() && cboNamHocInput.getEditor() != null && cboNamHocInput.getEditor().getItem() != null) {
+            namHocVal = cboNamHocInput.getEditor().getItem().toString().trim();
+        }
+        hk.setNamHoc(namHocVal);
+
         hk.setHocKy(Integer.parseInt(cboHocKyInput.getSelectedItem().toString()));
         hk.setXepLoai(cboXepLoai.getSelectedItem().toString());
         hk.setNhanXet(txtNhanXet.getText());
